@@ -3,987 +3,1768 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zyron Organization — Money Receipt</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          gold: { DEFAULT: '#e2b96f', dark: '#c9962e' },
-          navy: { DEFAULT: '#1a1a2e', mid: '#16213e', deep: '#0f3460', card: '#1e2a45', border: '#2d3f66', darker: '#0d1b2a' },
-        }
-      }
-    }
-  }
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>ZYRON Organization - Money Receipt Management System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  .form-input { width:100%;background:#0d1b2a;border:1px solid #2d3f66;border-radius:6px;padding:8px 12px;color:#e2e8f0;font-size:13px;outline:none;transition:border-color .2s; }
-  .form-input:focus { border-color:#e2b96f; }
-  .search-input { background:#0d1b2a;border:1px solid #2d3f66;border-radius:6px;padding:8px 12px 8px 36px;color:#e2e8f0;font-size:13px;outline:none;width:100%; }
-  .search-input:focus { border-color:#e2b96f; }
-  .month-check { width:15px;height:15px;accent-color:#e2b96f;cursor:pointer; }
-  .month-amount { background:#0d1b2a;border:1px solid #2d3f66;border-radius:4px;padding:5px 8px;color:#e2e8f0;font-size:13px;width:100%;outline:none; }
-  .month-amount:focus { border-color:#e2b96f; }
-  .month-amount:disabled { opacity:.3;cursor:not-allowed; }
-  /* PIN dots */
-  .pin-dot { width:14px;height:14px;border-radius:50%;border:2px solid #3d5280;background:transparent;transition:all .15s; }
-  .pin-dot.filled { background:#e2b96f;border-color:#e2b96f; }
-  /* PIN pad button */
-  .pin-key { background:#1e2a45;border:1px solid #2d3f66;color:#e2e8f0;font-size:20px;font-weight:600;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;user-select:none; }
-  .pin-key:hover { background:#2d3f66;border-color:#e2b96f; }
-  .pin-key:active { transform:scale(.94); }
-  /* Receipt */
-  #receipt-preview, #user-receipt-preview { font-family:'Times New Roman',Times,serif;background:#fff;color:#000;width:100%;max-width:720px;margin:0 auto;padding:40px 50px;border:1px solid #ccc;position:relative; }
-  .receipt-org-title { font-family:'IM Fell English',serif;font-size:42px;color:#7B2D8B;text-align:center;margin:0 0 2px;letter-spacing:1px; }
-  .receipt-subtitle { font-family:'IM Fell English',serif;font-style:italic;font-size:24px;text-align:center;color:#111;margin:0 0 24px; }
-  .receipt-header-grid { display:grid;grid-template-columns:1fr 1fr;gap:0 30px;margin-bottom:24px;border-top:1px solid #999;border-bottom:1px solid #999;padding:14px 0; }
-  .receipt-section-label { color:#7B2D8B;font-weight:700;font-size:15px;margin-bottom:10px;display:block; }
-  .receipt-field { font-size:14px;margin-bottom:6px;line-height:1.5; }
-  .receipt-table { width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px; }
-  .receipt-table th { background:#f5f5f5;border:1px solid #333;padding:7px 10px;font-weight:700;text-align:left; }
-  .receipt-table th:first-child { width:50px;text-align:center; }
-  .receipt-table th:last-child { width:130px;text-align:right; }
-  .receipt-table td { border:1px solid #555;padding:6px 10px;vertical-align:middle; }
-  .receipt-table td:first-child { text-align:center;color:#333; }
-  .receipt-table td:last-child { text-align:right; }
-  .receipt-table tr.total-row td { font-weight:700;background:#f9f9f9;font-size:15px; }
-  .receipt-receipt-no { position:absolute;top:12px;right:50px;font-size:11px;color:#000;font-weight:600; }
-  .receipt-footer { display:grid;grid-template-columns:1fr 1fr;align-items:flex-end;margin-top:10px; }
-  .receipt-sig-line { border-top:1.5px solid #333;margin:0 auto 4px;width:160px; }
-  /* PAID circular seal stamp */
-  .paid-stamp {
-    position:absolute;
-    top:50%; left:50%;
-    transform:translate(-50%,-50%) rotate(-20deg);
-    pointer-events:none;
-    z-index:10;
-    opacity:0;
-    transition:opacity .5s ease;
-    width:210px;
-    height:210px;
+  :root {
+    --navy: #0a1628;
+    --navy2: #0f2040;
+    --navy3: #162a52;
+    --navy4: #1e3a6e;
+    --gold: #c9a84c;
+    --gold2: #e8c96a;
+    --gold3: #f5dfa0;
+    --gold4: #fdf3d0;
+    --silver: #a8b8c8;
+    --white: #ffffff;
+    --text-light: #e8ecf0;
+    --text-muted: #8a9bb0;
+    --danger: #e05252;
+    --success: #4caf7d;
+    --border: rgba(201,168,76,0.25);
   }
-  .paid-stamp.visible { opacity:1; }
-  .paid-stamp svg {
-    width:210px;
-    height:210px;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--navy);
+    color: var(--text-light);
+    min-height: 100vh;
   }
-  @media print {
-    body * { visibility:hidden; }
-    #receipt-preview, #receipt-preview * { visibility:visible; }
-    #receipt-preview { position:fixed;left:0;top:0;width:210mm;padding:20mm 18mm;border:none; }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy2); }
+  ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+  /* ===== AUTH SCREEN ===== */
+  #auth-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; background: var(--navy);
+    background-image: radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.05) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.05) 0%, transparent 60%);
   }
-  @media (max-width:900px) {
-    .main-layout { flex-direction:column !important; }
-    .sidebar-panel { width:100% !important;border-right:none !important;border-bottom:1px solid #0f3460; }
-    #receipt-preview { padding:24px 18px; }
-    .receipt-org-title { font-size:28px; }
-    .receipt-subtitle { font-size:18px; }
+  .auth-card {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
   }
+  .logo-wrap { margin-bottom: 24px; }
+  .logo-wrap img { width: 100px; height: 100px; object-fit: contain; border-radius: 50%; background: var(--navy3); padding: 4px; }
+  .org-title { font-size: 26px; font-weight: 700; color: var(--gold); letter-spacing: 2px; }
+  .org-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; letter-spacing: 1px; }
+  .auth-tabs { display: flex; gap: 0; margin: 28px 0 24px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .auth-tab {
+    flex: 1; padding: 10px; background: transparent; border: none;
+    color: var(--text-muted); cursor: pointer; font-size: 14px; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .auth-tab.active { background: var(--gold); color: var(--navy); }
+  .form-group { margin-bottom: 16px; text-align: left; }
+  .form-group label { display: block; font-size: 12px; color: var(--gold); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 11px 14px; background: var(--navy3);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text-light); font-size: 14px; outline: none;
+    transition: border 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+  .form-group select option { background: var(--navy3); }
+  .btn-primary {
+    width: 100%; padding: 13px; background: var(--gold);
+    border: none; border-radius: 8px; color: var(--navy);
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    letter-spacing: 0.5px; transition: background 0.2s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { background: var(--gold2); }
+  .auth-error { color: var(--danger); font-size: 13px; margin-top: 10px; }
+
+  /* ===== MAIN APP ===== */
+  #app { display: none; }
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 240px; background: var(--navy2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100; transition: transform 0.3s;
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sidebar-logo img { width: 44px; height: 44px; border-radius: 50%; object-fit: contain; background: var(--navy3); padding: 2px; }
+  .sidebar-logo-text .org-name { font-size: 16px; font-weight: 700; color: var(--gold); }
+  .sidebar-logo-text .org-tagline { font-size: 10px; color: var(--text-muted); }
+  .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .nav-section { font-size: 10px; color: var(--text-muted); padding: 0 20px; margin: 12px 0 6px; letter-spacing: 1px; font-weight: 600; text-transform: uppercase; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 20px; cursor: pointer; transition: all 0.2s;
+    color: var(--text-muted); font-size: 14px; border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: rgba(201,168,76,0.08); color: var(--text-light); }
+  .nav-item.active { background: rgba(201,168,76,0.12); color: var(--gold); border-left-color: var(--gold); }
+  .nav-item .nav-icon { font-size: 18px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--gold); color: var(--navy); font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+  .sidebar-user {
+    padding: 16px 20px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--gold); color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; flex-shrink: 0;
+  }
+  .user-info .user-name { font-size: 13px; font-weight: 600; color: var(--text-light); }
+  .user-info .user-role { font-size: 11px; color: var(--gold); }
+  .btn-logout {
+    margin-left: auto; background: var(--danger); border: none;
+    color: white; padding: 7px 14px; border-radius: 6px;
+    cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .btn-logout:hover { background: #c94444; }
+
+  /* Main content */
+  .main-content {
+    margin-left: 240px; padding: 24px;
+    min-height: 100vh; background: var(--navy);
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-title { font-size: 22px; font-weight: 700; color: var(--gold); }
+  .page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .btn-gold {
+    background: var(--gold); color: var(--navy); border: none;
+    padding: 10px 20px; border-radius: 8px; font-size: 14px;
+    font-weight: 700; cursor: pointer; transition: background 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-gold:hover { background: var(--gold2); }
+  .btn-outline {
+    background: transparent; color: var(--gold); border: 1px solid var(--gold);
+    padding: 9px 18px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-outline:hover { background: rgba(201,168,76,0.1); }
+  .btn-danger {
+    background: var(--danger); color: white; border: none;
+    padding: 7px 14px; border-radius: 6px; font-size: 12px;
+    font-weight: 600; cursor: pointer; transition: background 0.2s;
+  }
+  .btn-danger:hover { background: #c94444; }
+  .btn-sm {
+    padding: 6px 14px; font-size: 12px; font-weight: 600;
+    border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s;
+  }
+
+  /* Cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--navy2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .stat-icon { font-size: 28px; margin-bottom: 10px; }
+  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--gold); margin-top: 4px; }
+  .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Panels */
+  .panel {
+    background: var(--navy2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin-bottom: 20px;
+  }
+  .panel-title {
+    font-size: 16px; font-weight: 700; color: var(--gold);
+    margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+
+  /* Form Grid */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 16px; }
+  .form-grid-full { grid-column: 1 / -1; }
+  input[type="text"], input[type="number"], input[type="date"], input[type="password"], select, textarea {
+    width: 100%; padding: 10px 14px; background: var(--navy3);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text-light); font-size: 14px; outline: none;
+    transition: border 0.2s; font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+  select option { background: var(--navy3); }
+  label { display: block; font-size: 12px; color: var(--gold); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--navy3); }
+  thead th {
+    padding: 12px 16px; text-align: left;
+    color: var(--gold); font-weight: 700; font-size: 12px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid rgba(201,168,76,0.1); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(201,168,76,0.05); }
+  tbody td { padding: 12px 16px; color: var(--text-light); vertical-align: middle; }
+  tbody tr:last-child { border-bottom: none; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center; padding: 3px 10px;
+    border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+  }
+  .badge-gold { background: rgba(201,168,76,0.2); color: var(--gold); }
+  .badge-green { background: rgba(76,175,125,0.2); color: #4caf7d; }
+  .badge-red { background: rgba(224,82,82,0.2); color: #e05252; }
+  .badge-blue { background: rgba(100,149,237,0.2); color: #6495ed; }
+  .badge-purple { background: rgba(167,119,227,0.2); color: #a777e3; }
+
+  /* Member card */
+  .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
+  .member-card {
+    background: var(--navy3); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; text-align: center;
+    transition: border-color 0.2s;
+  }
+  .member-card:hover { border-color: var(--gold); }
+  .member-avatar-lg {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--gold); color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 20px; margin: 0 auto 12px;
+  }
+  .member-name { font-size: 15px; font-weight: 700; color: var(--text-light); }
+  .member-role { font-size: 12px; color: var(--gold); margin: 4px 0 8px; }
+  .member-id { font-size: 11px; color: var(--text-muted); }
+  .member-balance { font-size: 18px; font-weight: 700; color: var(--gold2); margin-top: 10px; }
+
+  /* Search / filter bar */
+  .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-bar input, .filter-bar select { flex: 1; min-width: 160px; max-width: 260px; }
+
+  /* Receipt preview */
+  .receipt-preview {
+    background: white; color: #111; padding: 32px;
+    border-radius: 8px; max-width: 500px; margin: 0 auto;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+  .receipt-header { text-align: center; border-bottom: 2px solid #c9a84c; padding-bottom: 16px; margin-bottom: 16px; }
+  .receipt-org { font-size: 22px; font-weight: 700; color: #0a1628; letter-spacing: 2px; }
+  .receipt-tagline { font-size: 11px; color: #666; }
+  .receipt-title { font-size: 18px; font-weight: 700; text-transform: uppercase; color: #c9a84c; margin: 12px 0; }
+  .receipt-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+  .receipt-row .key { color: #555; }
+  .receipt-row .val { font-weight: 600; color: #222; }
+  .receipt-amount-box { text-align: center; margin: 16px 0; padding: 12px; background: #fdf3d0; border-radius: 8px; }
+  .receipt-amount-label { font-size: 11px; color: #666; }
+  .receipt-amount-val { font-size: 28px; font-weight: 700; color: #0a1628; }
+  .receipt-footer { text-align: center; margin-top: 16px; font-size: 11px; color: #888; border-top: 1px solid #eee; padding-top: 12px; }
+  .receipt-sig { display: flex; justify-content: space-between; margin-top: 24px; font-size: 12px; color: #555; }
+  .receipt-sig-line { border-top: 1px solid #333; padding-top: 4px; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--gold); color: var(--navy);
+    padding: 12px 24px; border-radius: 8px; font-weight: 700;
+    font-size: 14px; z-index: 9999; opacity: 0;
+    transition: opacity 0.3s; pointer-events: none;
+  }
+  #toast.show { opacity: 1; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 16px;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-box {
+    background: var(--navy2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; width: 100%; max-width: 560px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+
+  /* Responsive */
+  .hamburger { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; background: var(--gold); color: var(--navy); border: none; padding: 8px 12px; border-radius: 8px; font-size: 20px; cursor: pointer; font-weight: 700; }
+  @media(max-width: 768px) {
+    .hamburger { display: block; }
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { margin-left: 0; padding: 16px; padding-top: 56px; }
+    .stat-grid { grid-template-columns: repeat(2,1fr); }
+    .member-grid { grid-template-columns: repeat(2,1fr); }
+    .auth-card { padding: 32px 20px; }
+  }
+
+  .logo-img-placeholder {
+    width: 90px; height: 90px; margin: 0 auto 16px;
+    border-radius: 50%; background: var(--navy3); border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 900; color: var(--gold); letter-spacing: -2px;
+  }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .text-muted { color: var(--text-muted); font-size: 13px; }
+  .text-gold { color: var(--gold); }
+  .mt-16 { margin-top: 16px; }
+  .flex-end { display: flex; justify-content: flex-end; }
+  .flex-gap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .w-full { width: 100%; }
 </style>
 </head>
-<body class="font-sans bg-navy min-h-screen">
+<body>
 
-<!-- ═══════════════════════════════════════════
-     LOGIN SCREEN
-═══════════════════════════════════════════ -->
-<div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
-  <div class="w-full max-w-sm">
-    <!-- Logo -->
-    <div class="text-center mb-8">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7B2D8B] to-[#4a1a56] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-900/40">
-        <span class="text-gold font-extrabold text-2xl">Z</span>
-      </div>
-      <div class="text-gold font-bold text-lg tracking-widest">ZYRON ORGANIZATION</div>
-      <div class="text-slate-500 text-xs mt-1">Money Receipt System</div>
+<!-- LOGO DATA (embedded as variable, will be set from uploaded file) -->
+<img id="logo-source" src="" style="display:none" alt="">
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- HAMBURGER -->
+<button class="hamburger" onclick="toggleSidebar()" title="Menu">☰</button>
+
+<!-- ==================== AUTH SCREEN ==================== -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="logo-wrap">
+      <img id="auth-logo" src="" alt="ZYRON" style="width:140px;height:auto;object-fit:contain;">
     </div>
-
-    <!-- Role selector -->
-    <div class="flex bg-navy-darker rounded-xl p-1 mb-6 border border-navy-border">
-      <button id="role-admin-btn" onclick="selectRole('admin')" class="flex-1 py-2 rounded-lg text-sm font-semibold transition-all bg-navy-card text-gold border border-navy-border">
-        🔐 Admin
-      </button>
-      <button id="role-user-btn" onclick="selectRole('user')" class="flex-1 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400">
-        👤 User
-      </button>
+    <div class="org-title">ZYRON</div>
+    <div class="org-sub">ORGANIZATION</div>
+    <div class="auth-tabs" style="margin-top:28px;">
+      <button class="auth-tab active" onclick="switchAuthTab('admin')">Admin Login</button>
+      <button class="auth-tab" onclick="switchAuthTab('user')">Member Login</button>
     </div>
-
-    <!-- Card -->
-    <div class="bg-navy-card border border-navy-border rounded-2xl p-6 shadow-2xl">
-      <div id="login-role-label" class="text-center text-slate-400 text-xs font-semibold uppercase tracking-widest mb-5">Enter Admin PIN</div>
-
-      <!-- PIN dots -->
-      <div class="flex justify-center gap-3 mb-6">
-        <div class="pin-dot" id="dot-0"></div>
-        <div class="pin-dot" id="dot-1"></div>
-        <div class="pin-dot" id="dot-2"></div>
-        <div class="pin-dot" id="dot-3"></div>
+    <div id="admin-login-form">
+      <div class="form-group">
+        <label>USERNAME</label>
+        <input type="text" id="admin-user" placeholder="Enter admin username" value="admin">
       </div>
-
-      <!-- Error -->
-      <div id="pin-error" class="hidden text-center text-red-400 text-xs font-semibold mb-3 bg-red-900/30 border border-red-800/50 rounded-lg py-2">Incorrect PIN. Try again.</div>
-
-      <!-- PIN pad -->
-      <div class="grid grid-cols-3 gap-2.5">
-        <button class="pin-key" onclick="pinPress('1')">1</button>
-        <button class="pin-key" onclick="pinPress('2')">2</button>
-        <button class="pin-key" onclick="pinPress('3')">3</button>
-        <button class="pin-key" onclick="pinPress('4')">4</button>
-        <button class="pin-key" onclick="pinPress('5')">5</button>
-        <button class="pin-key" onclick="pinPress('6')">6</button>
-        <button class="pin-key" onclick="pinPress('7')">7</button>
-        <button class="pin-key" onclick="pinPress('8')">8</button>
-        <button class="pin-key" onclick="pinPress('9')">9</button>
-        <button class="pin-key col-span-1 text-base" onclick="pinClear()" style="font-size:13px;padding:14px;">CLR</button>
-        <button class="pin-key" onclick="pinPress('0')">0</button>
-        <button class="pin-key text-xl" onclick="pinBack()">⌫</button>
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" id="admin-pass" placeholder="Enter password" value="zyron2024">
       </div>
+      <button class="btn-primary" onclick="adminLogin()">LOGIN AS ADMIN</button>
     </div>
-    <div class="text-center text-slate-700 text-xs mt-4">Default Admin PIN: <span class="text-slate-500 font-mono">1234</span> · User PIN: <span class="text-slate-500 font-mono">0000</span></div>
+    <div id="user-login-form" style="display:none">
+      <div class="form-group">
+        <label>MEMBER ID</label>
+        <input type="text" id="user-id-input" placeholder="e.g. ZY-001">
+      </div>
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" id="user-pass" placeholder="Enter your password">
+      </div>
+      <button class="btn-primary" onclick="memberLogin()">LOGIN AS MEMBER</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div style="margin-top:20px; font-size:12px; color:var(--text-muted);">
+      Admin: admin / zyron2024 &nbsp;|&nbsp; Members: ID / zyron123
+    </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     ADMIN APP
-═══════════════════════════════════════════ -->
-<div id="admin-app" class="hidden">
-
-  <!-- Header -->
-  <header class="bg-gradient-to-br from-navy-mid to-navy-deep border-b-2 border-gold px-6 py-3.5 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[#7B2D8B] to-[#4a1a56] flex items-center justify-center">
-        <span class="text-gold font-extrabold text-sm">Z</span>
-      </div>
-      <div>
-        <div class="text-gold font-bold text-sm tracking-widest">ZYRON ORGANIZATION</div>
-        <div class="text-slate-500 text-xs">Admin Panel</div>
+<!-- ==================== MAIN APP ==================== -->
+<div id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img id="sidebar-logo-img" src="" alt="ZYRON" style="width:44px;height:44px;object-fit:contain;flex-shrink:0;">
+      <div class="sidebar-logo-text">
+        <div class="org-name">ZYRON</div>
+        <div class="org-tagline">Organization</div>
       </div>
     </div>
-    <div class="flex items-center gap-3">
-      <span class="hidden sm:block text-slate-500 text-xs" id="receipt-counter-display"></span>
-      <span class="bg-[#1b3a2d] text-green-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-green-900">🔐 Admin</span>
-      <button onclick="logout()" class="text-slate-400 hover:text-red-400 text-xs font-semibold px-3 py-1.5 rounded-lg border border-navy-border hover:border-red-900 transition-colors">Logout</button>
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <!-- Filled dynamically -->
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-username">Admin</div>
+        <div class="user-role" id="sidebar-role">Administrator</div>
+      </div>
+      <button class="btn-logout" onclick="logout()">🚪 Logout</button>
     </div>
-  </header>
+  </aside>
 
-  <!-- Layout -->
-  <div class="main-layout flex" style="min-height:calc(100vh - 60px);">
+  <!-- Main Content -->
+  <main class="main-content" id="main-content">
 
-    <!-- Sidebar -->
-    <div class="sidebar-panel bg-navy-mid border-r border-navy-deep overflow-y-auto p-5" style="width:380px;min-width:340px;">
-
-      <!-- Tabs -->
-      <div class="flex gap-1.5 mb-4">
-        <button id="tab-form" onclick="showTab('form')" class="px-3 py-2 rounded-md text-xs font-semibold transition-all text-gold border border-navy-border bg-navy-border">📄 New</button>
-        <button id="tab-history" onclick="showTab('history')" class="px-3 py-2 rounded-md text-xs font-semibold transition-all text-slate-400 hover:text-slate-200">🗂 History</button>
-        <button id="tab-users" onclick="showTab('users')" class="px-3 py-2 rounded-md text-xs font-semibold transition-all text-slate-400 hover:text-slate-200">👥 Users</button>
-        <button id="tab-settings" onclick="showTab('settings')" class="px-3 py-2 rounded-md text-xs font-semibold transition-all text-slate-400 hover:text-slate-200">⚙</button>
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📊 Dashboard</div>
+          <div class="page-subtitle">ZYRON Organization — Financial Overview</div>
+        </div>
+<button class="btn-gold" id="dash-new-receipt-btn" onclick="navigate('new-receipt')">+ New Receipt</button>      </div>
+      <div class="stat-grid" id="dashboard-stats"></div>
+      <div class="panel" id="monthly-summary-panel">
+        <div class="panel-title" style="justify-content:space-between;">
+          <span>🗓️ Monthly Fee Summary</span>
+          <select id="dash-summary-year" onchange="renderMonthlySummary()" style="width:auto;padding:6px 12px;font-size:12px;"></select>
+        </div>
+        <div id="monthly-summary-grid"></div>
       </div>
-
-      <!-- NEW RECEIPT TAB -->
-      <div id="tab-content-form">
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4 mb-3">
-          <div class="flex justify-between items-center mb-1">
-            <span class="text-gold text-xs font-bold tracking-widest">RECEIPT NUMBER</span>
-            <span id="receipt-no-display" class="text-green-400 text-xs font-bold tracking-wide"></span>
-          </div>
-          <div class="text-slate-600 text-xs">Auto-generated · Increments on each save</div>
-        </div>
-
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4 mb-3">
-          <div class="text-gold text-xs font-bold tracking-widest mb-3">RECEIVED BY</div>
-          <div class="mb-3">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Receiver Name</label>
-            <input class="form-input" id="receiver-name" type="text" placeholder="e.g. Jihadul Islam">
-          </div>
-          <div>
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Mobile Number</label>
-            <input class="form-input" id="receiver-mobile" type="text" placeholder="e.g. 01864036643">
-          </div>
-        </div>
-
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4 mb-3">
-          <div class="text-gold text-xs font-bold tracking-widest mb-3">RECEIVED FROM</div>
-          <div class="mb-3">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Recipient Name</label>
-            <input class="form-input" id="recipient-name" type="text" placeholder="e.g. Rakibul Islam Fahim">
-          </div>
-          <div class="mb-3">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Recipient Number</label>
-            <input class="form-input" id="recipient-mobile" type="text" placeholder="e.g. 01616499976">
-          </div>
-          <div>
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Payment Date</label>
-            <input class="form-input" id="payment-date" type="date">
-          </div>
-        </div>
-
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4 mb-3">
-          <div class="flex justify-between items-center mb-3">
-            <span class="text-gold text-xs font-bold tracking-widest">PAYMENT MONTHS</span>
-            <label class="flex items-center gap-1.5 cursor-pointer text-slate-400 text-xs">
-              <input type="checkbox" id="select-all-months" onchange="toggleAllMonths(this)" class="accent-gold">
-              Select All
-            </label>
-          </div>
-          <div class="grid px-2 mb-1" style="grid-template-columns:32px 1fr 110px;gap:6px;">
-            <span></span>
-            <span class="text-slate-600 text-xs font-bold uppercase tracking-widest">Month</span>
-            <span class="text-slate-600 text-xs font-bold uppercase tracking-widest">Amount</span>
-          </div>
-          <div id="months-container"></div>
-          <div class="border-t border-navy-border mt-2.5 pt-2.5 flex justify-between items-center">
-            <span class="text-slate-400 text-sm font-semibold">Total</span>
-            <span id="total-display" class="text-gold text-base font-bold">৳ 0</span>
-          </div>
-        </div>
-
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4 mb-3">
-          <div class="text-gold text-xs font-bold tracking-widest mb-3">PAYMENT METHOD</div>
-          <select class="form-input" id="payment-method">
-            <option value="Bkash">Bkash</option>
-            <option value="Nagad">Nagad</option>
-            <option value="Rocket">Rocket</option>
-            <option value="Cash">Cash</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Cheque">Cheque</option>
-          </select>
-        </div>
-
-        <!-- Signature -->
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4 mb-4">
-          <div class="text-gold text-xs font-bold tracking-widest mb-3">✍ TREASURER SIGNATURE</div>
-          <div id="sig-upload-zone" onclick="document.getElementById('sig-file-input').click()"
-            ondragover="event.preventDefault();this.style.borderColor='#e2b96f'"
-            ondragleave="this.style.borderColor='#2d3f66'"
-            ondrop="handleSigDrop(event)"
-            class="border-2 border-dashed border-navy-border rounded-lg p-4 text-center cursor-pointer transition-colors bg-navy-darker">
-            <div id="sig-zone-content">
-              <div class="text-3xl mb-1.5">🖊️</div>
-              <div class="text-slate-400 text-xs font-semibold">Click or drag signature image</div>
-              <div class="text-slate-600 text-xs mt-1">PNG / JPG with transparent background</div>
-            </div>
-            <img id="sig-zone-preview" src="" alt="" class="hidden max-h-16 max-w-[200px] object-contain mx-auto"/>
-          </div>
-          <input type="file" id="sig-file-input" accept="image/*" class="hidden" onchange="loadSigFile(this)">
-          <div id="sig-controls" class="hidden mt-2.5 gap-2">
-            <button onclick="document.getElementById('sig-file-input').click()" class="flex-1 bg-navy-border text-slate-200 border border-[#3d5280] rounded-lg py-1.5 text-xs font-semibold hover:bg-[#3d5280] transition-colors">↺ Change</button>
-            <button onclick="clearSignature()" class="flex-1 bg-red-900 text-red-300 border border-red-800 rounded-lg py-1.5 text-xs font-semibold hover:bg-red-800 transition-colors">✕ Remove</button>
-          </div>
-          <div class="mt-2.5 bg-gray-900 rounded-md px-3 py-2">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="sig-save-pref" checked class="accent-gold">
-              <span class="text-slate-500 text-xs">Remember signature</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex flex-col gap-2 mb-6">
-          <button onclick="generateReceipt()" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gold to-gold-dark text-navy font-bold rounded-lg py-2.5 text-sm hover:opacity-90 transition-all">
-            ✦ Generate & Preview
-          </button>
-          <div class="flex gap-2">
-            <button onclick="printReceipt()" class="flex-1 flex items-center justify-center gap-1 bg-navy-border text-slate-200 border border-[#3d5280] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#3d5280] transition-colors">🖨 Print</button>
-            <button onclick="downloadPDF()" class="flex-1 flex items-center justify-center gap-1 bg-navy-border text-slate-200 border border-[#3d5280] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#3d5280] transition-colors">⬇ PDF</button>
-          </div>
-          <button onclick="saveReceipt()" class="w-full flex items-center justify-center gap-2 bg-navy-border text-gold border border-gold rounded-lg py-2.5 text-sm font-semibold hover:bg-navy-border/80 transition-colors">
-            💾 Save Receipt
-          </button>
-          <button onclick="resetForm()" class="w-full flex items-center justify-center gap-2 bg-navy-border text-slate-400 border border-navy-border rounded-lg py-2.5 text-sm font-semibold hover:bg-[#3d5280] transition-colors">
-            ↺ Reset Form
-          </button>
-        </div>
-      </div>
-
-      <!-- HISTORY TAB -->
-      <div id="tab-content-history" class="hidden">
-        <div class="relative mb-3">
-          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
-          <input class="search-input" id="search-input" type="text" placeholder="Search by name or receipt no..." oninput="renderHistory()">
-        </div>
-        <div id="history-list"></div>
-      </div>
-
-      <!-- USERS TAB -->
-      <div id="tab-content-users" class="hidden">
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4 mb-3">
-          <div class="text-gold text-xs font-bold tracking-widest mb-3">🔐 PIN MANAGEMENT</div>
-          <p class="text-slate-500 text-xs mb-4">Change the 4-digit PIN for each role. These PINs control who can access what.</p>
-
-          <div class="mb-4">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Admin PIN (Current)</label>
-            <input class="form-input" id="current-admin-pin" type="password" maxlength="4" placeholder="Enter current PIN to confirm">
-          </div>
-          <div class="mb-4">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">New Admin PIN</label>
-            <input class="form-input" id="new-admin-pin" type="password" maxlength="4" placeholder="4 digits">
-          </div>
-          <div class="mb-4">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">New User PIN</label>
-            <input class="form-input" id="new-user-pin" type="password" maxlength="4" placeholder="4 digits">
-          </div>
-          <button onclick="savePINs()" class="w-full flex items-center justify-center bg-gradient-to-r from-gold to-gold-dark text-navy font-bold rounded-lg py-2.5 text-sm hover:opacity-90 transition-opacity">Update PINs</button>
-          <div id="pin-change-msg" class="hidden mt-2 text-center text-xs font-semibold py-2 rounded-lg"></div>
-        </div>
-
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4">
-          <div class="text-gold text-xs font-bold tracking-widest mb-3">ℹ ROLE PERMISSIONS</div>
-          <div class="space-y-2 text-xs text-slate-400">
-            <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Admin — Full access: create, edit, delete, settings</div>
-            <div class="flex items-center gap-2"><span class="text-green-400">✓</span> User — View all receipts (read-only)</div>
-            <div class="flex items-center gap-2"><span class="text-green-400">✓</span> User — Download & print receipts</div>
-            <div class="flex items-center gap-2"><span class="text-red-400">✗</span> User — Cannot create or delete receipts</div>
-            <div class="flex items-center gap-2"><span class="text-red-400">✗</span> User — Cannot change settings or PINs</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SETTINGS TAB -->
-      <div id="tab-content-settings" class="hidden">
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4 mb-3">
-          <div class="text-gold text-xs font-bold tracking-widest mb-3">ORGANIZATION SETTINGS</div>
-          <div class="mb-3">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Organization Name</label>
-            <input class="form-input" id="setting-org-name" type="text" value="Zyron Organization">
-          </div>
-          <div class="mb-3">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Default Receiver Name</label>
-            <input class="form-input" id="setting-default-receiver" type="text" placeholder="e.g. Jihadul Islam">
-          </div>
-          <div class="mb-3">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Default Receiver Mobile</label>
-            <input class="form-input" id="setting-default-mobile" type="text" placeholder="e.g. 01864036643">
-          </div>
-          <div class="mb-4">
-            <label class="block text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Default Amount / Month (BDT)</label>
-            <input class="form-input" id="setting-default-amount" type="number" value="500">
-          </div>
-          <button onclick="saveSettings()" class="w-full flex items-center justify-center bg-gradient-to-r from-gold to-gold-dark text-navy font-bold rounded-lg py-2.5 text-sm hover:opacity-90 transition-opacity">Save Settings</button>
-        </div>
-        <div class="bg-navy-card border border-navy-border rounded-xl p-4">
-          <div class="text-gold text-xs font-bold tracking-widest mb-3">DATA MANAGEMENT</div>
-          <p class="text-slate-500 text-xs mb-3">All receipts saved locally in your browser.</p>
-          <button onclick="clearAllData()" class="w-full bg-red-900 text-red-300 border border-red-800 rounded-lg py-2 text-xs font-semibold hover:bg-red-800 transition-colors">🗑 Clear All Data</button>
-        </div>
-      </div>
-
-    </div><!-- /sidebar -->
-
-    <!-- Preview -->
-    <div class="flex-1 overflow-y-auto p-6 bg-[#111827]">
-      <div class="max-w-3xl mx-auto">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-slate-400 text-xs font-semibold uppercase tracking-widest">Receipt Preview</h2>
-          <div class="text-slate-600 text-xs">A4 · 210mm × 297mm</div>
-        </div>
-        <div id="receipt-preview">
-          <div class="receipt-receipt-no">Receipt No: <span id="preview-receipt-no"></span></div>
-          <!-- PAID circular seal stamp -->
-          <div class="paid-stamp" id="paid-stamp">
-            <svg viewBox="0 0 210 210" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <path id="outerArc" d="M 105,105 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0"/>
-                <path id="innerArc" d="M 105,105 m -60,0 a 60,60 0 1,0 120,0 a 60,60 0 1,0 -120,0"/>
-              </defs>
-              <!-- Outer circle -->
-              <circle cx="105" cy="105" r="98" fill="none" stroke="#c0392b" stroke-width="3.5" opacity="0.45"/>
-              <!-- Inner circle -->
-              <circle cx="105" cy="105" r="84" fill="none" stroke="#c0392b" stroke-width="1.5" opacity="0.35"/>
-              <!-- Org name curved along top -->
-              <text font-family="'Times New Roman',serif" font-size="12.5" font-weight="700" fill="#c0392b" opacity="0.5" letter-spacing="3.2">
-                <textPath href="#outerArc" startOffset="9%">ZYRON ORGANISATION</textPath>
-              </text>
-              <!-- PAID big text center -->
-              <text x="105" y="115" text-anchor="middle" font-family="'Times New Roman',serif" font-size="52" font-weight="900" fill="#c0392b" opacity="0.45" letter-spacing="4">PAID</text>
-              <!-- THANK YOU below -->
-              <text x="105" y="140" text-anchor="middle" font-family="'Times New Roman',serif" font-size="13" font-weight="600" fill="#c0392b" opacity="0.4" letter-spacing="2.5">THANK YOU</text>
-              <!-- Decorative dots -->
-              <circle cx="105" cy="30" r="3" fill="#c0392b" opacity="0.3"/>
-              <circle cx="105" cy="180" r="3" fill="#c0392b" opacity="0.3"/>
-            </svg>
-          </div>
-          <div class="receipt-org-title" id="preview-org-name">Zyron Organization</div>
-          <div class="receipt-subtitle">Money Receipt</div>
-          <div class="receipt-header-grid">
-            <div>
-              <span class="receipt-section-label">Received By :</span>
-              <div class="receipt-field"><strong>Receiver Name</strong> : <span id="preview-receiver-name">—</span></div>
-              <div class="receipt-field"><strong>Mobile Number</strong> : <span id="preview-receiver-mobile">—</span></div>
-            </div>
-            <div>
-              <span class="receipt-section-label">Received From :</span>
-              <div class="receipt-field"><strong>Recipient Name</strong> : <span id="preview-recipient-name">—</span></div>
-              <div class="receipt-field"><strong>Number</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span id="preview-recipient-mobile">—</span></div>
-              <div class="receipt-field"><strong>Payment Date</strong>&nbsp;: <span id="preview-payment-date">—</span></div>
-            </div>
-          </div>
-          <table class="receipt-table">
-            <thead><tr><th>Sr.</th><th>Month Name</th><th style="text-align:right;">Amount (BDT)</th></tr></thead>
-            <tbody id="preview-months-body"></tbody>
-            <tfoot><tr class="total-row"><td colspan="2" style="text-align:right;padding-right:12px;">Total</td><td style="text-align:right;">= <span id="preview-total">0</span></td></tr></tfoot>
-          </table>
-          <div class="receipt-footer">
-            <div>
-              <span style="color:#7B2D8B;font-weight:700;font-size:14px;">Payment Method</span>
-              <span style="font-size:14px;"> : <span id="preview-payment-method">—</span></span>
-            </div>
-            <div style="text-align:center;">
-              <div id="sig-preview-wrap" style="height:58px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:2px;">
-                <img id="sig-preview-img" src="" alt="" style="display:none;max-height:56px;max-width:160px;object-fit:contain;"/>
-                <div id="sig-empty-placeholder" style="height:44px;"></div>
-              </div>
-              <div class="receipt-sig-line"></div>
-              <div style="font-size:13px;color:#222;margin-top:5px;font-weight:600;font-family:'Times New Roman',Times,serif;">Treasurer Signature</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     USER APP
-═══════════════════════════════════════════ -->
-<div id="user-app" class="hidden min-h-screen">
-
-  <!-- Header -->
-  <header class="bg-gradient-to-br from-navy-mid to-navy-deep border-b-2 border-gold px-6 py-3.5 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[#7B2D8B] to-[#4a1a56] flex items-center justify-center">
-        <span class="text-gold font-extrabold text-sm">Z</span>
-      </div>
-      <div>
-        <div class="text-gold font-bold text-sm tracking-widest">ZYRON ORGANIZATION</div>
-        <div class="text-slate-500 text-xs">Member View</div>
-      </div>
-    </div>
-    <div class="flex items-center gap-3">
-      <span class="bg-navy-card text-slate-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-navy-border">👤 User</span>
-      <button onclick="logout()" class="text-slate-400 hover:text-red-400 text-xs font-semibold px-3 py-1.5 rounded-lg border border-navy-border hover:border-red-900 transition-colors">Logout</button>
-    </div>
-  </header>
-
-  <div class="main-layout flex" style="min-height:calc(100vh - 60px);">
-
-    <!-- User Sidebar -->
-    <div class="sidebar-panel bg-navy-mid border-r border-navy-deep overflow-y-auto p-5" style="width:360px;min-width:320px;">
-      <div class="mb-4">
-        <div class="text-gold text-xs font-bold tracking-widest mb-3">ALL RECEIPTS</div>
-        <div class="relative mb-3">
-          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
-          <input class="search-input" id="user-search-input" type="text" placeholder="Search receipts..." oninput="renderUserHistory()">
-        </div>
-        <div id="user-history-list"></div>
-      </div>
-    </div>
-
-    <!-- User Preview -->
-    <div class="flex-1 overflow-y-auto p-6 bg-[#111827]">
-      <div class="max-w-3xl mx-auto">
-        <!-- Info bar -->
-        <div class="bg-navy-card border border-navy-border rounded-xl p-3 mb-4 flex items-center justify-between">
-          <div class="flex items-center gap-2 text-slate-400 text-xs">
-            <span class="text-yellow-400">ℹ</span>
-            Read-only view — Select a receipt from the list to preview it.
-          </div>
-          <div class="flex gap-2" id="user-action-btns" style="display:none!important;">
-            <button onclick="userPrint()" class="flex items-center gap-1 bg-navy-border text-slate-200 border border-[#3d5280] rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-[#3d5280] transition-colors">🖨 Print</button>
-            <button onclick="userDownloadPDF()" class="flex items-center gap-1 bg-navy-border text-slate-200 border border-[#3d5280] rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-[#3d5280] transition-colors">⬇ PDF</button>
-          </div>
-        </div>
-
-        <!-- Empty state -->
-        <div id="user-empty-state" class="text-center py-20">
-          <div class="text-5xl mb-4 opacity-30">🧾</div>
-          <div class="text-slate-600 text-sm">Select a receipt from the left to preview</div>
-        </div>
-
-        <!-- Receipt preview (user, read-only) -->
-        <div id="user-receipt-wrapper" class="hidden">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-slate-400 text-xs font-semibold uppercase tracking-widest">Receipt Preview</h2>
-            <div class="flex gap-2">
-              <button onclick="userPrint()" class="flex items-center gap-1 bg-navy-border text-slate-200 border border-[#3d5280] rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-[#3d5280] transition-colors">🖨 Print</button>
-              <button onclick="userDownloadPDF()" class="flex items-center gap-1 bg-gradient-to-r from-gold to-gold-dark text-navy rounded-lg px-3 py-1.5 text-xs font-bold hover:opacity-90 transition-opacity">⬇ Download PDF</button>
-            </div>
-          </div>
-          <div id="user-receipt-preview">
-            <div class="receipt-receipt-no">Receipt No: <span id="u-preview-receipt-no"></span></div>
-            <!-- PAID circular seal stamp -->
-            <div class="paid-stamp visible" id="u-paid-stamp">
-              <svg viewBox="0 0 210 210" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <path id="outerArcU" d="M 105,105 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0"/>
-                  <path id="innerArcU" d="M 105,105 m -60,0 a 60,60 0 1,0 120,0 a 60,60 0 1,0 -120,0"/>
-                </defs>
-                <circle cx="105" cy="105" r="98" fill="none" stroke="#c0392b" stroke-width="3.5" opacity="0.45"/>
-                <circle cx="105" cy="105" r="84" fill="none" stroke="#c0392b" stroke-width="1.5" opacity="0.35"/>
-                <text font-family="'Times New Roman',serif" font-size="12.5" font-weight="700" fill="#c0392b" opacity="0.5" letter-spacing="3.2">
-                  <textPath href="#outerArcU" startOffset="9%">ZYRON ORGANISATION</textPath>
-                </text>
-                <text x="105" y="115" text-anchor="middle" font-family="'Times New Roman',serif" font-size="52" font-weight="900" fill="#c0392b" opacity="0.45" letter-spacing="4">PAID</text>
-                <text x="105" y="140" text-anchor="middle" font-family="'Times New Roman',serif" font-size="13" font-weight="600" fill="#c0392b" opacity="0.4" letter-spacing="2.5">THANK YOU</text>
-                <circle cx="105" cy="30" r="3" fill="#c0392b" opacity="0.3"/>
-                <circle cx="105" cy="180" r="3" fill="#c0392b" opacity="0.3"/>
-              </svg>
-            </div>
-            <div class="receipt-org-title" id="u-preview-org-name">Zyron Organization</div>
-            <div class="receipt-subtitle">Money Receipt</div>
-            <div class="receipt-header-grid">
-              <div>
-                <span class="receipt-section-label">Received By :</span>
-                <div class="receipt-field"><strong>Receiver Name</strong> : <span id="u-preview-receiver-name">—</span></div>
-                <div class="receipt-field"><strong>Mobile Number</strong> : <span id="u-preview-receiver-mobile">—</span></div>
-              </div>
-              <div>
-                <span class="receipt-section-label">Received From :</span>
-                <div class="receipt-field"><strong>Recipient Name</strong> : <span id="u-preview-recipient-name">—</span></div>
-                <div class="receipt-field"><strong>Number</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span id="u-preview-recipient-mobile">—</span></div>
-                <div class="receipt-field"><strong>Payment Date</strong>&nbsp;: <span id="u-preview-payment-date">—</span></div>
-              </div>
-            </div>
-            <table class="receipt-table">
-              <thead><tr><th>Sr.</th><th>Month Name</th><th style="text-align:right;">Amount (BDT)</th></tr></thead>
-              <tbody id="u-preview-months-body"></tbody>
-              <tfoot><tr class="total-row"><td colspan="2" style="text-align:right;padding-right:12px;">Total</td><td style="text-align:right;">= <span id="u-preview-total">0</span></td></tr></tfoot>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;">
+        <div class="panel" style="grid-column:1/-1">
+          <div class="panel-title">💰 Recent Receipts</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Receipt #</th><th>Member</th><th>Amount</th><th>Purpose</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="recent-receipts-table"></tbody>
             </table>
-            <div class="receipt-footer">
-              <div>
-                <span style="color:#7B2D8B;font-weight:700;font-size:14px;">Payment Method</span>
-                <span style="font-size:14px;"> : <span id="u-preview-payment-method">—</span></span>
-              </div>
-              <div style="text-align:center;">
-                <div id="u-sig-preview-wrap" style="height:58px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:2px;">
-                  <img id="u-sig-preview-img" src="" alt="" style="display:none;max-height:56px;max-width:160px;object-fit:contain;"/>
-                  <div style="height:44px;"></div>
-                </div>
-                <div class="receipt-sig-line"></div>
-                <div style="font-size:13px;color:#222;margin-top:5px;font-weight:600;font-family:'Times New Roman',Times,serif;">Treasurer Signature</div>
-              </div>
-            </div>
           </div>
         </div>
-
       </div>
+    </div>
+
+    <!-- NEW RECEIPT PAGE -->
+    <div class="page" id="page-new-receipt">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🧾 Create New Receipt</div>
+          <div class="page-subtitle">Generate a money receipt for a member</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">📝 Receipt Details</div>
+        <div class="form-grid">
+          <div>
+            <label>RECEIPT NUMBER</label>
+            <input type="text" id="rcpt-no" placeholder="Auto-generated" readonly>
+          </div>
+          <div>
+            <label>DATE</label>
+            <input type="date" id="rcpt-date">
+          </div>
+          <div>
+            <label>MEMBER</label>
+            <select id="rcpt-member" onchange="onMemberSelect()">
+              <option value="">-- Select Member --</option>
+            </select>
+          </div>
+          <div>
+            <label>MEMBER ID</label>
+            <input type="text" id="rcpt-member-id" readonly placeholder="Auto-filled">
+          </div>
+          <div>
+            <label>AMOUNT (BDT ৳)</label>
+            <input type="number" id="rcpt-amount" placeholder="Enter amount" min="0">
+          </div>
+          <div>
+            <label>PAYMENT METHOD</label>
+            <select id="rcpt-method">
+              <option>Cash</option>
+              <option>bKash</option>
+              <option>Nagad</option>
+              <option>Bank Transfer</option>
+              <option>Cheque</option>
+            </select>
+          </div>
+          <div>
+            <label>PURPOSE / CATEGORY</label>
+            <select id="rcpt-purpose">
+              <option>Monthly Fee</option>
+              <option>Registration Fee</option>
+            </select>
+          </div>
+          <div>
+            <label>MONTH</label>
+            <select id="rcpt-month">
+              <option value="">-- Select Month --</option>
+              <option>January</option>
+              <option>February</option>
+              <option>March</option>
+              <option>April</option>
+              <option>May</option>
+              <option>June</option>
+              <option>July</option>
+              <option>August</option>
+              <option>September</option>
+              <option>October</option>
+              <option>November</option>
+              <option>December</option>
+            </select>
+          </div>
+          <div>
+            <label>YEAR</label>
+            <input type="number" id="rcpt-year" placeholder="e.g. 2026" min="2000" max="2100">
+          </div>
+          <div>
+            <label>RECEIVED BY</label>
+            <select id="rcpt-by">
+              <option>Jihadul Islam (Treasurer)</option>
+              <option>Rakib Bin Rashed (President)</option>
+              <option>Rakibul Islam Fahim (Gen. Secretary)</option>
+            </select>
+          </div>
+          <div class="form-grid-full">
+            <label>NOTES / REMARKS</label>
+            <textarea id="rcpt-notes" rows="2" placeholder="Optional notes..."></textarea>
+          </div>
+        </div>
+        <div class="flex-gap mt-16">
+          <button class="btn-gold" onclick="saveReceipt()">💾 Save Receipt</button>
+          <button class="btn-outline" onclick="previewReceipt()">👁️ Preview</button>
+          <button class="btn-outline" onclick="clearReceiptForm()">🔄 Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECEIPT HISTORY PAGE -->
+    <div class="page" id="page-receipts">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📋 Receipt History</div>
+          <div class="page-subtitle">All money receipts — search, filter & download</div>
+        </div>
+        <button class="btn-gold" onclick="navigate('new-receipt')">+ New Receipt</button>
+      </div>
+      <div class="panel">
+        <div class="filter-bar">
+          <input type="text" id="search-receipt" placeholder="🔍 Search member, receipt #..." oninput="renderReceiptsTable()">
+          <select id="filter-purpose" onchange="renderReceiptsTable()">
+            <option value="">All Purposes</option>
+            <option>Monthly Fee</option>
+            <option>Registration Fee</option>
+          </select>
+          <select id="filter-member" onchange="renderReceiptsTable()">
+            <option value="">All Members</option>
+          </select>
+          <button class="btn-outline" onclick="exportCSV()">📤 Export CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Receipt #</th><th>Date</th><th>Member</th><th>Amount</th>
+                <th>Purpose</th><th>Month</th><th>Method</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="receipts-table-body"></tbody>
+          </table>
+        </div>
+        <div id="receipts-empty" style="text-align:center;padding:32px;color:var(--text-muted);display:none;">
+          No receipts found. <a href="#" onclick="navigate('new-receipt')" style="color:var(--gold)">Create one →</a>
+        </div>
+        <div id="receipts-pagination" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:13px;color:var(--text-muted);"></div>
+      </div>
+    </div>
+
+    <!-- MEMBERS PAGE -->
+    <div class="page" id="page-members">
+      <div class="page-header">
+        <div>
+          <div class="page-title">👥 Member Management</div>
+          <div class="page-subtitle">Manage organization members</div>
+        </div>
+        <button class="btn-gold" id="add-member-btn" onclick="openAddMemberModal()">+ Add Member</button>
+      </div>
+      <div class="member-grid" id="members-grid"></div>
+    </div>
+
+    <!-- REPORTS PAGE -->
+    <div class="page" id="page-reports">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📈 Reports & Analytics</div>
+          <div class="page-subtitle">Financial summary and insights</div>
+        </div>
+      </div>
+      <div class="stat-grid" id="report-stats"></div>
+      <div class="panel">
+        <div class="panel-title">💳 Member-wise Collection</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Member</th><th>Role</th><th>Total Receipts</th><th>Total Amount</th><th>Last Payment</th></tr></thead>
+            <tbody id="report-member-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">🗂️ Purpose-wise Breakdown</div>
+        <div id="purpose-breakdown"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE (admin only) -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div>
+          <div class="page-title">⚙️ System Settings</div>
+          <div class="page-subtitle">Admin configuration</div>
+        </div>
+      </div>
+      <div class="panel" style="max-width:520px;">
+        <div class="panel-title">✍️ Treasurer Signature</div>
+        <p class="text-muted" style="margin-bottom:16px;">Upload a photo of the treasurer's signature. It will appear automatically on every money receipt (preview & PDF) under "Authorized Signature".</p>
+        <div id="signature-current-wrap" style="margin-bottom:16px;display:none;">
+          <div style="background:#fff;border-radius:8px;padding:12px;display:inline-block;">
+            <img id="signature-current-img" src="" alt="Treasurer Signature" style="max-width:200px;max-height:80px;object-fit:contain;display:block;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>UPLOAD SIGNATURE IMAGE</label>
+          <input type="file" id="signature-file-input" accept="image/*" onchange="handleSignatureUpload(event)">
+        </div>
+        <div class="flex-gap">
+          <button class="btn-outline" onclick="removeSignature()">🗑️ Remove Signature</button>
+        </div>
+      </div>
+      <div class="panel" style="max-width:520px;">
+        <div class="panel-title">🔒 Admin Password</div>
+        <div class="form-group">
+          <label>CURRENT PASSWORD</label>
+          <input type="password" id="curr-pass">
+        </div>
+        <div class="form-group">
+          <label>NEW PASSWORD</label>
+          <input type="password" id="new-pass">
+        </div>
+        <div class="form-group">
+          <label>CONFIRM NEW PASSWORD</label>
+          <input type="password" id="conf-pass">
+        </div>
+        <button class="btn-gold" onclick="changeAdminPass()">Update Password</button>
+      </div>
+      <div class="panel" style="max-width:520px;">
+        <div class="panel-title">🗑️ Data Management</div>
+        <p class="text-muted" style="margin-bottom:16px;">Danger zone — irreversible actions</p>
+        <button class="btn-danger" onclick="clearAllData()">Clear All Receipt Data</button>
+      </div>
+    </div>
+
+    <!-- MY RECEIPTS PAGE (member) -->
+    <div class="page" id="page-my-receipts">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🧾 My Receipts</div>
+          <div class="page-subtitle">Your personal receipt history</div>
+        </div>
+      </div>
+      <div class="stat-grid" id="my-stats"></div>
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Receipt #</th><th>Date</th><th>Amount</th><th>Purpose</th><th>Month</th><th>Method</th><th>Download</th></tr>
+            </thead>
+            <tbody id="my-receipts-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMBERS DIRECTORY PAGE (member view) -->
+    <div class="page" id="page-member-directory">
+      <div class="page-header">
+        <div>
+          <div class="page-title">👥 Members</div>
+          <div class="page-subtitle">ZYRON Organization — all members</div>
+        </div>
+      </div>
+      <div class="member-grid" id="member-directory-grid"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CUSTOM CONFIRM MODAL -->
+<div class="modal-overlay hidden" id="confirm-modal">
+  <div class="modal-box" style="max-width:380px;text-align:center;">
+    <div style="font-size:40px;margin-bottom:12px;" id="confirm-icon">⚠️</div>
+    <div class="modal-title" id="confirm-title" style="justify-content:center;">Are you sure?</div>
+    <div id="confirm-msg" style="color:var(--text-muted);font-size:14px;margin-bottom:24px;line-height:1.6;"></div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button class="btn-outline" onclick="confirmResolve(false)" style="min-width:100px;">Cancel</button>
+      <button class="btn-danger" id="confirm-ok-btn" onclick="confirmResolve(true)" style="min-width:100px;padding:10px 20px;font-size:14px;">Confirm</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
-<div id="notif" class="fixed bottom-6 right-6 bg-[#1b3a2d] text-green-400 border border-green-800 rounded-xl px-5 py-3 text-xs font-semibold z-50 translate-y-20 opacity-0 transition-all duration-300 pointer-events-none"></div>
+<!-- RECEIPT PREVIEW MODAL -->
+<div class="modal-overlay hidden" id="preview-modal">
+  <div class="modal-box" style="max-width:540px;">
+    <div class="modal-title">🧾 Receipt Preview</div>
+    <div id="receipt-print-area"></div>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModal('preview-modal')">Close</button>
+      <button class="btn-gold" onclick="downloadPDF()">⬇ Download PDF</button>
+    </div>
+  </div>
+</div>
 
-<!-- ═══════════════════════════════════════════ SCRIPT ═══ -->
+<!-- ADD/EDIT MEMBER MODAL -->
+<div class="modal-overlay hidden" id="member-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="member-modal-title">Add New Member</div>
+    <div class="form-grid">
+      <div>
+        <label>FULL NAME</label>
+        <input type="text" id="m-name" placeholder="Member full name">
+      </div>
+      <div>
+        <label>ROLE / POSITION</label>
+        <input type="text" id="m-role" placeholder="e.g. General Secretary">
+      </div>
+      <div>
+        <label>PHONE</label>
+        <input type="text" id="m-phone" placeholder="01XXXXXXXXX">
+      </div>
+      <div>
+        <label>EMAIL</label>
+        <input type="text" id="m-email" placeholder="email@example.com">
+      </div>
+      <div class="form-grid-full">
+        <label>ADDRESS</label>
+        <input type="text" id="m-address" placeholder="Address">
+      </div>
+    </div>
+    <div id="m-password-section" style="display:none;">
+      <hr class="divider">
+      <div class="form-grid">
+        <div class="form-grid-full">
+          <label>RESET LOGIN PASSWORD</label>
+          <input type="text" id="m-password" placeholder="Leave blank to keep current password">
+          <div class="text-muted" style="margin-top:6px;">Member ID: <span id="m-password-id" style="color:var(--gold);font-weight:700;"></span> — Member logs in with this ID + password.</div>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="m-edit-id">
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModal('member-modal')">Cancel</button>
+      <button class="btn-gold" onclick="saveMember()">Save Member</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW RECEIPT MODAL -->
+<div class="modal-overlay hidden" id="view-receipt-modal">
+  <div class="modal-box" style="max-width:540px;">
+    <div class="modal-title">🧾 Receipt Details</div>
+    <div id="view-receipt-content"></div>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModal('view-receipt-modal')">Close</button>
+      <button class="btn-gold" onclick="downloadViewedPDF()">⬇ Download PDF</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+// ===========================
+// LOGO (ZYRON crest, embedded as base64 so the file stays fully self-contained)
+// ===========================
+const ZYRON_LOGO = "Adobe Express - file.png"
+// ===========================
+// STATE & STORAGE
+// ===========================
+const ADMIN_CREDS_KEY = 'zyron_admin';
+const MEMBERS_KEY = 'zyron_members';
+const RECEIPTS_KEY = 'zyron_receipts';
+const COUNTER_KEY = 'zyron_counter';
+const SIGNATURE_KEY = 'zyron_treasurer_signature';
 
-// ── Auth ──────────────────────────────────────────────────
-let currentRole = 'admin'; // which role PIN pad is for
-let pinBuffer = '';
+let currentUser = null;
+let currentViewReceipt = null;
+let currentPendingReceipt = null;
+let editingMemberId = null;
+let receiptPage = 1;
+const PAGE_SIZE = 15;
 
-function getPINs() {
-  const stored = JSON.parse(localStorage.getItem('zyron_pins') || '{}');
-  return { admin: stored.admin || '1234', user: stored.user || '0000' };
+function ls_get(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
+function ls_set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+function getAdminCreds() {
+  return ls_get(ADMIN_CREDS_KEY) || { username: 'admin', password: 'zyron2024' };
 }
 
-function selectRole(role) {
-  currentRole = role;
-  pinBuffer = '';
-  updatePinDots();
-  document.getElementById('pin-error').classList.add('hidden');
-  if (role === 'admin') {
-    document.getElementById('role-admin-btn').className = 'flex-1 py-2 rounded-lg text-sm font-semibold transition-all bg-navy-card text-gold border border-navy-border';
-    document.getElementById('role-user-btn').className = 'flex-1 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400';
-    document.getElementById('login-role-label').textContent = 'Enter Admin PIN';
+function getMembers() { return ls_get(MEMBERS_KEY) || defaultMembers(); }
+function getReceipts() { return ls_get(RECEIPTS_KEY) || []; }
+function getCounter() { return ls_get(COUNTER_KEY) || 1; }
+function incCounter() { let c = getCounter(); ls_set(COUNTER_KEY, c + 1); return c; }
+
+function getSignature() { return ls_get(SIGNATURE_KEY) || null; }
+function setSignature(dataUrl) { ls_set(SIGNATURE_KEY, dataUrl); }
+function clearSignature() { localStorage.removeItem(SIGNATURE_KEY); }
+
+const MEMBER_COLORS = ['#c9a84c','#4caf7d','#6495ed','#a777e3','#e07d52','#52b0e0','#e05299','#7daf52','#e05252','#52e0c4','#af7de0'];
+
+function defaultMembers() {
+  const defaults = [
+    { name: 'Rakibul Islam Fahim', role: 'General Secretary', phone: '', email: '', address: '' },
+    { name: 'Saad Bin Zaman', role: 'Member', phone: '', email: '', address: '' },
+    { name: 'Saidul Islam', role: 'Member', phone: '', email: '', address: '' },
+    { name: 'Asif', role: 'Member', phone: '', email: '', address: '' },
+    { name: 'Jihadul Islam', role: 'Treasurer', phone: '', email: '', address: '' },
+    { name: 'Rakib Bin Rashed', role: 'President', phone: '', email: '', address: '' },
+    { name: 'Zunayed Ahmed Tanvir', role: 'Member', phone: '', email: '', address: '' },
+    { name: 'Fahim Saharier', role: 'Member', phone: '', email: '', address: '' },
+    { name: 'Akib', role: 'Member', phone: '', email: '', address: '' },
+    { name: 'Mainul Karim', role: 'Member', phone: '', email: '', address: '' },
+  ];
+  const members = defaults.map((m, i) => ({
+    id: `ZY-${String(i+1).padStart(3,'0')}`,
+    ...m,
+    color: MEMBER_COLORS[i % MEMBER_COLORS.length],
+    password: 'zyron123',
+    joinDate: '2024-01-01',
+  }));
+  ls_set(MEMBERS_KEY, members);
+  return members;
+}
+
+function initStorage() {
+  if (!ls_get(MEMBERS_KEY)) defaultMembers();
+}
+
+// ===========================
+// AUTH
+// ===========================
+let authMode = 'admin';
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('admin-login-form').style.display = mode === 'admin' ? 'block' : 'none';
+  document.getElementById('user-login-form').style.display = mode === 'user' ? 'block' : 'none';
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0 && mode==='admin')||(i===1 && mode==='user')));
+  document.getElementById('auth-error').textContent = '';
+}
+
+function adminLogin() {
+  const u = document.getElementById('admin-user').value.trim();
+  const p = document.getElementById('admin-pass').value;
+  const creds = getAdminCreds();
+  if (u === creds.username && p === creds.password) {
+    currentUser = { type: 'admin', name: 'Admin', role: 'Administrator', id: 'admin' };
+    enterApp();
   } else {
-    document.getElementById('role-user-btn').className = 'flex-1 py-2 rounded-lg text-sm font-semibold transition-all bg-navy-card text-slate-200 border border-navy-border';
-    document.getElementById('role-admin-btn').className = 'flex-1 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400';
-    document.getElementById('login-role-label').textContent = 'Enter User PIN';
+    document.getElementById('auth-error').textContent = '❌ Invalid credentials.';
   }
 }
 
-function pinPress(digit) {
-  if (pinBuffer.length >= 4) return;
-  pinBuffer += digit;
-  updatePinDots();
-  if (pinBuffer.length === 4) {
-    setTimeout(tryLogin, 200);
-  }
-}
-function pinBack() { pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); }
-function pinClear() { pinBuffer = ''; updatePinDots(); document.getElementById('pin-error').classList.add('hidden'); }
-
-function updatePinDots() {
-  for (let i=0;i<4;i++) {
-    const dot = document.getElementById(`dot-${i}`);
-    if (i < pinBuffer.length) dot.classList.add('filled'); else dot.classList.remove('filled');
-  }
-}
-
-function tryLogin() {
-  const pins = getPINs();
-  if (currentRole === 'admin' && pinBuffer === pins.admin) {
-    enterAdmin();
-  } else if (currentRole === 'user' && pinBuffer === pins.user) {
-    enterUser();
+function memberLogin() {
+  const id = document.getElementById('user-id-input').value.trim().toUpperCase();
+  const p = document.getElementById('user-pass').value;
+  const members = getMembers();
+  const member = members.find(m => m.id === id && m.password === p);
+  if (member) {
+    currentUser = { type: 'member', name: member.name, role: member.role, id: member.id };
+    enterApp();
   } else {
-    document.getElementById('pin-error').classList.remove('hidden');
-    pinBuffer = '';
-    updatePinDots();
+    document.getElementById('auth-error').textContent = '❌ Invalid Member ID or password.';
   }
 }
 
-function enterAdmin() {
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('admin-app').classList.remove('hidden');
-  initAdmin();
-}
-function enterUser() {
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('user-app').classList.remove('hidden');
-  renderUserHistory();
-}
-function logout() {
-  document.getElementById('admin-app').classList.add('hidden');
-  document.getElementById('user-app').classList.add('hidden');
-  document.getElementById('login-screen').classList.remove('hidden');
-  pinBuffer = ''; updatePinDots();
-  document.getElementById('pin-error').classList.add('hidden');
-  selectRole('admin');
+function enterApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sidebar-logo-img').src = ZYRON_LOGO;
+  setupSidebar();
+  navigate('dashboard');
+  updateSidebarUser();
 }
 
-// ── Data ──────────────────────────────────────────────────
-let settings = JSON.parse(localStorage.getItem('zyron_settings') || '{}');
-let receipts = JSON.parse(localStorage.getItem('zyron_receipts') || '[]');
-
-function getSettings() {
-  return { orgName: settings.orgName || 'Zyron Organization', defaultReceiver: settings.defaultReceiver || '', defaultMobile: settings.defaultMobile || '', defaultAmount: settings.defaultAmount || 500 };
-}
-function nextReceiptNo() {
-  return `ZR-${new Date().getFullYear()}-${String(receipts.length+1).padStart(4,'0')}`;
+async function logout() {
+  const ok = await confirmDialog('🚪 Logout', 'Are you sure you want to logout from ZYRON?', 'Logout', '#e05252');
+  if (!ok) return;
+  currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
 }
 
-// ── Admin Init ────────────────────────────────────────────
-function initAdmin() {
-  const s = getSettings();
-  document.getElementById('setting-org-name').value = s.orgName;
-  document.getElementById('setting-default-receiver').value = s.defaultReceiver;
-  document.getElementById('setting-default-mobile').value = s.defaultMobile;
-  document.getElementById('setting-default-amount').value = s.defaultAmount;
-  if (s.defaultReceiver) document.getElementById('receiver-name').value = s.defaultReceiver;
-  if (s.defaultMobile) document.getElementById('receiver-mobile').value = s.defaultMobile;
-  const today = new Date();
-  document.getElementById('payment-date').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  buildMonthsUI();
-  updateReceiptNo();
-  updateCounterDisplay();
-  const savedSig = localStorage.getItem('zyron_signature');
-  if (savedSig) applySigImage(savedSig);
-  generateReceipt();
+function updateSidebarUser() {
+  document.getElementById('sidebar-avatar').textContent = currentUser.name[0].toUpperCase();
+  document.getElementById('sidebar-username').textContent = currentUser.name;
+  document.getElementById('sidebar-role').textContent = currentUser.role;
 }
 
-// ── Signature ─────────────────────────────────────────────
-function loadSigFile(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => { applySigImage(e.target.result); if (document.getElementById('sig-save-pref').checked) localStorage.setItem('zyron_signature', e.target.result); notify('Signature uploaded!'); };
-  reader.readAsDataURL(file);
-}
-function handleSigDrop(e) {
-  e.preventDefault(); document.getElementById('sig-upload-zone').style.borderColor='#2d3f66';
-  const file = e.dataTransfer.files[0]; if (!file||!file.type.startsWith('image/')) return;
-  const reader = new FileReader();
-  reader.onload = ev => { applySigImage(ev.target.result); if (document.getElementById('sig-save-pref').checked) localStorage.setItem('zyron_signature', ev.target.result); notify('Signature uploaded!'); };
-  reader.readAsDataURL(file);
-}
-function applySigImage(dataUrl) {
-  document.getElementById('sig-zone-content').style.display = 'none';
-  const zp = document.getElementById('sig-zone-preview'); zp.src = dataUrl; zp.classList.remove('hidden');
-  const ctrl = document.getElementById('sig-controls'); ctrl.classList.remove('hidden'); ctrl.style.display = 'flex';
-  const pi = document.getElementById('sig-preview-img'); pi.src = dataUrl; pi.style.display = 'block';
-  document.getElementById('sig-empty-placeholder').style.display = 'none';
-}
-function clearSignature() {
-  document.getElementById('sig-zone-content').style.display = 'block';
-  const zp = document.getElementById('sig-zone-preview'); zp.src=''; zp.classList.add('hidden');
-  const ctrl = document.getElementById('sig-controls'); ctrl.classList.add('hidden'); ctrl.style.display='none';
-  document.getElementById('sig-file-input').value = '';
-  const pi = document.getElementById('sig-preview-img'); pi.src=''; pi.style.display='none';
-  document.getElementById('sig-empty-placeholder').style.display = 'block';
-  localStorage.removeItem('zyron_signature'); notify('Signature removed');
+// ===========================
+// SIDEBAR NAVIGATION
+// ===========================
+const adminNav = [
+  { section: 'Overview' },
+  { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+  { section: 'Receipts' },
+  { id: 'new-receipt', icon: '🧾', label: 'New Receipt' },
+  { id: 'receipts', icon: '📋', label: 'Receipt History' },
+  { section: 'Members' },
+  { id: 'members', icon: '👥', label: 'Members' },
+  { section: 'Analytics' },
+  { id: 'reports', icon: '📈', label: 'Reports' },
+  { section: 'System' },
+  { id: 'settings', icon: '⚙️', label: 'Settings' },
+];
+const memberNav = [
+  { section: 'Overview' },
+  { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+  { section: 'My Account' },
+  { id: 'my-receipts', icon: '🧾', label: 'My Receipts' },
+  { section: 'Organization' },
+  { id: 'member-directory', icon: '👥', label: 'Members' },
+];
+
+function setupSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  const items = currentUser.type === 'admin' ? adminNav : memberNav;
+  nav.innerHTML = items.map(item => {
+    if (item.section) return `<div class="nav-section">${item.section}</div>`;
+    return `<div class="nav-item" id="nav-${item.id}" onclick="navigate('${item.id}')">
+      <span class="nav-icon">${item.icon}</span>
+      <span>${item.label}</span>
+    </div>`;
+  }).join('');
 }
 
-function updateReceiptNo() {
-  const no = nextReceiptNo();
-  document.getElementById('receipt-no-display').textContent = no;
-  document.getElementById('preview-receipt-no').textContent = no;
-}
-function updateCounterDisplay() {
-  const el = document.getElementById('receipt-counter-display');
-  if (el) el.textContent = `${receipts.length} receipt${receipts.length!==1?'s':''} saved`;
-}
-
-// ── Months ────────────────────────────────────────────────
-function buildMonthsUI() {
-  const s = getSettings(); const year = new Date().getFullYear();
-  document.getElementById('months-container').innerHTML = MONTHS.map((m,i) => `
-    <div class="grid items-center px-2 py-1 rounded-md hover:bg-[#1a2d47] transition-colors" id="month-row-${i}" style="grid-template-columns:32px 1fr 110px;gap:6px;">
-      <input type="checkbox" class="month-check" id="month-check-${i}" onchange="toggleMonth(${i})">
-      <span class="text-slate-300 text-sm">${m}, ${year}</span>
-      <input type="number" class="month-amount" id="month-amount-${i}" value="${s.defaultAmount}" disabled min="0" oninput="calcTotal()">
-    </div>`).join('');
-  calcTotal();
-}
-function toggleMonth(i) {
-  const cb = document.getElementById(`month-check-${i}`);
-  const input = document.getElementById(`month-amount-${i}`);
-  const row = document.getElementById(`month-row-${i}`);
-  input.disabled = !cb.checked;
-  if (cb.checked) row.classList.add('bg-[#1b3a2d]'); else row.classList.remove('bg-[#1b3a2d]');
-  calcTotal(); updateSelectAllState();
-}
-function toggleAllMonths(master) { MONTHS.forEach((_,i) => { document.getElementById(`month-check-${i}`).checked = master.checked; toggleMonth(i); }); }
-function updateSelectAllState() {
-  const all = MONTHS.every((_,i)=>document.getElementById(`month-check-${i}`).checked);
-  const none = MONTHS.every((_,i)=>!document.getElementById(`month-check-${i}`).checked);
-  const m = document.getElementById('select-all-months');
-  m.checked = all; m.indeterminate = !all && !none;
-}
-function calcTotal() {
-  let t=0; MONTHS.forEach((_,i)=>{ if(document.getElementById(`month-check-${i}`).checked) t+=parseFloat(document.getElementById(`month-amount-${i}`).value)||0; });
-  document.getElementById('total-display').textContent = `৳ ${t.toLocaleString()}`; return t;
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById(`page-${page}`);
+  if (pg) pg.classList.add('active');
+  const ni = document.getElementById(`nav-${page}`);
+  if (ni) ni.classList.add('active');
+  closeSidebar();
+  loadPage(page);
 }
 
-// ── Generate ──────────────────────────────────────────────
-function formatDateDisplay(dateStr) {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr+'T00:00:00'); const day=d.getDate();
-  const s=['th','st','nd','rd'][(day%10>3||Math.floor(day/10)===1)?0:day%10]||'th';
-  return `${day}${s} ${MONTHS[d.getMonth()]}, ${d.getFullYear()}`;
-}
-function generateReceipt() {
-  const s=getSettings(); const year=new Date().getFullYear();
-  document.getElementById('preview-org-name').textContent = s.orgName;
-  document.getElementById('preview-receiver-name').textContent = document.getElementById('receiver-name').value||'—';
-  document.getElementById('preview-receiver-mobile').textContent = document.getElementById('receiver-mobile').value||'—';
-  document.getElementById('preview-recipient-name').textContent = document.getElementById('recipient-name').value||'—';
-  document.getElementById('preview-recipient-mobile').textContent = document.getElementById('recipient-mobile').value||'—';
-  document.getElementById('preview-payment-date').textContent = formatDateDisplay(document.getElementById('payment-date').value);
-  document.getElementById('preview-payment-method').textContent = document.getElementById('payment-method').value;
-  let total=0,rows='',sr=1;
-  MONTHS.forEach((m,i)=>{ if(!document.getElementById(`month-check-${i}`).checked) return; const a=parseFloat(document.getElementById(`month-amount-${i}`).value)||0; total+=a; rows+=`<tr><td>${sr++}.</td><td>${m}, ${year}</td><td style="text-align:right;font-weight:500;">${a.toLocaleString()}</td></tr>`; });
-  if(!rows) rows=`<tr><td colspan="3" style="text-align:center;color:#aaa;padding:14px;">— No months selected —</td></tr>`;
-  document.getElementById('preview-months-body').innerHTML = rows;
-  document.getElementById('preview-total').textContent = total.toLocaleString();
-  // Show PAID stamp
-  const stamp = document.getElementById('paid-stamp');
-  if (stamp) stamp.classList.add('visible');
-  notify('Receipt generated!');
+function loadPage(page) {
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'new-receipt') initNewReceipt();
+  if (page === 'receipts') { renderReceiptsTable(); populateMemberFilter(); }
+  if (page === 'members') renderMembers();
+  if (page === 'reports') renderReports();
+  if (page === 'my-receipts') renderMyReceipts();
+  if (page === 'member-directory') renderMemberDirectory();
+  if (page === 'settings') renderSettings();
 }
 
-function printReceipt() { generateReceipt(); setTimeout(()=>window.print(),200); }
-function downloadPDF() {
-  generateReceipt();
-  const el=document.getElementById('receipt-preview');
-  const name=document.getElementById('recipient-name').value||'receipt';
-  const no=document.getElementById('receipt-no-display').textContent;
-  notify('Generating PDF…');
-  html2pdf().set({margin:[10,8,10,8],filename:`${no}_${name.replace(/\s+/g,'_')}.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save().then(()=>notify('PDF downloaded!'));
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+// ===========================
+// DASHBOARD
+// ===========================
+function renderDashboard() {
+  const receipts = getReceipts();
+  const members = getMembers();
+  const total = receipts.reduce((s,r) => s + Number(r.amount), 0);
+  const today = new Date().toISOString().split('T')[0];
+  const todayAmt = receipts.filter(r => r.date === today).reduce((s,r) => s + Number(r.amount), 0);
+  const monthStart = today.substring(0,7);
+  const monthAmt = receipts.filter(r => r.date.startsWith(monthStart)).reduce((s,r) => s + Number(r.amount), 0);
+
+  // Toggle "New Receipt" button on dashboard — admin only
+  const dashBtn = document.getElementById('dash-new-receipt-btn');
+  if (dashBtn) dashBtn.style.display = currentUser.type === 'admin' ? 'inline-flex' : 'none';
+
+  const statsEl = document.getElementById('dashboard-stats');
+  if (currentUser.type === 'admin') {
+    statsEl.innerHTML = `
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Collected</div><div class="stat-value">৳${total.toLocaleString()}</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">This Month</div><div class="stat-value">৳${monthAmt.toLocaleString()}</div><div class="stat-sub">${monthStart}</div></div>
+      <div class="stat-card"><div class="stat-icon">📆</div><div class="stat-label">Today</div><div class="stat-value">৳${todayAmt.toLocaleString()}</div><div class="stat-sub">${today}</div></div>
+      <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">Total Receipts</div><div class="stat-value">${receipts.length}</div><div class="stat-sub">Transactions</div></div>
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Total Members</div><div class="stat-value">${members.length}</div><div class="stat-sub">Active</div></div>
+    `;
+  } else {
+    const myR = receipts.filter(r => r.memberId === currentUser.id);
+    const myT = myR.reduce((s,r) => s + Number(r.amount), 0);
+    const member = members.find(m => m.id === currentUser.id);
+    statsEl.innerHTML = `
+      <div class="stat-card"><div class="stat-icon">🏷️</div><div class="stat-label">Member ID</div><div class="stat-value" style="font-size:20px;">${currentUser.id}</div><div class="stat-sub">${member?.role||''}</div></div>
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Paid</div><div class="stat-value">৳${myT.toLocaleString()}</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">My Receipts</div><div class="stat-value">${myR.length}</div><div class="stat-sub">Transactions</div></div>
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Total Members</div><div class="stat-value">${members.length}</div><div class="stat-sub">In organization</div></div>
+    `;
+  }
+
+  // Recent receipts
+  const recentEl = document.getElementById('recent-receipts-table');
+  const recentSource = currentUser.type === 'admin' ? receipts : receipts.filter(r => r.memberId === currentUser.id);
+  const recent = [...recentSource].sort((a,b) => b.id.localeCompare(a.id)).slice(0,8);
+
+  renderMonthlySummary();
+
+  if (recent.length === 0) {
+    recentEl.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No receipts yet.</td></tr>';
+    return;
+  }
+  recentEl.innerHTML = recent.map(r => `
+    <tr>
+      <td><span class="badge badge-gold">${r.receiptNo}</span></td>
+      <td>${r.memberName}</td>
+      <td style="color:var(--gold);font-weight:700;">৳${Number(r.amount).toLocaleString()}</td>
+      <td>${r.purpose}</td>
+      <td>${r.date}</td>
+      <td><span class="badge badge-green">Paid</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderMonthlySummary() {
+  const receipts = getReceipts();
+  const members = getMembers();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  // populate year selector (years seen in receipts, plus current year)
+  const yearsSet = new Set(receipts.map(r => Number(r.year)).filter(y => y));
+  yearsSet.add(new Date().getFullYear());
+  const years = [...yearsSet].sort((a,b) => b-a);
+  const yearSel = document.getElementById('dash-summary-year');
+  const prevSelected = yearSel.value;
+  yearSel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+  yearSel.value = prevSelected && years.includes(Number(prevSelected)) ? prevSelected : String(new Date().getFullYear());
+  const selectedYear = yearSel.value;
+
+  const grid = document.getElementById('monthly-summary-grid');
+  const monthlyReceipts = receipts.filter(r => r.purpose === 'Monthly Fee' && String(r.year) === String(selectedYear) && r.month);
+
+  if (currentUser.type === 'admin') {
+    // Org-wide: for each month, total amount collected & how many members paid
+    const totalMembers = members.length;
+    grid.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+        ${months.map(m => {
+          const mReceipts = monthlyReceipts.filter(r => r.month === m);
+          const paidMemberIds = new Set(mReceipts.map(r => r.memberId));
+          const amt = mReceipts.reduce((s,r) => s + Number(r.amount), 0);
+          const paidCount = paidMemberIds.size;
+          const isFull = totalMembers > 0 && paidCount >= totalMembers;
+          return `
+            <div style="background:var(--navy3);border:1px solid ${isFull ? 'var(--success)' : amt>0 ? 'var(--gold)' : 'var(--border)'};border-radius:10px;padding:12px;text-align:center;">
+              <div style="font-size:12px;color:var(--text-muted);font-weight:700;letter-spacing:0.5px;">${m}</div>
+              <div style="font-size:17px;font-weight:700;color:${amt>0 ? 'var(--gold)' : 'var(--text-muted)'};margin-top:4px;">৳${amt.toLocaleString()}</div>
+              <div style="font-size:11px;color:${isFull ? '#4caf7d' : 'var(--text-muted)'};margin-top:2px;">${paidCount}/${totalMembers} paid</div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
+  } else {
+    // Member view: which months they've paid for, which are due
+    const myPaidMonths = new Set(monthlyReceipts.filter(r => r.memberId === currentUser.id).map(r => r.month));
+    grid.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;">
+        ${months.map(m => {
+          const paid = myPaidMonths.has(m);
+          return `
+            <div style="background:var(--navy3);border:1px solid ${paid ? 'var(--success)' : 'var(--border)'};border-radius:10px;padding:12px;text-align:center;">
+              <div style="font-size:12px;color:var(--text-muted);font-weight:700;letter-spacing:0.5px;">${m}</div>
+              <div style="font-size:13px;font-weight:700;margin-top:6px;color:${paid ? '#4caf7d' : '#e05252'};">${paid ? '✅ Paid' : '⏳ Due'}</div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+}
+
+// ===========================
+// NEW RECEIPT
+// ===========================
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function initNewReceipt() {
+  const members = getMembers();
+  const sel = document.getElementById('rcpt-member');
+  sel.innerHTML = '<option value="">-- Select Member --</option>' +
+    members.map(m => `<option value="${m.id}">${m.name} (${m.id})</option>`).join('');
+  const no = `ZY-RCP-${String(getCounter()).padStart(4,'0')}`;
+  document.getElementById('rcpt-no').value = no;
+  document.getElementById('rcpt-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('rcpt-member-id').value = '';
+  document.getElementById('rcpt-year').value = new Date().getFullYear();
+  document.getElementById('rcpt-month').value = MONTH_NAMES[new Date().getMonth()];
+}
+
+function onMemberSelect() {
+  const val = document.getElementById('rcpt-member').value;
+  document.getElementById('rcpt-member-id').value = val;
+}
+
+function getReceiptFormData() {
+  const memberId = document.getElementById('rcpt-member').value;
+  const members = getMembers();
+  const member = members.find(m => m.id === memberId);
+  return {
+    receiptNo: document.getElementById('rcpt-no').value,
+    date: document.getElementById('rcpt-date').value,
+    memberId,
+    memberName: member ? member.name : '',
+    memberRole: member ? member.role : '',
+    amount: document.getElementById('rcpt-amount').value,
+    method: document.getElementById('rcpt-method').value,
+    purpose: document.getElementById('rcpt-purpose').value,
+    month: document.getElementById('rcpt-month').value,
+    year: document.getElementById('rcpt-year').value,
+    receivedBy: document.getElementById('rcpt-by').value,
+    notes: document.getElementById('rcpt-notes').value,
+  };
+}
+
+function validateReceipt(d) {
+  if (!d.memberId) return 'Please select a member.';
+  if (!d.amount || Number(d.amount) <= 0) return 'Please enter a valid amount.';
+  if (!d.date) return 'Please select a date.';
+  if (d.purpose === 'Monthly Fee' && !d.month) return 'Please select the month this fee is for.';
+  return null;
 }
 
 function saveReceipt() {
-  generateReceipt(); const s=getSettings(); const year=new Date().getFullYear();
-  const months=MONTHS.map((m,i)=>{ const cb=document.getElementById(`month-check-${i}`); return {month:`${m},${year}`,amount:cb.checked?(parseFloat(document.getElementById(`month-amount-${i}`).value)||0):null,paid:cb.checked}; });
-  const r={receiptNo:document.getElementById('receipt-no-display').textContent,orgName:s.orgName,receiverName:document.getElementById('receiver-name').value,receiverMobile:document.getElementById('receiver-mobile').value,recipientName:document.getElementById('recipient-name').value,recipientMobile:document.getElementById('recipient-mobile').value,paymentDate:document.getElementById('payment-date').value,paymentMethod:document.getElementById('payment-method').value,months,total:calcTotal(),savedAt:new Date().toISOString(),sig:localStorage.getItem('zyron_signature')||null};
-  receipts.push(r); localStorage.setItem('zyron_receipts',JSON.stringify(receipts));
-  updateReceiptNo(); updateCounterDisplay(); notify(`Receipt ${r.receiptNo} saved!`);
+  const d = getReceiptFormData();
+  const err = validateReceipt(d);
+  if (err) { showToast('⚠️ ' + err); return; }
+  const receipts = getReceipts();
+  const id = incCounter();
+  const receipt = {
+    id: `id_${Date.now()}`,
+    receiptNo: `ZY-RCP-${String(id).padStart(4,'0')}`,
+    date: d.date, memberId: d.memberId, memberName: d.memberName,
+    memberRole: d.memberRole, amount: d.amount,
+    method: d.method, purpose: d.purpose, month: d.month, year: d.year,
+    receivedBy: d.receivedBy,
+    notes: d.notes, createdAt: new Date().toISOString(),
+  };
+  receipts.push(receipt);
+  ls_set(RECEIPTS_KEY, receipts);
+  showToast('✅ Receipt saved successfully!');
+  clearReceiptForm();
+  initNewReceipt();
 }
 
-// ── Admin History ─────────────────────────────────────────
-function renderHistory() {
-  const q=(document.getElementById('search-input')?.value||'').toLowerCase();
-  const list=document.getElementById('history-list');
-  const filtered=receipts.filter(r=>(r.recipientName||'').toLowerCase().includes(q)||(r.receiptNo||'').toLowerCase().includes(q)||(r.receiverName||'').toLowerCase().includes(q)).slice().reverse();
-  if(!filtered.length){list.innerHTML=`<div class="text-slate-600 text-center py-8 text-sm">No receipts found</div>`;return;}
-  list.innerHTML=filtered.map(r=>`
-    <div onclick="loadReceipt(${receipts.indexOf(r)})" class="bg-navy-card border border-navy-border rounded-xl p-3 mb-2 cursor-pointer hover:border-gold transition-colors flex justify-between items-center">
-      <div>
-        <div class="text-slate-100 text-sm font-semibold">${r.recipientName||'Unknown'}</div>
-        <div class="text-slate-500 text-xs mt-0.5">${r.receiptNo} · ${new Date(r.savedAt).toLocaleDateString()}</div>
-      </div>
-      <div class="text-right">
-        <span class="bg-[#1b3a2d] text-green-400 text-xs font-semibold px-2 py-0.5 rounded-full">৳ ${(r.total||0).toLocaleString()}</span>
-        <button onclick="event.stopPropagation();deleteReceipt(${receipts.indexOf(r)})" class="block text-red-400 text-xs mt-1 bg-transparent border-none cursor-pointer hover:text-red-300">✕ Delete</button>
-      </div>
-    </div>`).join('');
+function clearReceiptForm() {
+  ['rcpt-amount','rcpt-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rcpt-member').value = '';
+  document.getElementById('rcpt-member-id').value = '';
 }
 
-function loadReceipt(idx) {
-  const r=receipts[idx]; if(!r) return;
-  document.getElementById('receiver-name').value=r.receiverName||'';
-  document.getElementById('receiver-mobile').value=r.receiverMobile||'';
-  document.getElementById('recipient-name').value=r.recipientName||'';
-  document.getElementById('recipient-mobile').value=r.recipientMobile||'';
-  document.getElementById('payment-date').value=r.paymentDate||'';
-  document.getElementById('payment-method').value=r.paymentMethod||'Bkash';
-  r.months.forEach((m,i)=>{
-    const cb=document.getElementById(`month-check-${i}`); const input=document.getElementById(`month-amount-${i}`); const row=document.getElementById(`month-row-${i}`);
-    cb.checked=m.paid; input.disabled=!m.paid;
-    if(m.paid&&m.amount!==null) input.value=m.amount;
-    if(m.paid) row.classList.add('bg-[#1b3a2d]'); else row.classList.remove('bg-[#1b3a2d]');
+function previewReceipt() {
+  const d = getReceiptFormData();
+  const err = validateReceipt(d);
+  if (err) { showToast('⚠️ ' + err); return; }
+  currentPendingReceipt = d;
+  document.getElementById('receipt-print-area').innerHTML = buildReceiptHTML(d);
+  openModal('preview-modal');
+}
+
+function buildReceiptHTML(r) {
+  const sig = getSignature();
+  return `
+  <div class="receipt-preview" id="receipt-html">
+    <div class="receipt-header">
+      <img src="${ZYRON_LOGO}" alt="ZYRON" style="width:70px;height:auto;object-fit:contain;margin:0 auto 6px;display:block;">
+      <div style="font-weight:900;font-size:22px;color:#0a1628;letter-spacing:3px;margin-bottom:2px;">ZYRON</div>
+      <div style="font-size:12px;color:#c9a84c;font-weight:700;letter-spacing:2px;">ORGANIZATION</div>
+      <div class="receipt-title">Money Receipt</div>
+    </div>
+    <div class="receipt-amount-box">
+      <div class="receipt-amount-label">AMOUNT RECEIVED</div>
+      <div class="receipt-amount-val">৳ ${Number(r.amount).toLocaleString()}</div>
+      <div style="font-size:11px;color:#666;margin-top:4px;">${numberToWords(Number(r.amount))} Taka Only</div>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="receipt-row"><span class="key">Receipt No.</span><span class="val">${r.receiptNo}</span></div>
+      <div class="receipt-row"><span class="key">Date</span><span class="val">${r.date}</span></div>
+      <div class="receipt-row"><span class="key">Member Name</span><span class="val">${r.memberName}</span></div>
+      <div class="receipt-row"><span class="key">Member ID</span><span class="val">${r.memberId}</span></div>
+      <div class="receipt-row"><span class="key">Role / Position</span><span class="val">${r.memberRole || '—'}</span></div>
+      <div class="receipt-row"><span class="key">Purpose</span><span class="val">${r.purpose}${r.month ? ` (${r.month}${r.year ? ' '+r.year : ''})` : ''}</span></div>
+      <div class="receipt-row"><span class="key">Payment Method</span><span class="val">${r.method}</span></div>
+      <div class="receipt-row"><span class="key">Received By</span><span class="val">${r.receivedBy}</span></div>
+      ${r.notes ? `<div class="receipt-row"><span class="key">Notes</span><span class="val">${r.notes}</span></div>` : ''}
+    </div>
+    <div class="receipt-sig">
+      <div style="text-align:center;">
+        <div style="width:120px;height:36px;"></div>
+        <div style="width:120px;border-top:1px solid #333;padding-top:4px;font-size:12px;color:#555;">Member Signature</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:120px;height:36px;display:flex;align-items:flex-end;justify-content:center;">
+          ${sig ? `<img src="${sig}" alt="Signature" style="max-width:110px;max-height:34px;object-fit:contain;">` : ''}
+        </div>
+        <div style="width:120px;border-top:1px solid #333;padding-top:4px;font-size:12px;color:#555;">Authorized Signature</div>
+      </div>
+    </div>
+    <div class="receipt-footer">
+      ZYRON Organization — Official Money Receipt<br>
+      This is a computer-generated receipt. Generated on ${new Date().toLocaleString()}
+    </div>
+  </div>`;
+}
+
+function downloadPDF() {
+  if (!currentPendingReceipt) return;
+  generatePDF(currentPendingReceipt);
+  closeModal('preview-modal');
+}
+
+function downloadViewedPDF() {
+  if (!currentViewReceipt) return;
+  generatePDF(currentViewReceipt);
+  closeModal('view-receipt-modal');
+}
+
+function generatePDF(r) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' });
+  const W = 148, M = 14;
+  let y = 14;
+
+  // Header
+  doc.setFillColor(10, 22, 40);
+  doc.rect(0, 0, W, 32, 'F');
+  try {
+    const logoW = 16, logoH = logoW * (163/260);
+    doc.addImage(ZYRON_LOGO, 'PNG', W/2 - logoW/2, 3, logoW, logoH);
+  } catch(e) {}
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(201, 168, 76);
+  doc.text('ZYRON ORGANIZATION', W/2, 21, { align: 'center' });
+  doc.setFontSize(8);
+  doc.setTextColor(200, 200, 200);
+  doc.text('Official Money Receipt', W/2, 26.5, { align: 'center' });
+  doc.setFontSize(7);
+  doc.text(`Receipt No: ${r.receiptNo}  |  Date: ${r.date}`, W/2, 30.5, { align: 'center' });
+
+  y = 42;
+
+  // Amount Box
+  doc.setFillColor(253, 243, 208);
+  doc.roundedRect(M, y, W - M*2, 22, 3, 3, 'F');
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.setFont('helvetica', 'normal');
+  doc.text('AMOUNT RECEIVED', W/2, y+7, { align: 'center' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.setTextColor(10, 22, 40);
+  doc.text(`BDT ${Number(r.amount).toLocaleString()}`, W/2, y+16, { align: 'center' });
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'italic');
+  doc.setTextColor(120, 120, 120);
+  doc.text(numberToWords(Number(r.amount)) + ' Taka Only', W/2, y+21, { align: 'center' });
+  y += 30;
+
+  // Details
+  doc.setFontSize(9);
+  const rows = [
+    ['Member Name', r.memberName],
+    ['Member ID', r.memberId],
+    ['Role / Position', r.memberRole || '—'],
+    ['Purpose', r.purpose + (r.month ? ` (${r.month}${r.year ? ' '+r.year : ''})` : '')],
+    ['Payment Method', r.method],
+    ['Received By', r.receivedBy],
+  ];
+  if (r.notes) rows.push(['Notes', r.notes]);
+
+  rows.forEach(([k, v], i) => {
+    const rowY = y + i * 10;
+    if (i % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(M, rowY - 4, W - M*2, 10, 'F'); }
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(k + ':', M + 3, rowY + 2);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text(String(v), M + 55, rowY + 2);
   });
-  calcTotal();
-  document.getElementById('preview-receipt-no').textContent=r.receiptNo;
-  document.getElementById('receipt-no-display').textContent=r.receiptNo;
-  generateReceipt(); showTab('form'); notify(`Loaded ${r.receiptNo}`);
+
+  y += rows.length * 10 + 10;
+
+  // Signature
+  const sig = getSignature();
+  if (sig) {
+    try {
+      const sigW = 35, sigH = 12;
+      doc.addImage(sig, W-M-45+5, y+2, sigW, sigH);
+    } catch(e) {}
+  }
+  doc.setDrawColor(100);
+  doc.line(M, y+16, M+45, y+16);
+  doc.line(W-M-45, y+16, W-M, y+16);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(100,100,100);
+  doc.text('Member Signature', M + 22, y+20, { align:'center' });
+  doc.text('Authorized Signature', W-M-22, y+20, { align:'center' });
+
+  // Footer
+  doc.setFillColor(10, 22, 40);
+  doc.rect(0, 200, W, 10, 'F');
+  doc.setFontSize(7);
+  doc.setTextColor(201, 168, 76);
+  doc.text('ZYRON Organization — Computer Generated Receipt', W/2, 206, { align: 'center' });
+
+  doc.save(`${r.receiptNo}_${r.memberName.replace(/\s/g,'_')}.pdf`);
+  showToast('📥 PDF downloaded!');
 }
 
-function deleteReceipt(idx) {
-  if(!confirm('Delete this receipt?')) return;
-  receipts.splice(idx,1); localStorage.setItem('zyron_receipts',JSON.stringify(receipts));
-  updateCounterDisplay(); renderHistory(); updateReceiptNo(); notify('Deleted');
+// ===========================
+// RECEIPT HISTORY TABLE
+// ===========================
+function populateMemberFilter() {
+  const members = getMembers();
+  const sel = document.getElementById('filter-member');
+  sel.innerHTML = '<option value="">All Members</option>' +
+    members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
 }
 
-// ── User History ──────────────────────────────────────────
-function renderUserHistory() {
-  const q=(document.getElementById('user-search-input')?.value||'').toLowerCase();
-  const list=document.getElementById('user-history-list');
-  const filtered=receipts.filter(r=>(r.recipientName||'').toLowerCase().includes(q)||(r.receiptNo||'').toLowerCase().includes(q)).slice().reverse();
-  if(!filtered.length){list.innerHTML=`<div class="text-slate-600 text-center py-8 text-sm">No receipts found</div>`;return;}
-  list.innerHTML=filtered.map(r=>`
-    <div onclick="userLoadReceipt(${receipts.indexOf(r)})" class="bg-navy-card border border-navy-border rounded-xl p-3 mb-2 cursor-pointer hover:border-gold transition-colors flex justify-between items-center">
-      <div>
-        <div class="text-slate-100 text-sm font-semibold">${r.recipientName||'Unknown'}</div>
-        <div class="text-slate-500 text-xs mt-0.5">${r.receiptNo} · ${new Date(r.savedAt).toLocaleDateString()}</div>
+function renderReceiptsTable() {
+  let receipts = getReceipts();
+  const search = (document.getElementById('search-receipt')?.value || '').toLowerCase();
+  const purpose = document.getElementById('filter-purpose')?.value || '';
+  const memberId = document.getElementById('filter-member')?.value || '';
+
+  if (search) receipts = receipts.filter(r =>
+    r.memberName.toLowerCase().includes(search) ||
+    r.receiptNo.toLowerCase().includes(search) ||
+    r.purpose.toLowerCase().includes(search));
+  if (purpose) receipts = receipts.filter(r => r.purpose === purpose);
+  if (memberId) receipts = receipts.filter(r => r.memberId === memberId);
+
+  receipts = [...receipts].sort((a,b) => b.createdAt?.localeCompare(a.createdAt||''));
+
+  const total = receipts.length;
+  const pages = Math.ceil(total / PAGE_SIZE) || 1;
+  if (receiptPage > pages) receiptPage = 1;
+  const slice = receipts.slice((receiptPage-1)*PAGE_SIZE, receiptPage*PAGE_SIZE);
+
+  const tbody = document.getElementById('receipts-table-body');
+  const empty = document.getElementById('receipts-empty');
+  const pagination = document.getElementById('receipts-pagination');
+
+  if (slice.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    pagination.innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = slice.map(r => `
+    <tr>
+      <td><span class="badge badge-gold">${r.receiptNo}</span></td>
+      <td>${r.date}</td>
+      <td>${r.memberName}<br><span style="font-size:11px;color:var(--text-muted);">${r.memberId}</span></td>
+      <td style="color:var(--gold);font-weight:700;">৳${Number(r.amount).toLocaleString()}</td>
+      <td>${r.purpose}</td>
+      <td>${r.month ? `<span class="badge badge-purple">${r.month}${r.year ? ' '+r.year : ''}</span>` : '<span class="text-muted">—</span>'}</td>
+      <td><span class="badge badge-blue">${r.method}</span></td>
+      <td><span class="badge badge-green">Paid</span></td>
+      <td>
+        <div class="flex-gap">
+          <button class="btn-sm btn-outline" style="padding:5px 10px;font-size:11px;" onclick="viewReceipt('${r.id}')">View</button>
+          <button class="btn-sm" style="background:var(--gold);color:var(--navy);padding:5px 10px;font-size:11px;" onclick="downloadReceiptPDF('${r.id}')">PDF</button>
+          ${currentUser.type==='admin' ? `<button class="btn-sm btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteReceipt('${r.id}')">Del</button>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  pagination.innerHTML = `
+    <span>Showing ${(receiptPage-1)*PAGE_SIZE+1}–${Math.min(receiptPage*PAGE_SIZE, total)} of ${total} receipts</span>
+    <div class="flex-gap">
+      <button class="btn-outline" style="padding:5px 12px;" onclick="changePage(-1)" ${receiptPage===1?'disabled':''}>‹ Prev</button>
+      <span>Page ${receiptPage} of ${pages}</span>
+      <button class="btn-outline" style="padding:5px 12px;" onclick="changePage(1)" ${receiptPage===pages?'disabled':''}>Next ›</button>
+    </div>
+  `;
+}
+
+function changePage(d) {
+  receiptPage += d;
+  renderReceiptsTable();
+}
+
+function viewReceipt(id) {
+  const receipts = getReceipts();
+  const r = receipts.find(x => x.id === id);
+  if (!r) return;
+  currentViewReceipt = r;
+  document.getElementById('view-receipt-content').innerHTML = buildReceiptHTML(r);
+  openModal('view-receipt-modal');
+}
+
+function downloadReceiptPDF(id) {
+  const receipts = getReceipts();
+  const r = receipts.find(x => x.id === id);
+  if (r) generatePDF(r);
+}
+
+async function deleteReceipt(id) {
+  const ok = await confirmDialog('🗑️ Delete Receipt', 'Delete this receipt? This cannot be undone.', 'Delete', '#e05252');
+  if (!ok) return;
+  const receipts = getReceipts().filter(r => r.id !== id);
+  ls_set(RECEIPTS_KEY, receipts);
+  renderReceiptsTable();
+  showToast('🗑️ Receipt deleted.');
+}
+
+function exportCSV() {
+  const receipts = getReceipts();
+  const headers = ['Receipt No','Date','Member Name','Member ID','Amount','Purpose','Method','Received By','Notes'];
+  const rows = receipts.map(r => [r.receiptNo, r.date, r.memberName, r.memberId, r.amount, r.purpose, r.method, r.receivedBy, r.notes||'']);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'ZYRON_Receipts.csv'; a.click();
+  showToast('📤 CSV exported!');
+}
+
+// ===========================
+// MEMBERS (admin management page)
+// ===========================
+function renderMembers() {
+  const members = getMembers();
+  const receipts = getReceipts();
+  const isAdmin = currentUser.type === 'admin';
+  const grid = document.getElementById('members-grid');
+  if (document.getElementById('add-member-btn')) {
+    document.getElementById('add-member-btn').style.display = isAdmin ? 'inline-flex' : 'none';
+  }
+  grid.innerHTML = members.map(m => {
+    const total = receipts.filter(r => r.memberId === m.id).reduce((s,r) => s+Number(r.amount), 0);
+    return `
+    <div class="member-card">
+      <div class="member-avatar-lg" style="background:${m.color};">${m.name[0].toUpperCase()}</div>
+      <div class="member-name">${m.name}</div>
+      <div class="member-role">${m.role}</div>
+      <div class="member-id">${m.id}</div>
+      <div class="member-balance">৳${total.toLocaleString()}</div>
+      ${m.phone ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📞 ${m.phone}</div>` : ''}
+      ${isAdmin ? `
+      <div class="flex-gap" style="justify-content:center;margin-top:12px;">
+        <button class="btn-sm btn-outline" onclick="editMember('${m.id}')" style="padding:5px 12px;font-size:11px;">Edit</button>
+        <button class="btn-sm btn-danger" onclick="deleteMember('${m.id}')" style="padding:5px 12px;font-size:11px;">Del</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ===========================
+// MEMBER DIRECTORY (member-facing, read-only — shows names of all members)
+// ===========================
+function renderMemberDirectory() {
+  const members = getMembers();
+  const grid = document.getElementById('member-directory-grid');
+  grid.innerHTML = members.map(m => `
+    <div class="member-card">
+      <div class="member-avatar-lg" style="background:${m.color};">${m.name[0].toUpperCase()}</div>
+      <div class="member-name">${m.name}</div>
+      <div class="member-role">${m.role}</div>
+      <div class="member-id">${m.id}</div>
+    </div>
+  `).join('');
+}
+
+function openAddMemberModal() {
+  editingMemberId = null;
+  document.getElementById('member-modal-title').textContent = 'Add New Member';
+  ['m-name','m-role','m-phone','m-email','m-address','m-password'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('m-edit-id').value = '';
+  document.getElementById('m-password-section').style.display = 'none';
+  openModal('member-modal');
+}
+
+function editMember(id) {
+  const members = getMembers();
+  const m = members.find(x => x.id === id);
+  if (!m) return;
+  editingMemberId = id;
+  document.getElementById('member-modal-title').textContent = 'Edit Member';
+  document.getElementById('m-name').value = m.name;
+  document.getElementById('m-role').value = m.role;
+  document.getElementById('m-phone').value = m.phone || '';
+  document.getElementById('m-email').value = m.email || '';
+  document.getElementById('m-address').value = m.address || '';
+  document.getElementById('m-edit-id').value = id;
+  document.getElementById('m-password').value = '';
+  document.getElementById('m-password-id').textContent = m.id;
+  document.getElementById('m-password-section').style.display = 'block';
+  openModal('member-modal');
+}
+
+function saveMember() {
+  const name = document.getElementById('m-name').value.trim();
+  const role = document.getElementById('m-role').value.trim();
+  if (!name) { showToast('⚠️ Name is required.'); return; }
+  const members = getMembers();
+  if (editingMemberId) {
+    const idx = members.findIndex(m => m.id === editingMemberId);
+    if (idx !== -1) {
+      const newPassword = document.getElementById('m-password').value.trim();
+      members[idx] = { ...members[idx], name, role,
+        phone: document.getElementById('m-phone').value,
+        email: document.getElementById('m-email').value,
+        address: document.getElementById('m-address').value,
+      };
+      if (newPassword) {
+        if (newPassword.length < 4) { showToast('⚠️ Password must be at least 4 characters.'); return; }
+        members[idx].password = newPassword;
+      }
+    }
+    showToast('✅ Member updated!');
+  } else {
+    const newId = `ZY-${String(members.length + 1).padStart(3,'0')}`;
+    members.push({
+      id: newId, name, role,
+      phone: document.getElementById('m-phone').value,
+      email: document.getElementById('m-email').value,
+      address: document.getElementById('m-address').value,
+      color: MEMBER_COLORS[members.length % MEMBER_COLORS.length],
+      password: 'zyron123',
+      joinDate: new Date().toISOString().split('T')[0],
+    });
+    showToast(`✅ Member added! ID: ${newId}`);
+  }
+  ls_set(MEMBERS_KEY, members);
+  closeModal('member-modal');
+  renderMembers();
+}
+
+async function deleteMember(id) {
+  const ok = await confirmDialog('🗑️ Delete Member', 'Delete this member? Their receipts will remain.', 'Delete', '#e05252');
+  if (!ok) return;
+  const members = getMembers().filter(m => m.id !== id);
+  ls_set(MEMBERS_KEY, members);
+  renderMembers();
+  showToast('🗑️ Member deleted.');
+}
+
+// ===========================
+// REPORTS
+// ===========================
+function renderReports() {
+  const receipts = getReceipts();
+  const members = getMembers();
+  const total = receipts.reduce((s,r) => s+Number(r.amount),0);
+  const today = new Date().toISOString().split('T')[0];
+  const monthStart = today.substring(0,7);
+  const monthAmt = receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
+
+  document.getElementById('report-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Collection</div><div class="stat-value">৳${total.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">This Month</div><div class="stat-value">৳${monthAmt.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">Total Receipts</div><div class="stat-value">${receipts.length}</div></div>
+    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Members</div><div class="stat-value">${members.length}</div></div>
+  `;
+
+  // Member-wise
+  const memberTable = document.getElementById('report-member-table');
+  memberTable.innerHTML = members.map(m => {
+    const mR = receipts.filter(r => r.memberId === m.id);
+    const mT = mR.reduce((s,r)=>s+Number(r.amount),0);
+    const last = mR.sort((a,b)=>b.date.localeCompare(a.date))[0];
+    return `<tr>
+      <td><div class="flex-gap"><div class="user-avatar" style="width:30px;height:30px;font-size:12px;background:${m.color};">${m.name[0]}</div>${m.name}</div></td>
+      <td><span class="badge badge-gold">${m.role}</span></td>
+      <td>${mR.length}</td>
+      <td style="color:var(--gold);font-weight:700;">৳${mT.toLocaleString()}</td>
+      <td>${last ? last.date : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  // Purpose breakdown
+  const purposes = {};
+  receipts.forEach(r => { purposes[r.purpose] = (purposes[r.purpose]||0) + Number(r.amount); });
+  const purposeEl = document.getElementById('purpose-breakdown');
+  if (Object.keys(purposes).length === 0) { purposeEl.innerHTML = '<p class="text-muted">No data yet.</p>'; return; }
+  const maxAmt = Math.max(...Object.values(purposes));
+  purposeEl.innerHTML = Object.entries(purposes).sort((a,b)=>b[1]-a[1]).map(([p,a]) => `
+    <div style="margin-bottom:14px;">
+      <div class="flex-gap" style="justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:13px;">${p}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--gold);">৳${a.toLocaleString()}</span>
       </div>
-      <div class="text-right">
-        <span class="bg-[#1b3a2d] text-green-400 text-xs font-semibold px-2 py-0.5 rounded-full">৳ ${(r.total||0).toLocaleString()}</span>
-        <div class="text-slate-600 text-xs mt-0.5">${r.paymentMethod||''}</div>
+      <div style="height:8px;background:var(--navy3);border-radius:4px;">
+        <div style="height:8px;background:var(--gold);border-radius:4px;width:${(a/maxAmt*100).toFixed(1)}%;transition:width 0.5s;"></div>
       </div>
-    </div>`).join('');
+    </div>
+  `).join('');
 }
 
-function userLoadReceipt(idx) {
-  const r=receipts[idx]; if(!r) return;
-  document.getElementById('user-empty-state').classList.add('hidden');
-  document.getElementById('user-receipt-wrapper').classList.remove('hidden');
-  document.getElementById('u-preview-receipt-no').textContent=r.receiptNo;
-  document.getElementById('u-preview-org-name').textContent=r.orgName||'Zyron Organization';
-  document.getElementById('u-preview-receiver-name').textContent=r.receiverName||'—';
-  document.getElementById('u-preview-receiver-mobile').textContent=r.receiverMobile||'—';
-  document.getElementById('u-preview-recipient-name').textContent=r.recipientName||'—';
-  document.getElementById('u-preview-recipient-mobile').textContent=r.recipientMobile||'—';
-  document.getElementById('u-preview-payment-date').textContent=formatDateDisplay(r.paymentDate);
-  document.getElementById('u-preview-payment-method').textContent=r.paymentMethod||'—';
-  let rows='',sr=1;
-  r.months.forEach(m=>{ if(!m.paid) return; rows+=`<tr><td>${sr++}.</td><td>${m.month.replace(',',' ')}</td><td style="text-align:right;font-weight:500;">${(m.amount||0).toLocaleString()}</td></tr>`; });
-  if(!rows) rows=`<tr><td colspan="3" style="text-align:center;color:#aaa;padding:14px;">—</td></tr>`;
-  document.getElementById('u-preview-months-body').innerHTML=rows;
-  document.getElementById('u-preview-total').textContent=(r.total||0).toLocaleString();
-  const uSig=document.getElementById('u-sig-preview-img');
-  if(r.sig){ uSig.src=r.sig; uSig.style.display='block'; } else { uSig.src=''; uSig.style.display='none'; }
-}
+// ===========================
+// MY RECEIPTS (member)
+// ===========================
+function renderMyReceipts() {
+  const receipts = getReceipts().filter(r => r.memberId === currentUser.id);
+  const total = receipts.reduce((s,r)=>s+Number(r.amount),0);
+  const monthStart = new Date().toISOString().substring(0,7);
+  const monthAmt = receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
 
-function userPrint() {
-  const el=document.getElementById('user-receipt-preview');
-  const orig=document.getElementById('receipt-preview');
-  // swap visibility trick
-  orig.id='receipt-preview-hidden-bak';
-  el.id='receipt-preview';
-  window.print();
-  el.id='user-receipt-preview';
-  orig.id='receipt-preview';
-}
+  document.getElementById('my-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Paid</div><div class="stat-value">৳${total.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">This Month</div><div class="stat-value">৳${monthAmt.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">Total Receipts</div><div class="stat-value">${receipts.length}</div></div>
+  `;
 
-function userDownloadPDF() {
-  const el=document.getElementById('user-receipt-preview');
-  const no=document.getElementById('u-preview-receipt-no').textContent;
-  const name=document.getElementById('u-preview-recipient-name').textContent||'receipt';
-  notify('Generating PDF…');
-  html2pdf().set({margin:[10,8,10,8],filename:`${no}_${name.replace(/\s+/g,'_')}.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save().then(()=>notify('PDF downloaded!'));
-}
-
-// ── Settings ──────────────────────────────────────────────
-function saveSettings() {
-  settings={orgName:document.getElementById('setting-org-name').value||'Zyron Organization',defaultReceiver:document.getElementById('setting-default-receiver').value,defaultMobile:document.getElementById('setting-default-mobile').value,defaultAmount:parseFloat(document.getElementById('setting-default-amount').value)||500};
-  localStorage.setItem('zyron_settings',JSON.stringify(settings)); notify('Settings saved!');
-}
-function clearAllData() {
-  if(!confirm('Delete ALL receipts?')) return;
-  localStorage.removeItem('zyron_receipts'); localStorage.removeItem('zyron_settings');
-  receipts=[]; settings={}; updateCounterDisplay(); updateReceiptNo(); notify('All data cleared');
-}
-function resetForm() {
-  const s=getSettings();
-  document.getElementById('receiver-name').value=s.defaultReceiver;
-  document.getElementById('receiver-mobile').value=s.defaultMobile;
-  document.getElementById('recipient-name').value='';
-  document.getElementById('recipient-mobile').value='';
-  document.getElementById('payment-method').value='Bkash';
-  MONTHS.forEach((_,i)=>{ const cb=document.getElementById(`month-check-${i}`); cb.checked=false; const inp=document.getElementById(`month-amount-${i}`); inp.disabled=true; inp.value=s.defaultAmount; document.getElementById(`month-row-${i}`).classList.remove('bg-[#1b3a2d]'); });
-  document.getElementById('select-all-months').checked=false;
-  calcTotal(); updateReceiptNo(); notify('Form reset');
-}
-
-// ── PIN management ────────────────────────────────────────
-function savePINs() {
-  const pins=getPINs();
-  const currentInput=document.getElementById('current-admin-pin').value;
-  const newAdmin=document.getElementById('new-admin-pin').value;
-  const newUser=document.getElementById('new-user-pin').value;
-  const msgEl=document.getElementById('pin-change-msg');
-  if(currentInput!==pins.admin){
-    msgEl.textContent='Current admin PIN is incorrect.';
-    msgEl.className='mt-2 text-center text-xs font-semibold py-2 rounded-lg bg-red-900/30 text-red-400 border border-red-800/50';
-    msgEl.classList.remove('hidden'); return;
+  const tbody = document.getElementById('my-receipts-table');
+  if (receipts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No receipts yet.</td></tr>';
+    return;
   }
-  if(newAdmin&&newAdmin.length!==4){
-    msgEl.textContent='New admin PIN must be exactly 4 digits.';
-    msgEl.className='mt-2 text-center text-xs font-semibold py-2 rounded-lg bg-red-900/30 text-red-400 border border-red-800/50';
-    msgEl.classList.remove('hidden'); return;
-  }
-  if(newUser&&newUser.length!==4){
-    msgEl.textContent='New user PIN must be exactly 4 digits.';
-    msgEl.className='mt-2 text-center text-xs font-semibold py-2 rounded-lg bg-red-900/30 text-red-400 border border-red-800/50';
-    msgEl.classList.remove('hidden'); return;
-  }
-  const updated={admin:newAdmin||pins.admin,user:newUser||pins.user};
-  localStorage.setItem('zyron_pins',JSON.stringify(updated));
-  document.getElementById('current-admin-pin').value='';
-  document.getElementById('new-admin-pin').value='';
-  document.getElementById('new-user-pin').value='';
-  msgEl.textContent='PINs updated successfully!';
-  msgEl.className='mt-2 text-center text-xs font-semibold py-2 rounded-lg bg-[#1b3a2d] text-green-400 border border-green-900';
-  msgEl.classList.remove('hidden');
-  notify('PINs updated!');
+  tbody.innerHTML = [...receipts].sort((a,b)=>b.date.localeCompare(a.date)).map(r => `
+    <tr>
+      <td><span class="badge badge-gold">${r.receiptNo}</span></td>
+      <td>${r.date}</td>
+      <td style="color:var(--gold);font-weight:700;">৳${Number(r.amount).toLocaleString()}</td>
+      <td>${r.purpose}</td>
+      <td>${r.month ? `<span class="badge badge-purple">${r.month}${r.year ? ' '+r.year : ''}</span>` : '<span class="text-muted">—</span>'}</td>
+      <td><span class="badge badge-blue">${r.method}</span></td>
+      <td>
+        <button class="btn-sm" style="background:var(--gold);color:var(--navy);padding:5px 10px;font-size:11px;" onclick="downloadReceiptPDF('${r.id}')">⬇ PDF</button>
+        <button class="btn-sm btn-outline" onclick="viewReceipt('${r.id}')" style="padding:5px 10px;font-size:11px;">View</button>
+      </td>
+    </tr>
+  `).join('');
 }
 
-// ── Tabs ──────────────────────────────────────────────────
-function showTab(tab) {
-  ['form','history','users','settings'].forEach(t=>{
-    const content=document.getElementById(`tab-content-${t}`);
-    const btn=document.getElementById(`tab-${t}`);
-    if(!content) return;
-    if(t===tab){ content.classList.remove('hidden'); if(btn){btn.classList.add('text-gold','bg-navy-border','border','border-[#3d5280]');btn.classList.remove('text-slate-400');} }
-    else{ content.classList.add('hidden'); if(btn){btn.classList.remove('text-gold','bg-navy-border','border','border-[#3d5280]');btn.classList.add('text-slate-400');} }
+// ===========================
+// SETTINGS
+// ===========================
+function renderSettings() {
+  const sig = getSignature();
+  const wrap = document.getElementById('signature-current-wrap');
+  const img = document.getElementById('signature-current-img');
+  if (sig) {
+    img.src = sig;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function handleSignatureUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('⚠️ Please upload an image file.'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    setSignature(e.target.result);
+    renderSettings();
+    showToast('✅ Treasurer signature uploaded!');
+    event.target.value = '';
+  };
+  reader.onerror = function() { showToast('❌ Failed to read image.'); };
+  reader.readAsDataURL(file);
+}
+
+async function removeSignature() {
+  if (!getSignature()) { showToast('ℹ️ No signature uploaded yet.'); return; }
+  const ok = await confirmDialog('🗑️ Remove Signature', 'Remove the treasurer signature from receipts?', 'Remove', '#e05252');
+  if (!ok) return;
+  clearSignature();
+  renderSettings();
+  showToast('🗑️ Signature removed.');
+}
+
+function changeAdminPass() {
+  const curr = document.getElementById('curr-pass').value;
+  const newP = document.getElementById('new-pass').value;
+  const conf = document.getElementById('conf-pass').value;
+  const creds = getAdminCreds();
+  if (curr !== creds.password) { showToast('❌ Current password is wrong.'); return; }
+  if (newP.length < 6) { showToast('⚠️ Password must be at least 6 chars.'); return; }
+  if (newP !== conf) { showToast('⚠️ Passwords do not match.'); return; }
+  ls_set(ADMIN_CREDS_KEY, { ...creds, password: newP });
+  showToast('✅ Password updated!');
+  ['curr-pass','new-pass','conf-pass'].forEach(id => document.getElementById(id).value = '');
+}
+
+async function clearAllData() {
+  const ok = await confirmDialog('⚠️ Clear All Data', 'DELETE ALL RECEIPTS permanently? This cannot be undone!', 'Delete All', '#e05252');
+  if (!ok) return;
+  ls_set(RECEIPTS_KEY, []);
+  ls_set(COUNTER_KEY, 1);
+  showToast('🗑️ All receipts cleared.');
+}
+
+// ===========================
+// MODAL HELPERS
+// ===========================
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// Custom confirm dialog (replaces browser confirm() which is blocked in some contexts)
+let _confirmResolve = null;
+function confirmDialog(title, msg, okLabel, okColor) {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-msg').textContent = msg;
+    const btn = document.getElementById('confirm-ok-btn');
+    btn.textContent = okLabel || 'Confirm';
+    btn.style.background = okColor || '#e05252';
+    openModal('confirm-modal');
   });
-  if(tab==='history') renderHistory();
+}
+function confirmResolve(val) {
+  closeModal('confirm-modal');
+  if (_confirmResolve) { _confirmResolve(val); _confirmResolve = null; }
 }
 
-// ── Toast ─────────────────────────────────────────────────
-let notifTimer;
-function notify(msg) {
-  const el=document.getElementById('notif');
-  el.textContent=msg;
-  el.classList.remove('translate-y-20','opacity-0');
-  el.classList.add('translate-y-0','opacity-100');
-  clearTimeout(notifTimer);
-  notifTimer=setTimeout(()=>{ el.classList.add('translate-y-20','opacity-0'); el.classList.remove('translate-y-0','opacity-100'); },2500);
+// Close modal on overlay click (but NOT the confirm modal)
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay') && e.target.id !== 'confirm-modal') {
+    e.target.classList.add('hidden');
+  }
+});
+
+// ===========================
+// TOAST
+// ===========================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
+
+// ===========================
+// NUMBER TO WORDS (BDT)
+// ===========================
+function numberToWords(n) {
+  if (n === 0) return 'Zero';
+  const ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine',
+    'Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function convert(num) {
+    if (num < 20) return ones[num];
+    if (num < 100) return tens[Math.floor(num/10)] + (num%10 ? ' '+ones[num%10] : '');
+    if (num < 1000) return ones[Math.floor(num/100)] + ' Hundred' + (num%100 ? ' '+convert(num%100) : '');
+    if (num < 100000) return convert(Math.floor(num/1000)) + ' Thousand' + (num%1000 ? ' '+convert(num%1000) : '');
+    if (num < 10000000) return convert(Math.floor(num/100000)) + ' Lakh' + (num%100000 ? ' '+convert(num%100000) : '');
+    return convert(Math.floor(num/10000000)) + ' Crore' + (num%10000000 ? ' '+convert(num%10000000) : '');
+  }
+  return convert(Math.floor(n));
+}
+
+// ===========================
+// INIT
+// ===========================
+initStorage();
+document.getElementById('auth-logo').src = ZYRON_LOGO;
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => m.classList.add('hidden'));
+  }
+});
 </script>
 </body>
 </html>
