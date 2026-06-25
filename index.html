@@ -5,665 +5,425 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZYRON Organization - Money Receipt Management System</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          midnight: '#0B1220',
+          ink: '#111C30',
+          ink2: '#172545',
+          brass: '#C9A227',
+          brasslight: '#E8D9A8',
+          brasspale: '#F7F0D8',
+          parchment: '#F7F3E8',
+          ember: '#D6573F',
+          mint: '#4FAE8E',
+          slatemuted: '#7F8FAE',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['IBM Plex Mono', 'monospace'],
+        },
+      }
+    }
+  }
+</script>
 <style>
-  :root {
-    --navy: #0a1628;
-    --navy2: #0f2040;
-    --navy3: #162a52;
-    --navy4: #1e3a6e;
-    --gold: #c9a84c;
-    --gold2: #e8c96a;
-    --gold3: #f5dfa0;
-    --gold4: #fdf3d0;
-    --silver: #a8b8c8;
-    --white: #ffffff;
-    --text-light: #e8ecf0;
-    --text-muted: #8a9bb0;
-    --danger: #e05252;
-    --success: #4caf7d;
-    --border: rgba(201,168,76,0.25);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: var(--navy);
-    color: var(--text-light);
-    min-height: 100vh;
-  }
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--navy2); }
-  ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+  body { font-family: 'Inter', sans-serif; background-color: #0B1220; }
+  .font-display { font-family: 'Fraunces', serif; }
+  .font-mono { font-family: 'IBM Plex Mono', monospace; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #111C30; }
+  ::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 3px; }
 
-  /* ===== AUTH SCREEN ===== */
-  #auth-screen {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 100vh; background: var(--navy);
-    background-image: radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.05) 0%, transparent 60%),
-                      radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.05) 0%, transparent 60%);
-  }
-  .auth-card {
-    background: var(--navy2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 420px;
-    text-align: center;
-  }
-  .logo-wrap { margin-bottom: 24px; }
-  .logo-wrap img { width: 100px; height: 100px; object-fit: contain; border-radius: 50%; background: var(--navy3); padding: 4px; }
-  .org-title { font-size: 26px; font-weight: 700; color: var(--gold); letter-spacing: 2px; }
-  .org-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; letter-spacing: 1px; }
-  .auth-tabs { display: flex; gap: 0; margin: 28px 0 24px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .auth-tab {
-    flex: 1; padding: 10px; background: transparent; border: none;
-    color: var(--text-muted); cursor: pointer; font-size: 14px; font-weight: 600;
-    transition: all 0.2s;
-  }
-  .auth-tab.active { background: var(--gold); color: var(--navy); }
-  .form-group { margin-bottom: 16px; text-align: left; }
-  .form-group label { display: block; font-size: 12px; color: var(--gold); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
-  .form-group input, .form-group select {
-    width: 100%; padding: 11px 14px; background: var(--navy3);
-    border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text-light); font-size: 14px; outline: none;
-    transition: border 0.2s;
-  }
-  .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
-  .form-group select option { background: var(--navy3); }
-  .btn-primary {
-    width: 100%; padding: 13px; background: var(--gold);
-    border: none; border-radius: 8px; color: var(--navy);
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    letter-spacing: 0.5px; transition: background 0.2s;
-    margin-top: 8px;
-  }
-  .btn-primary:hover { background: var(--gold2); }
-  .auth-error { color: var(--danger); font-size: 13px; margin-top: 10px; }
-
-  /* ===== MAIN APP ===== */
-  #app { display: none; }
-  .sidebar {
-    position: fixed; left: 0; top: 0; bottom: 0;
-    width: 240px; background: var(--navy2);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    z-index: 100; transition: transform 0.3s;
-  }
-  .sidebar-logo {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 12px;
-  }
-  .sidebar-logo img { width: 44px; height: 44px; border-radius: 50%; object-fit: contain; background: var(--navy3); padding: 2px; }
-  .sidebar-logo-text .org-name { font-size: 16px; font-weight: 700; color: var(--gold); }
-  .sidebar-logo-text .org-tagline { font-size: 10px; color: var(--text-muted); }
-  .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
-  .nav-section { font-size: 10px; color: var(--text-muted); padding: 0 20px; margin: 12px 0 6px; letter-spacing: 1px; font-weight: 600; text-transform: uppercase; }
-  .nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 20px; cursor: pointer; transition: all 0.2s;
-    color: var(--text-muted); font-size: 14px; border-left: 3px solid transparent;
-  }
-  .nav-item:hover { background: rgba(201,168,76,0.08); color: var(--text-light); }
-  .nav-item.active { background: rgba(201,168,76,0.12); color: var(--gold); border-left-color: var(--gold); }
-  .nav-item .nav-icon { font-size: 18px; width: 20px; text-align: center; }
-  .nav-badge { margin-left: auto; background: var(--gold); color: var(--navy); font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
-  .sidebar-user {
-    padding: 16px 20px; border-top: 1px solid var(--border);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .user-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: var(--gold); color: var(--navy);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 14px; flex-shrink: 0;
-  }
-  .user-info .user-name { font-size: 13px; font-weight: 600; color: var(--text-light); }
-  .user-info .user-role { font-size: 11px; color: var(--gold); }
-  .btn-logout {
-    margin-left: auto; background: var(--danger); border: none;
-    color: white; padding: 7px 14px; border-radius: 6px;
-    cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .btn-logout:hover { background: #c94444; }
-
-  /* Main content */
-  .main-content {
-    margin-left: 240px; padding: 24px;
-    min-height: 100vh; background: var(--navy);
-  }
   .page { display: none; }
   .page.active { display: block; }
-  .page-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 24px; padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .page-title { font-size: 22px; font-weight: 700; color: var(--gold); }
-  .page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-  .btn-gold {
-    background: var(--gold); color: var(--navy); border: none;
-    padding: 10px 20px; border-radius: 8px; font-size: 14px;
-    font-weight: 700; cursor: pointer; transition: background 0.2s;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-gold:hover { background: var(--gold2); }
-  .btn-outline {
-    background: transparent; color: var(--gold); border: 1px solid var(--gold);
-    padding: 9px 18px; border-radius: 8px; font-size: 13px;
-    font-weight: 600; cursor: pointer; transition: all 0.2s;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-outline:hover { background: rgba(201,168,76,0.1); }
-  .btn-danger {
-    background: var(--danger); color: white; border: none;
-    padding: 7px 14px; border-radius: 6px; font-size: 12px;
-    font-weight: 600; cursor: pointer; transition: background 0.2s;
-  }
-  .btn-danger:hover { background: #c94444; }
-  .btn-sm {
-    padding: 6px 14px; font-size: 12px; font-weight: 600;
-    border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s;
-  }
-
-  /* Cards */
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin-bottom: 24px; }
-  .stat-card {
-    background: var(--navy2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px;
-  }
-  .stat-icon { font-size: 28px; margin-bottom: 10px; }
-  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-  .stat-value { font-size: 28px; font-weight: 700; color: var(--gold); margin-top: 4px; }
-  .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-
-  /* Panels */
-  .panel {
-    background: var(--navy2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 24px; margin-bottom: 20px;
-  }
-  .panel-title {
-    font-size: 16px; font-weight: 700; color: var(--gold);
-    margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
-    padding-bottom: 12px; border-bottom: 1px solid var(--border);
-  }
-
-  /* Form Grid */
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 16px; }
-  .form-grid-full { grid-column: 1 / -1; }
-  input[type="text"], input[type="number"], input[type="date"], input[type="password"], select, textarea {
-    width: 100%; padding: 10px 14px; background: var(--navy3);
-    border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text-light); font-size: 14px; outline: none;
-    transition: border 0.2s; font-family: inherit;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--gold); }
-  select option { background: var(--navy3); }
-  label { display: block; font-size: 12px; color: var(--gold); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
-
-  /* Table */
-  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead tr { background: var(--navy3); }
-  thead th {
-    padding: 12px 16px; text-align: left;
-    color: var(--gold); font-weight: 700; font-size: 12px;
-    letter-spacing: 0.5px; text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-  }
-  tbody tr { border-bottom: 1px solid rgba(201,168,76,0.1); transition: background 0.15s; }
-  tbody tr:hover { background: rgba(201,168,76,0.05); }
-  tbody td { padding: 12px 16px; color: var(--text-light); vertical-align: middle; }
-  tbody tr:last-child { border-bottom: none; }
-
-  /* Badges */
-  .badge {
-    display: inline-flex; align-items: center; padding: 3px 10px;
-    border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
-  }
-  .badge-gold { background: rgba(201,168,76,0.2); color: var(--gold); }
-  .badge-green { background: rgba(76,175,125,0.2); color: #4caf7d; }
-  .badge-red { background: rgba(224,82,82,0.2); color: #e05252; }
-  .badge-blue { background: rgba(100,149,237,0.2); color: #6495ed; }
-  .badge-purple { background: rgba(167,119,227,0.2); color: #a777e3; }
-
-  /* Member card */
-  .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
-  .member-card {
-    background: var(--navy3); border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px; text-align: center;
-    transition: border-color 0.2s;
-  }
-  .member-card:hover { border-color: var(--gold); }
-  .member-avatar-lg {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: var(--gold); color: var(--navy);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 20px; margin: 0 auto 12px;
-  }
-  .member-name { font-size: 15px; font-weight: 700; color: var(--text-light); }
-  .member-role { font-size: 12px; color: var(--gold); margin: 4px 0 8px; }
-  .member-id { font-size: 11px; color: var(--text-muted); }
-  .member-balance { font-size: 18px; font-weight: 700; color: var(--gold2); margin-top: 10px; }
-
-  /* Search / filter bar */
-  .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-  .filter-bar input, .filter-bar select { flex: 1; min-width: 160px; max-width: 260px; }
-
-  /* Receipt preview */
-  .receipt-preview {
-    background: white; color: #111; padding: 32px;
-    border-radius: 8px; max-width: 500px; margin: 0 auto;
-    font-family: 'Segoe UI', Arial, sans-serif;
-  }
-  .receipt-header { text-align: center; border-bottom: 2px solid #c9a84c; padding-bottom: 16px; margin-bottom: 16px; }
-  .receipt-org { font-size: 22px; font-weight: 700; color: #0a1628; letter-spacing: 2px; }
-  .receipt-tagline { font-size: 11px; color: #666; }
-  .receipt-title { font-size: 18px; font-weight: 700; text-transform: uppercase; color: #c9a84c; margin: 12px 0; }
-  .receipt-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
-  .receipt-row .key { color: #555; }
-  .receipt-row .val { font-weight: 600; color: #222; }
-  .receipt-amount-box { text-align: center; margin: 16px 0; padding: 12px; background: #fdf3d0; border-radius: 8px; }
-  .receipt-amount-label { font-size: 11px; color: #666; }
-  .receipt-amount-val { font-size: 28px; font-weight: 700; color: #0a1628; }
-  .receipt-footer { text-align: center; margin-top: 16px; font-size: 11px; color: #888; border-top: 1px solid #eee; padding-top: 12px; }
-  .receipt-sig { display: flex; justify-content: space-between; margin-top: 24px; font-size: 12px; color: #555; }
-  .receipt-sig-line { border-top: 1px solid #333; padding-top: 4px; }
-
-  /* Toast */
-  #toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--gold); color: var(--navy);
-    padding: 12px 24px; border-radius: 8px; font-weight: 700;
-    font-size: 14px; z-index: 9999; opacity: 0;
-    transition: opacity 0.3s; pointer-events: none;
-  }
-  #toast.show { opacity: 1; }
-
-  /* Modal */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000; padding: 16px;
-  }
   .modal-overlay.hidden { display: none; }
-  .modal-box {
-    background: var(--navy2); border: 1px solid var(--border);
-    border-radius: 16px; padding: 32px; width: 100%; max-width: 560px;
-    max-height: 90vh; overflow-y: auto;
-  }
-  .modal-title { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 20px; }
-  .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
 
-  /* Responsive */
-  .hamburger { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; background: var(--gold); color: var(--navy); border: none; padding: 8px 12px; border-radius: 8px; font-size: 20px; cursor: pointer; font-weight: 700; }
-  @media(max-width: 768px) {
-    .hamburger { display: block; }
+  .stamp-corner { position: relative; }
+  .stamp-corner::before {
+    content: ''; position: absolute; top: -1px; left: -1px;
+    width: 18px; height: 18px;
+    border-top: 2px solid #C9A227; border-left: 2px solid #C9A227;
+    border-radius: 4px 0 0 0;
+  }
+  .stamp-corner::after {
+    content: ''; position: absolute; bottom: -1px; right: -1px;
+    width: 18px; height: 18px;
+    border-bottom: 2px solid #C9A227; border-right: 2px solid #C9A227;
+    border-radius: 0 0 4px 0;
+  }
+
+  .chit-edge {
+    background-image: radial-gradient(circle, #0B1220 3px, transparent 3px);
+    background-size: 14px 14px;
+    background-position: center;
+    height: 8px;
+  }
+
+  .month-cb-item { transition: all .18s ease; }
+  .month-cb-item.selected { border-color: #C9A227 !important; background: rgba(201,162,39,.14); }
+  .month-cb-check { transition: all .18s ease; }
+  .month-cb-item.selected .month-cb-check { background: #C9A227; border-color: #C9A227; color: #0B1220; }
+  .month-cb-item.selected .month-cb-name { color: #F7F3E8; }
+
+  .month-cell.paid { border-color: #4FAE8E !important; }
+  .month-cell.partial { border-color: #C9A227 !important; }
+
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #C9A227 !important; box-shadow: 0 0 0 3px rgba(201,162,39,0.15); }
+
+  .sidebar { transition: transform .3s ease; }
+  @media (max-width: 768px) {
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
-    .main-content { margin-left: 0; padding: 16px; padding-top: 56px; }
-    .stat-grid { grid-template-columns: repeat(2,1fr); }
-    .member-grid { grid-template-columns: repeat(2,1fr); }
-    .auth-card { padding: 32px 20px; }
+    .main-content { margin-left: 0 !important; }
   }
 
-  .logo-img-placeholder {
-    width: 90px; height: 90px; margin: 0 auto 16px;
-    border-radius: 50%; background: var(--navy3); border: 2px solid var(--gold);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px; font-weight: 900; color: var(--gold); letter-spacing: -2px;
-  }
-
-  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-  .text-muted { color: var(--text-muted); font-size: 13px; }
-  .text-gold { color: var(--gold); }
-  .mt-16 { margin-top: 16px; }
-  .flex-end { display: flex; justify-content: flex-end; }
-  .flex-gap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .w-full { width: 100%; }
+  #toast { transition: opacity .3s, transform .3s; }
+  #toast.show { opacity: 1 !important; transform: translateY(0) !important; }
 </style>
 </head>
-<body>
+<body class="min-h-screen text-slate-100 bg-midnight">
 
-<!-- LOGO DATA (embedded as variable, will be set from uploaded file) -->
-<img id="logo-source" src="" style="display:none" alt="">
+<div id="toast" class="fixed bottom-6 right-6 z-[9999] bg-brass text-midnight font-bold text-sm px-5 py-3 rounded-lg opacity-0 translate-y-2 pointer-events-none shadow-xl"></div>
 
-<!-- TOAST -->
-<div id="toast"></div>
-
-<!-- HAMBURGER -->
-<button class="hamburger" onclick="toggleSidebar()" title="Menu">☰</button>
+<button onclick="toggleSidebar()" class="hamburger md:hidden fixed top-4 left-4 z-[200] bg-brass text-midnight border-none px-3 py-2 rounded-lg text-xl font-bold cursor-pointer">&#9776;</button>
 
 <!-- ==================== AUTH SCREEN ==================== -->
-<div id="auth-screen">
-  <div class="auth-card">
-    <div class="logo-wrap">
-      <img id="auth-logo" src="" alt="ZYRON" style="width:140px;height:auto;object-fit:contain;">
+<div id="auth-screen" class="flex items-center justify-center min-h-screen px-4" style="background-image: radial-gradient(ellipse at 20% 30%, rgba(201,162,39,.07) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(201,162,39,.05) 0%, transparent 60%);">
+  <div class="stamp-corner bg-ink border border-brass/25 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl">
+    <div class="flex justify-center  p-0 -mb-16">
+    <img src="Adobe Express - file.png"
+     alt="ZYRON Logo"
+     class="w-56 h-56 object-contain">
+</div>
+    <div class="font-display font-bold text-3xl text-brass tracking-[0.15em]">ZYRON</div>
+    <div class="font-mono text-[11px] text-slatemuted mt-1 tracking-[0.25em] uppercase">Organization </div>
+
+    <div class="flex mt-7 mb-5 border border-brass/25 rounded-lg overflow-hidden">
+      <button class="auth-tab active flex-1 py-2.5 text-sm font-semibold bg-brass text-midnight transition-all" onclick="switchAuthTab('admin')" data-tab="admin">Admin Login</button>
+      <button class="auth-tab flex-1 py-2.5 text-sm font-semibold bg-transparent text-slatemuted transition-all" onclick="switchAuthTab('user')" data-tab="user">Member Login</button>
     </div>
-    <div class="org-title">ZYRON</div>
-    <div class="org-sub">ORGANIZATION</div>
-    <div class="auth-tabs" style="margin-top:28px;">
-      <button class="auth-tab active" onclick="switchAuthTab('admin')">Admin Login</button>
-      <button class="auth-tab" onclick="switchAuthTab('user')">Member Login</button>
-    </div>
-    <div id="admin-login-form">
-      <div class="form-group">
-        <label>USERNAME</label>
-        <input type="text" id="admin-user" placeholder="Enter admin username" value="admin">
+
+    <div id="admin-login-form" class="text-left space-y-3.5">
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Username</label>
+        <input type="text" id="admin-user" value="admin" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
-      <div class="form-group">
-        <label>PASSWORD</label>
-        <input type="password" id="admin-pass" placeholder="Enter password" value="zyron2024">
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Password</label>
+        <input type="password" id="admin-pass" value="zyron2024" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
-      <button class="btn-primary" onclick="adminLogin()">LOGIN AS ADMIN</button>
+      <button onclick="adminLogin()" class="w-full py-3 bg-brass hover:bg-brasslight text-midnight font-bold text-sm rounded-lg tracking-wide transition-colors mt-2">LOGIN AS ADMIN</button>
     </div>
-    <div id="user-login-form" style="display:none">
-      <div class="form-group">
-        <label>MEMBER ID</label>
-        <input type="text" id="user-id-input" placeholder="e.g. ZY-001">
+
+    <div id="user-login-form" class="text-left space-y-3.5 hidden">
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Member ID</label>
+        <input type="text" id="user-id-input" placeholder="e.g. ZY-001" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
-      <div class="form-group">
-        <label>PASSWORD</label>
-        <input type="password" id="user-pass" placeholder="Enter your password">
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Password</label>
+        <input type="password" id="user-pass" placeholder="Password" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
-      <button class="btn-primary" onclick="memberLogin()">LOGIN AS MEMBER</button>
+      <button onclick="memberLogin()" class="w-full py-3 bg-brass hover:bg-brasslight text-midnight font-bold text-sm rounded-lg tracking-wide transition-colors mt-2">LOGIN AS MEMBER</button>
     </div>
-    <div id="auth-error" class="auth-error"></div>
-    <div style="margin-top:20px; font-size:12px; color:var(--text-muted);">
-      Admin: admin / zyron2024 &nbsp;|&nbsp; Members: ID / zyron123
-    </div>
+
+    <div id="auth-error" class="text-ember text-sm mt-3 min-h-[20px]"></div>
+    <div class="mt-5 font-mono text-[11px] text-slatemuted">Admin: admin / zyron2024 &nbsp;|&nbsp; Members: ZY-001~010 / zyron123</div>
   </div>
 </div>
 
 <!-- ==================== MAIN APP ==================== -->
-<div id="app">
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <img id="sidebar-logo-img" src="" alt="ZYRON" style="width:44px;height:44px;object-fit:contain;flex-shrink:0;">
-      <div class="sidebar-logo-text">
-        <div class="org-name">ZYRON</div>
-        <div class="org-tagline">Organization</div>
+<div id="app" class="hidden">
+  <aside class="sidebar fixed left-0 top-0 bottom-0 w-60 bg-ink border-r border-brass/20 flex flex-col z-[100]" id="sidebar">
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-brass/20">
+     <div class="flex justify-center mb-0">
+   <img src="Adobe Express - file.png"
+     alt="ZYRON Logo"
+     class="w-48 h-48 object-contain">
+</div>
+      <div>
+        <div class="font-display font-bold text-base text-brass leading-tight">ZYRON</div>
+        <div class="font-mono text-[10px] text-slatemuted tracking-wide">Organization</div>
       </div>
     </div>
-    <nav class="sidebar-nav" id="sidebar-nav">
-      <!-- Filled dynamically -->
-    </nav>
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sidebar-avatar">A</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebar-username">Admin</div>
-        <div class="user-role" id="sidebar-role">Administrator</div>
+    <nav class="flex-1 py-4 overflow-y-auto" id="sidebar-nav"></nav>
+    <div class="flex items-center gap-2.5 px-5 py-3.5 border-t border-brass/20">
+      <div class="w-8.5 h-8.5 w-[34px] h-[34px] rounded-full bg-brass text-midnight flex items-center justify-center font-bold text-sm flex-shrink-0" id="sidebar-avatar">A</div>
+      <div class="min-w-0">
+        <div class="text-[13px] font-semibold text-slate-100 truncate" id="sidebar-username">Admin</div>
+        <div class="text-[11px] text-brass truncate" id="sidebar-role">Administrator</div>
       </div>
-      <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+      <button onclick="logout()" class="ml-auto bg-ember hover:bg-ember/80 text-white px-3 py-1.5 rounded-md text-xs font-bold flex-shrink-0 transition-colors">&#128682;</button>
     </div>
   </aside>
 
-  <!-- Main Content -->
-  <main class="main-content" id="main-content">
-
-    <!-- DASHBOARD PAGE -->
+  <main class="main-content ml-60 p-6 min-h-screen">
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <div class="page-header">
+      <div class="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4 border-b border-brass/20">
         <div>
-          <div class="page-title">📊 Dashboard</div>
-          <div class="page-subtitle">ZYRON Organization — Financial Overview</div>
+          <div class="font-display font-bold text-2xl text-brass">Dashboard</div>
+          <div class="text-[13px] text-slatemuted mt-0.5">ZYRON Organization</div>
         </div>
-<button class="btn-gold" id="dash-new-receipt-btn" onclick="navigate('new-receipt')">+ New Receipt</button>      </div>
-      <div class="stat-grid" id="dashboard-stats"></div>
-      <div class="panel" id="monthly-summary-panel">
-        <div class="panel-title" style="justify-content:space-between;">
-          <span>🗓️ Monthly Fee Summary</span>
-          <select id="dash-summary-year" onchange="renderMonthlySummary()" style="width:auto;padding:6px 12px;font-size:12px;"></select>
+        <button class="hidden bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors items-center gap-1.5" id="dash-new-btn" onclick="navigate('new-receipt')">+ New Receipt</button>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="dashboard-stats"></div>
+      <div class="stamp-corner bg-ink border border-brass/20 rounded-xl p-6 mb-5">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-5 pb-3 border-b border-brass/20">
+          <span class="font-display font-bold text-base text-brass">Monthly Fee Summary</span>
+          <select id="dash-year-sel" onchange="renderMonthlySummary()" class="w-auto bg-ink2 border border-brass/25 rounded-md text-slate-100 text-xs px-3 py-1.5"></select>
         </div>
         <div id="monthly-summary-grid"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;">
-        <div class="panel" style="grid-column:1/-1">
-          <div class="panel-title">💰 Recent Receipts</div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Receipt #</th><th>Member</th><th>Amount</th><th>Purpose</th><th>Date</th><th>Status</th></tr></thead>
-              <tbody id="recent-receipts-table"></tbody>
-            </table>
-          </div>
+      <div class="bg-ink border border-brass/20 rounded-xl p-6">
+        <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Recent Receipts</div>
+        <div class="overflow-x-auto rounded-lg border border-brass/15">
+          <table class="w-full text-[13px] border-collapse">
+            <thead class="bg-ink2">
+              <tr><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Receipt #</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Member</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Amount</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Purpose</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th></tr>
+            </thead>
+            <tbody id="recent-receipts-table"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- NEW RECEIPT PAGE -->
+    <!-- NEW RECEIPT -->
     <div class="page" id="page-new-receipt">
-      <div class="page-header">
-        <div>
-          <div class="page-title">🧾 Create New Receipt</div>
-          <div class="page-subtitle">Generate a money receipt for a member</div>
-        </div>
+      <div class="mb-6 pb-4 border-b border-brass/20">
+        <div class="font-display font-bold text-2xl text-brass">New Receipt</div>
+        <div class="text-[13px] text-slatemuted mt-0.5">Create a money receipt — select one or multiple months</div>
       </div>
-      <div class="panel">
-        <div class="panel-title">📝 Receipt Details</div>
-        <div class="form-grid">
+      <div class="stamp-corner bg-ink border border-brass/20 rounded-xl p-6">
+        <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Receipt Details</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label>RECEIPT NUMBER</label>
-            <input type="text" id="rcpt-no" placeholder="Auto-generated" readonly>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Receipt Number</label>
+            <input type="text" id="rcpt-no" readonly class="w-full px-3.5 py-2.5 bg-ink2/60 border border-brass/25 rounded-lg text-slate-100 text-sm font-mono">
           </div>
           <div>
-            <label>DATE</label>
-            <input type="date" id="rcpt-date">
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Date</label>
+            <input type="date" id="rcpt-date" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
           </div>
           <div>
-            <label>MEMBER</label>
-            <select id="rcpt-member" onchange="onMemberSelect()">
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Member</label>
+            <select id="rcpt-member" onchange="onMemberSelect()" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
               <option value="">-- Select Member --</option>
             </select>
           </div>
           <div>
-            <label>MEMBER ID</label>
-            <input type="text" id="rcpt-member-id" readonly placeholder="Auto-filled">
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Member ID</label>
+            <input type="text" id="rcpt-member-id" readonly placeholder="Auto-filled" class="w-full px-3.5 py-2.5 bg-ink2/60 border border-brass/25 rounded-lg text-slate-100 text-sm font-mono">
           </div>
           <div>
-            <label>AMOUNT (BDT ৳)</label>
-            <input type="number" id="rcpt-amount" placeholder="Enter amount" min="0">
-          </div>
-          <div>
-            <label>PAYMENT METHOD</label>
-            <select id="rcpt-method">
-              <option>Cash</option>
-              <option>bKash</option>
-              <option>Nagad</option>
-              <option>Bank Transfer</option>
-              <option>Cheque</option>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Payment Method</label>
+            <select id="rcpt-method" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+              <option>Cash</option><option>bKash</option><option>Nagad</option><option>Bank Transfer</option><option>Cheque</option>
             </select>
           </div>
           <div>
-            <label>PURPOSE / CATEGORY</label>
-            <select id="rcpt-purpose">
-              <option>Monthly Fee</option>
-              <option>Registration Fee</option>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Purpose</label>
+            <select id="rcpt-purpose" onchange="onPurposeChange()" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+              <option value="Monthly Fee">Monthly Fee</option>
+              <option value="Registration Fee">Registration Fee</option>
             </select>
           </div>
           <div>
-            <label>MONTH</label>
-            <select id="rcpt-month">
-              <option value="">-- Select Month --</option>
-              <option>January</option>
-              <option>February</option>
-              <option>March</option>
-              <option>April</option>
-              <option>May</option>
-              <option>June</option>
-              <option>July</option>
-              <option>August</option>
-              <option>September</option>
-              <option>October</option>
-              <option>November</option>
-              <option>December</option>
-            </select>
-          </div>
-          <div>
-            <label>YEAR</label>
-            <input type="number" id="rcpt-year" placeholder="e.g. 2026" min="2000" max="2100">
-          </div>
-          <div>
-            <label>RECEIVED BY</label>
-            <select id="rcpt-by">
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Received By</label>
+            <select id="rcpt-by" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
               <option>Jihadul Islam (Treasurer)</option>
               <option>Rakib Bin Rashed (President)</option>
               <option>Rakibul Islam Fahim (Gen. Secretary)</option>
             </select>
           </div>
-          <div class="form-grid-full">
-            <label>NOTES / REMARKS</label>
-            <textarea id="rcpt-notes" rows="2" placeholder="Optional notes..."></textarea>
+          <div id="rcpt-year-wrap">
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Year</label>
+            <input type="number" id="rcpt-year" min="2000" max="2100" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          </div>
+          <div class="md:col-span-2 lg:col-span-3">
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Notes</label>
+            <textarea id="rcpt-notes" rows="2" placeholder="Optional notes..." class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm resize-none"></textarea>
           </div>
         </div>
-        <div class="flex-gap mt-16">
-          <button class="btn-gold" onclick="saveReceipt()">💾 Save Receipt</button>
-          <button class="btn-outline" onclick="previewReceipt()">👁️ Preview</button>
-          <button class="btn-outline" onclick="clearReceiptForm()">🔄 Clear</button>
+
+        <!-- MONTHLY FEE SECTION -->
+        <div id="monthly-fee-section" class="mt-6">
+          <label class="block text-[11px] text-brass font-bold mb-2.5 tracking-wide uppercase">Select Months &amp; Amounts</label>
+          <div class="bg-ink2 border border-brass/20 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3.5">
+              <span class="font-mono text-xs text-brass font-bold uppercase tracking-wide">&#128197; Pick one or more months</span>
+              <div class="flex gap-2">
+                <button onclick="selectAllMonths(true)" class="bg-brass/10 text-brass border border-brass/25 px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-brass/20 transition-colors">Select All</button>
+                <button onclick="selectAllMonths(false)" class="bg-brass/10 text-brass border border-brass/25 px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-brass/20 transition-colors">Clear</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2" id="month-cb-grid"></div>
+            <div id="month-selected-pills" class="flex flex-wrap gap-1.5 mt-2"></div>
+            <div class="mt-3 px-3.5 py-2.5 bg-brass/10 border border-brass/25 rounded-lg flex justify-between items-center">
+              <span class="text-xs text-slatemuted">&#128176; Total Amount</span>
+              <span class="text-lg font-bold text-brass font-mono" id="month-total-display">&#2547; 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- REGISTRATION FEE SECTION -->
+        <div id="registration-fee-section" class="mt-6 hidden">
+          <div>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Amount (BDT &#2547;)</label>
+            <input type="number" id="rcpt-amount-single" placeholder="Enter amount" min="1" oninput="updateSingleTotal()" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          </div>
+          <div class="mt-2 px-3.5 py-2.5 bg-brass/10 border border-brass/25 rounded-lg flex justify-between items-center">
+            <span class="text-xs text-slatemuted">Total Amount</span>
+            <span class="text-lg font-bold text-brass font-mono" id="single-total-display">&#2547; 0</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5 flex-wrap mt-6">
+          <button onclick="saveReceipt()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128190; Save Receipt</button>
+          <button onclick="previewReceipt()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4.5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128065;&#65039; Preview</button>
+          <button onclick="clearReceiptForm()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4.5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128260; Clear</button>
         </div>
       </div>
     </div>
 
-    <!-- RECEIPT HISTORY PAGE -->
+    <!-- RECEIPT HISTORY -->
     <div class="page" id="page-receipts">
-      <div class="page-header">
+      <div class="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4 border-b border-brass/20">
         <div>
-          <div class="page-title">📋 Receipt History</div>
-          <div class="page-subtitle">All money receipts — search, filter & download</div>
+          <div class="font-display font-bold text-2xl text-brass">Receipt History</div>
+          <div class="text-[13px] text-slatemuted mt-0.5">All receipts</div>
         </div>
-        <button class="btn-gold" onclick="navigate('new-receipt')">+ New Receipt</button>
+        <button class="hidden bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors items-center gap-1.5" id="history-new-btn" onclick="navigate('new-receipt')">+ New Receipt</button>
       </div>
-      <div class="panel">
-        <div class="filter-bar">
-          <input type="text" id="search-receipt" placeholder="🔍 Search member, receipt #..." oninput="renderReceiptsTable()">
-          <select id="filter-purpose" onchange="renderReceiptsTable()">
-            <option value="">All Purposes</option>
-            <option>Monthly Fee</option>
-            <option>Registration Fee</option>
+      <div class="bg-ink border border-brass/20 rounded-xl p-6">
+        <div class="flex gap-3 flex-wrap mb-5">
+          <input type="text" id="search-receipt" placeholder="&#128269; Search..." oninput="renderReceiptsTable()" class="flex-1 min-w-[160px] max-w-[260px] px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          <select id="filter-purpose" onchange="renderReceiptsTable()" class="flex-1 min-w-[160px] max-w-[260px] px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+            <option value="">All Purposes</option><option>Monthly Fee</option><option>Registration Fee</option>
           </select>
-          <select id="filter-member" onchange="renderReceiptsTable()">
+          <select id="filter-member" onchange="renderReceiptsTable()" class="flex-1 min-w-[160px] max-w-[260px] px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
             <option value="">All Members</option>
           </select>
-          <button class="btn-outline" onclick="exportCSV()">📤 Export CSV</button>
+          <button onclick="exportCSV()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4.5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128228; Export CSV</button>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
+        <div class="overflow-x-auto rounded-lg border border-brass/15">
+          <table class="w-full text-[13px] border-collapse">
+            <thead class="bg-ink2">
               <tr>
-                <th>Receipt #</th><th>Date</th><th>Member</th><th>Amount</th>
-                <th>Purpose</th><th>Month</th><th>Method</th><th>Status</th><th>Actions</th>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Receipt #</th>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Member</th>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Amount</th>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Purpose</th>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Months</th>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Method</th>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Actions</th>
               </tr>
             </thead>
             <tbody id="receipts-table-body"></tbody>
           </table>
         </div>
-        <div id="receipts-empty" style="text-align:center;padding:32px;color:var(--text-muted);display:none;">
-          No receipts found. <a href="#" onclick="navigate('new-receipt')" style="color:var(--gold)">Create one →</a>
-        </div>
-        <div id="receipts-pagination" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:13px;color:var(--text-muted);"></div>
+        <div id="receipts-empty" class="text-center py-8 text-slatemuted hidden">No receipts found.</div>
+        <div id="receipts-pagination" class="flex justify-between items-center mt-4 text-[13px] text-slatemuted"></div>
       </div>
     </div>
 
-    <!-- MEMBERS PAGE -->
+    <!-- MEMBERS -->
     <div class="page" id="page-members">
-      <div class="page-header">
+      <div class="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4 border-b border-brass/20">
         <div>
-          <div class="page-title">👥 Member Management</div>
-          <div class="page-subtitle">Manage organization members</div>
+          <div class="font-display font-bold text-2xl text-brass">Members</div>
+          <div class="text-[13px] text-slatemuted mt-0.5">Manage members</div>
         </div>
-        <button class="btn-gold" id="add-member-btn" onclick="openAddMemberModal()">+ Add Member</button>
+        <button onclick="openAddMemberModal()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">+ Add Member</button>
       </div>
-      <div class="member-grid" id="members-grid"></div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="members-grid"></div>
     </div>
 
-    <!-- REPORTS PAGE -->
+    <!-- REPORTS -->
     <div class="page" id="page-reports">
-      <div class="page-header">
-        <div>
-          <div class="page-title">📈 Reports & Analytics</div>
-          <div class="page-subtitle">Financial summary and insights</div>
-        </div>
+      <div class="mb-6 pb-4 border-b border-brass/20">
+        <div class="font-display font-bold text-2xl text-brass">Reports</div>
+        <div class="text-[13px] text-slatemuted mt-0.5">Financial summary</div>
       </div>
-      <div class="stat-grid" id="report-stats"></div>
-      <div class="panel">
-        <div class="panel-title">💳 Member-wise Collection</div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Member</th><th>Role</th><th>Total Receipts</th><th>Total Amount</th><th>Last Payment</th></tr></thead>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6" id="report-stats"></div>
+      <div class="bg-ink border border-brass/20 rounded-xl p-6">
+        <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Member-wise Collection</div>
+        <div class="overflow-x-auto rounded-lg border border-brass/15">
+          <table class="w-full text-[13px] border-collapse">
+            <thead class="bg-ink2">
+              <tr><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Member</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Role</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Receipts</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Total</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Last Payment</th></tr>
+            </thead>
             <tbody id="report-member-table"></tbody>
           </table>
         </div>
       </div>
-      <div class="panel">
-        <div class="panel-title">🗂️ Purpose-wise Breakdown</div>
-        <div id="purpose-breakdown"></div>
-      </div>
     </div>
 
-    <!-- SETTINGS PAGE (admin only) -->
+    <!-- SETTINGS -->
     <div class="page" id="page-settings">
-      <div class="page-header">
-        <div>
-          <div class="page-title">⚙️ System Settings</div>
-          <div class="page-subtitle">Admin configuration</div>
-        </div>
+      <div class="mb-6 pb-4 border-b border-brass/20">
+        <div class="font-display font-bold text-2xl text-brass">Settings</div>
+        <div class="text-[13px] text-slatemuted mt-0.5">Admin configuration</div>
       </div>
-      <div class="panel" style="max-width:520px;">
-        <div class="panel-title">✍️ Treasurer Signature</div>
-        <p class="text-muted" style="margin-bottom:16px;">Upload a photo of the treasurer's signature. It will appear automatically on every money receipt (preview & PDF) under "Authorized Signature".</p>
-        <div id="signature-current-wrap" style="margin-bottom:16px;display:none;">
-          <div style="background:#fff;border-radius:8px;padding:12px;display:inline-block;">
-            <img id="signature-current-img" src="" alt="Treasurer Signature" style="max-width:200px;max-height:80px;object-fit:contain;display:block;">
+      <div class="stamp-corner bg-ink border border-brass/20 rounded-xl p-6 max-w-lg mb-5">
+        <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Treasurer Signature</div>
+        <p class="text-slatemuted text-[13px] mb-3.5">Upload signature image — appears on every receipt PDF.</p>
+        <div id="sig-preview-wrap" class="hidden mb-3.5">
+          <div class="bg-parchment rounded-lg p-2.5 inline-block">
+            <img id="sig-preview-img" src="" alt="Signature" class="max-w-[180px] max-h-[70px] object-contain block">
           </div>
         </div>
-        <div class="form-group">
-          <label>UPLOAD SIGNATURE IMAGE</label>
-          <input type="file" id="signature-file-input" accept="image/*" onchange="handleSignatureUpload(event)">
+        <div class="mb-3.5">
+          <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Upload Signature</label>
+          <input type="file" id="sig-file" accept="image/*" onchange="handleSigUpload(event)" class="w-full text-sm text-slatemuted">
         </div>
-        <div class="flex-gap">
-          <button class="btn-outline" onclick="removeSignature()">🗑️ Remove Signature</button>
-        </div>
+        <button onclick="removeSig()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4 py-2 rounded-lg transition-colors">&#128465;&#65039; Remove Signature</button>
       </div>
-      <div class="panel" style="max-width:520px;">
-        <div class="panel-title">🔒 Admin Password</div>
-        <div class="form-group">
-          <label>CURRENT PASSWORD</label>
-          <input type="password" id="curr-pass">
+      <div class="bg-ink border border-brass/20 rounded-xl p-6 max-w-lg mb-5">
+        <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Change Admin Password</div>
+        <div class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Current Password</label>
+            <input type="password" id="curr-pass" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">New Password</label>
+            <input type="password" id="new-pass" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Confirm Password</label>
+            <input type="password" id="conf-pass" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          </div>
         </div>
-        <div class="form-group">
-          <label>NEW PASSWORD</label>
-          <input type="password" id="new-pass">
-        </div>
-        <div class="form-group">
-          <label>CONFIRM NEW PASSWORD</label>
-          <input type="password" id="conf-pass">
-        </div>
-        <button class="btn-gold" onclick="changeAdminPass()">Update Password</button>
+        <button onclick="changeAdminPass()" class="mt-4 bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Update Password</button>
       </div>
-      <div class="panel" style="max-width:520px;">
-        <div class="panel-title">🗑️ Data Management</div>
-        <p class="text-muted" style="margin-bottom:16px;">Danger zone — irreversible actions</p>
-        <button class="btn-danger" onclick="clearAllData()">Clear All Receipt Data</button>
+      <div class="bg-ink border border-ember/40 rounded-xl p-6 max-w-lg">
+        <div class="font-display font-bold text-base text-ember mb-5 pb-3 border-b border-ember/30">Data Management</div>
+        <p class="text-slatemuted text-[13px] mb-3.5">Danger zone — irreversible</p>
+        <button onclick="clearAllData()" class="bg-ember hover:bg-ember/80 text-white font-semibold text-xs px-3.5 py-2 rounded-md transition-colors">Clear All Receipt Data</button>
       </div>
     </div>
 
-    <!-- MY RECEIPTS PAGE (member) -->
+    <!-- MY RECEIPTS (member) -->
     <div class="page" id="page-my-receipts">
-      <div class="page-header">
-        <div>
-          <div class="page-title">🧾 My Receipts</div>
-          <div class="page-subtitle">Your personal receipt history</div>
-        </div>
+      <div class="mb-6 pb-4 border-b border-brass/20">
+        <div class="font-display font-bold text-2xl text-brass">My Receipts</div>
+        <div class="text-[13px] text-slatemuted mt-0.5">Your payment history</div>
       </div>
-      <div class="stat-grid" id="my-stats"></div>
-      <div class="panel">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Receipt #</th><th>Date</th><th>Amount</th><th>Purpose</th><th>Month</th><th>Method</th><th>Download</th></tr>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6" id="my-stats"></div>
+      <div class="bg-ink border border-brass/20 rounded-xl p-6">
+        <div class="overflow-x-auto rounded-lg border border-brass/15">
+          <table class="w-full text-[13px] border-collapse">
+            <thead class="bg-ink2">
+              <tr><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Receipt #</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Amount</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Purpose</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Months</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Method</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Action</th></tr>
             </thead>
             <tbody id="my-receipts-table"></tbody>
           </table>
@@ -671,1100 +431,929 @@
       </div>
     </div>
 
-    <!-- MEMBERS DIRECTORY PAGE (member view) -->
+    <!-- MEMBER DIRECTORY -->
     <div class="page" id="page-member-directory">
-      <div class="page-header">
-        <div>
-          <div class="page-title">👥 Members</div>
-          <div class="page-subtitle">ZYRON Organization — all members</div>
-        </div>
+      <div class="mb-6 pb-4 border-b border-brass/20">
+        <div class="font-display font-bold text-2xl text-brass">Members</div>
+        <div class="text-[13px] text-slatemuted mt-0.5">ZYRON Organization — all members</div>
       </div>
-      <div class="member-grid" id="member-directory-grid"></div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="member-directory-grid"></div>
     </div>
 
   </main>
 </div>
 
-<!-- CUSTOM CONFIRM MODAL -->
-<div class="modal-overlay hidden" id="confirm-modal">
-  <div class="modal-box" style="max-width:380px;text-align:center;">
-    <div style="font-size:40px;margin-bottom:12px;" id="confirm-icon">⚠️</div>
-    <div class="modal-title" id="confirm-title" style="justify-content:center;">Are you sure?</div>
-    <div id="confirm-msg" style="color:var(--text-muted);font-size:14px;margin-bottom:24px;line-height:1.6;"></div>
-    <div style="display:flex;gap:12px;justify-content:center;">
-      <button class="btn-outline" onclick="confirmResolve(false)" style="min-width:100px;">Cancel</button>
-      <button class="btn-danger" id="confirm-ok-btn" onclick="confirmResolve(true)" style="min-width:100px;padding:10px 20px;font-size:14px;">Confirm</button>
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="confirm-modal">
+  <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-sm text-center shadow-2xl">
+    <div class="text-4xl mb-2.5" id="confirm-icon">&#9888;&#65039;</div>
+    <div class="font-display font-bold text-lg text-brass mb-2" id="confirm-title"></div>
+    <div class="text-slatemuted text-sm mb-5 leading-relaxed" id="confirm-msg"></div>
+    <div class="flex gap-3 justify-center">
+      <button onclick="confirmResolve(false)" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg min-w-[90px] transition-colors">Cancel</button>
+      <button onclick="confirmResolve(true)" id="confirm-ok-btn" class="bg-ember hover:bg-ember/80 text-white font-bold text-sm px-5 py-2.5 rounded-lg min-w-[90px] transition-colors">Confirm</button>
     </div>
   </div>
 </div>
 
-<!-- RECEIPT PREVIEW MODAL -->
-<div class="modal-overlay hidden" id="preview-modal">
-  <div class="modal-box" style="max-width:540px;">
-    <div class="modal-title">🧾 Receipt Preview</div>
+<!-- PREVIEW MODAL -->
+<div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="preview-modal">
+  <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="font-display font-bold text-lg text-brass mb-4.5">Receipt Preview</div>
     <div id="receipt-print-area"></div>
-    <div class="modal-actions">
-      <button class="btn-outline" onclick="closeModal('preview-modal')">Close</button>
-      <button class="btn-gold" onclick="downloadPDF()">⬇ Download PDF</button>
+    <div class="flex gap-3 justify-end mt-4.5">
+      <button onclick="closeModal('preview-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Close</button>
+      <button onclick="downloadPDF()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">&#11015; Download PDF</button>
     </div>
   </div>
 </div>
 
-<!-- ADD/EDIT MEMBER MODAL -->
-<div class="modal-overlay hidden" id="member-modal">
-  <div class="modal-box">
-    <div class="modal-title" id="member-modal-title">Add New Member</div>
-    <div class="form-grid">
+<!-- MEMBER MODAL -->
+<div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="member-modal">
+  <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="font-display font-bold text-lg text-brass mb-4.5" id="member-modal-title">Add Member</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label>FULL NAME</label>
-        <input type="text" id="m-name" placeholder="Member full name">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Full Name</label>
+        <input type="text" id="m-name" placeholder="Full name" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
       <div>
-        <label>ROLE / POSITION</label>
-        <input type="text" id="m-role" placeholder="e.g. General Secretary">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Role / Position</label>
+        <input type="text" id="m-role" placeholder="e.g. President" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
       <div>
-        <label>PHONE</label>
-        <input type="text" id="m-phone" placeholder="01XXXXXXXXX">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Phone</label>
+        <input type="text" id="m-phone" placeholder="01XXXXXXXXX" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
       <div>
-        <label>EMAIL</label>
-        <input type="text" id="m-email" placeholder="email@example.com">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Email</label>
+        <input type="text" id="m-email" placeholder="email@example.com" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
-      <div class="form-grid-full">
-        <label>ADDRESS</label>
-        <input type="text" id="m-address" placeholder="Address">
+      <div class="md:col-span-2">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Address</label>
+        <input type="text" id="m-address" placeholder="Address" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
     </div>
-    <div id="m-password-section" style="display:none;">
-      <hr class="divider">
-      <div class="form-grid">
-        <div class="form-grid-full">
-          <label>RESET LOGIN PASSWORD</label>
-          <input type="text" id="m-password" placeholder="Leave blank to keep current password">
-          <div class="text-muted" style="margin-top:6px;">Member ID: <span id="m-password-id" style="color:var(--gold);font-weight:700;"></span> — Member logs in with this ID + password.</div>
-        </div>
+    <div id="m-pass-section" class="hidden">
+      <hr class="border-brass/20 my-4.5">
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Reset Login Password</label>
+        <input type="text" id="m-password" placeholder="Leave blank to keep current" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
+      <div class="text-slatemuted text-[13px] mt-1.5">Login ID: <span id="m-pass-id" class="text-brass font-bold"></span></div>
     </div>
     <input type="hidden" id="m-edit-id">
-    <div class="modal-actions">
-      <button class="btn-outline" onclick="closeModal('member-modal')">Cancel</button>
-      <button class="btn-gold" onclick="saveMember()">Save Member</button>
+    <div class="flex gap-3 justify-end mt-4.5">
+      <button onclick="closeModal('member-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Cancel</button>
+      <button onclick="saveMember()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Save Member</button>
     </div>
   </div>
 </div>
 
 <!-- VIEW RECEIPT MODAL -->
-<div class="modal-overlay hidden" id="view-receipt-modal">
-  <div class="modal-box" style="max-width:540px;">
-    <div class="modal-title">🧾 Receipt Details</div>
+<div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="view-receipt-modal">
+  <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="font-display font-bold text-lg text-brass mb-4.5">Receipt Details</div>
     <div id="view-receipt-content"></div>
-    <div class="modal-actions">
-      <button class="btn-outline" onclick="closeModal('view-receipt-modal')">Close</button>
-      <button class="btn-gold" onclick="downloadViewedPDF()">⬇ Download PDF</button>
+    <div class="flex gap-3 justify-end mt-4.5">
+      <button onclick="closeModal('view-receipt-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Close</button>
+      <button onclick="downloadViewedPDF()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">&#11015; Download PDF</button>
     </div>
   </div>
 </div>
 
+
 <script>
-// ===========================
-// LOGO (ZYRON crest, embedded as base64 so the file stays fully self-contained)
-// ===========================
-const ZYRON_LOGO = "Adobe Express - file.png"
-// ===========================
-// STATE & STORAGE
-// ===========================
-const ADMIN_CREDS_KEY = 'zyron_admin';
-const MEMBERS_KEY = 'zyron_members';
-const RECEIPTS_KEY = 'zyron_receipts';
-const COUNTER_KEY = 'zyron_counter';
-const SIGNATURE_KEY = 'zyron_treasurer_signature';
+const ADMIN_KEY='zyron_admin',MEMBERS_KEY='zyron_members',RECEIPTS_KEY='zyron_receipts',COUNTER_KEY='zyron_counter',SIG_KEY='zyron_sig';
+const PAGE_SIZE=15;
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const COLORS=['#C9A227','#4FAE8E','#6495ed','#a777e3','#D6573F','#52b0e0','#e05299','#7daf52','#cc8855','#52e0c4'];
+const ADMIN_PAGES=new Set(['dashboard','new-receipt','receipts','members','reports','settings']);
+const MEMBER_PAGES=new Set(['dashboard','my-receipts','member-directory']);
 
-let currentUser = null;
-let currentViewReceipt = null;
-let currentPendingReceipt = null;
-let editingMemberId = null;
-let receiptPage = 1;
-const PAGE_SIZE = 15;
+let currentUser=null,currentViewReceipt=null,currentPendingReceipt=null,editingMemberId=null,receiptPage=1;
 
-function ls_get(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
-function ls_set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+const ls_get=k=>{try{return JSON.parse(localStorage.getItem(k));}catch{return null;}};
+const ls_set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 
-function getAdminCreds() {
-  return ls_get(ADMIN_CREDS_KEY) || { username: 'admin', password: 'zyron2024' };
-}
+function getAdminCreds(){return ls_get(ADMIN_KEY)||{username:'admin',password:'zyron2024'};}
+function getMembers(){return ls_get(MEMBERS_KEY)||initDefaultMembers();}
+function getReceipts(){return ls_get(RECEIPTS_KEY)||[];}
+function getCounter(){return ls_get(COUNTER_KEY)||1;}
+function incCounter(){let c=getCounter();ls_set(COUNTER_KEY,c+1);return c;}
+function getSig(){return ls_get(SIG_KEY)||null;}
 
-function getMembers() { return ls_get(MEMBERS_KEY) || defaultMembers(); }
-function getReceipts() { return ls_get(RECEIPTS_KEY) || []; }
-function getCounter() { return ls_get(COUNTER_KEY) || 1; }
-function incCounter() { let c = getCounter(); ls_set(COUNTER_KEY, c + 1); return c; }
-
-function getSignature() { return ls_get(SIGNATURE_KEY) || null; }
-function setSignature(dataUrl) { ls_set(SIGNATURE_KEY, dataUrl); }
-function clearSignature() { localStorage.removeItem(SIGNATURE_KEY); }
-
-const MEMBER_COLORS = ['#c9a84c','#4caf7d','#6495ed','#a777e3','#e07d52','#52b0e0','#e05299','#7daf52','#e05252','#52e0c4','#af7de0'];
-
-function defaultMembers() {
-  const defaults = [
-    { name: 'Rakibul Islam Fahim', role: 'General Secretary', phone: '', email: '', address: '' },
-    { name: 'Saad Bin Zaman', role: 'Member', phone: '', email: '', address: '' },
-    { name: 'Saidul Islam', role: 'Member', phone: '', email: '', address: '' },
-    { name: 'Asif', role: 'Member', phone: '', email: '', address: '' },
-    { name: 'Jihadul Islam', role: 'Treasurer', phone: '', email: '', address: '' },
-    { name: 'Rakib Bin Rashed', role: 'President', phone: '', email: '', address: '' },
-    { name: 'Zunayed Ahmed Tanvir', role: 'Member', phone: '', email: '', address: '' },
-    { name: 'Fahim Saharier', role: 'Member', phone: '', email: '', address: '' },
-    { name: 'Akib', role: 'Member', phone: '', email: '', address: '' },
-    { name: 'Mainul Karim', role: 'Member', phone: '', email: '', address: '' },
+function initDefaultMembers(){
+  const list=[
+    {name:'Rakibul Islam Fahim',role:'General Secretary'},
+    {name:'Saad Bin Zaman',role:'Member'},
+    {name:'Saidul Islam Asif',role:'Member'},
+    {name:'Jihadul Islam',role:'Treasurer'},
+    {name:'Rakib Bin Rashed',role:'President'},
+    {name:'Zunayed Ahmed Tanvir',role:'Member'},
+    {name:'Fahim Saharier',role:'Member'},
+    {name:'Akib Mainul Karim',role:'Member'},
   ];
-  const members = defaults.map((m, i) => ({
-    id: `ZY-${String(i+1).padStart(3,'0')}`,
-    ...m,
-    color: MEMBER_COLORS[i % MEMBER_COLORS.length],
-    password: 'zyron123',
-    joinDate: '2024-01-01',
+  const members=list.map((m,i)=>({
+    id:`ZY-${String(i+1).padStart(3,'0')}`,name:m.name,role:m.role,
+    phone:'',email:'',address:'',color:COLORS[i%COLORS.length],
+    password:'zyron123',joinDate:'2024-01-01'
   }));
-  ls_set(MEMBERS_KEY, members);
+  ls_set(MEMBERS_KEY,members);
   return members;
 }
 
-function initStorage() {
-  if (!ls_get(MEMBERS_KEY)) defaultMembers();
-}
-
-// ===========================
 // AUTH
-// ===========================
-let authMode = 'admin';
-function switchAuthTab(mode) {
-  authMode = mode;
-  document.getElementById('admin-login-form').style.display = mode === 'admin' ? 'block' : 'none';
-  document.getElementById('user-login-form').style.display = mode === 'user' ? 'block' : 'none';
-  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0 && mode==='admin')||(i===1 && mode==='user')));
-  document.getElementById('auth-error').textContent = '';
+let authMode='admin';
+function switchAuthTab(mode){
+  authMode=mode;
+  document.getElementById('admin-login-form').classList.toggle('hidden',mode!=='admin');
+  document.getElementById('user-login-form').classList.toggle('hidden',mode!=='user');
+  document.querySelectorAll('.auth-tab').forEach(t=>{
+    const active=t.dataset.tab===mode;
+    t.classList.toggle('active',active);
+    t.classList.toggle('bg-brass',active);
+    t.classList.toggle('text-midnight',active);
+    t.classList.toggle('bg-transparent',!active);
+    t.classList.toggle('text-slatemuted',!active);
+  });
+  document.getElementById('auth-error').textContent='';
 }
-
-function adminLogin() {
-  const u = document.getElementById('admin-user').value.trim();
-  const p = document.getElementById('admin-pass').value;
-  const creds = getAdminCreds();
-  if (u === creds.username && p === creds.password) {
-    currentUser = { type: 'admin', name: 'Admin', role: 'Administrator', id: 'admin' };
-    enterApp();
-  } else {
-    document.getElementById('auth-error').textContent = '❌ Invalid credentials.';
-  }
+function adminLogin(){
+  const u=document.getElementById('admin-user').value.trim();
+  const p=document.getElementById('admin-pass').value;
+  const c=getAdminCreds();
+  if(u===c.username&&p===c.password){currentUser={type:'admin',name:'Admin',role:'Administrator',id:'admin'};enterApp();}
+  else document.getElementById('auth-error').textContent='Invalid credentials.';
 }
-
-function memberLogin() {
-  const id = document.getElementById('user-id-input').value.trim().toUpperCase();
-  const p = document.getElementById('user-pass').value;
-  const members = getMembers();
-  const member = members.find(m => m.id === id && m.password === p);
-  if (member) {
-    currentUser = { type: 'member', name: member.name, role: member.role, id: member.id };
-    enterApp();
-  } else {
-    document.getElementById('auth-error').textContent = '❌ Invalid Member ID or password.';
-  }
+function memberLogin(){
+  const id=document.getElementById('user-id-input').value.trim().toUpperCase();
+  const p=document.getElementById('user-pass').value;
+  const m=getMembers().find(x=>x.id===id&&x.password===p);
+  if(m){currentUser={type:'member',name:m.name,role:m.role,id:m.id};enterApp();}
+  else document.getElementById('auth-error').textContent='Invalid Member ID or password.';
 }
-
-function enterApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('sidebar-logo-img').src = ZYRON_LOGO;
-  setupSidebar();
+function enterApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').classList.remove('hidden');
+  setupSidebar();updateSidebarUser();
   navigate('dashboard');
-  updateSidebarUser();
+}
+async function logout(){
+  const ok=await confirmDialog('Logout','Logout from ZYRON?','Logout','ember');
+  if(!ok)return;
+  currentUser=null;
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('admin-user').value='admin';document.getElementById('admin-pass').value='zyron2024';
+  document.getElementById('user-id-input').value='';document.getElementById('user-pass').value='';
+  document.getElementById('auth-error').textContent='';switchAuthTab('admin');
+}
+function updateSidebarUser(){
+  document.getElementById('sidebar-avatar').textContent=currentUser.name[0].toUpperCase();
+  document.getElementById('sidebar-username').textContent=currentUser.name;
+  document.getElementById('sidebar-role').textContent=currentUser.role;
 }
 
-async function logout() {
-  const ok = await confirmDialog('🚪 Logout', 'Are you sure you want to logout from ZYRON?', 'Logout', '#e05252');
-  if (!ok) return;
-  currentUser = null;
-  document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-}
-
-function updateSidebarUser() {
-  document.getElementById('sidebar-avatar').textContent = currentUser.name[0].toUpperCase();
-  document.getElementById('sidebar-username').textContent = currentUser.name;
-  document.getElementById('sidebar-role').textContent = currentUser.role;
-}
-
-// ===========================
-// SIDEBAR NAVIGATION
-// ===========================
-const adminNav = [
-  { section: 'Overview' },
-  { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-  { section: 'Receipts' },
-  { id: 'new-receipt', icon: '🧾', label: 'New Receipt' },
-  { id: 'receipts', icon: '📋', label: 'Receipt History' },
-  { section: 'Members' },
-  { id: 'members', icon: '👥', label: 'Members' },
-  { section: 'Analytics' },
-  { id: 'reports', icon: '📈', label: 'Reports' },
-  { section: 'System' },
-  { id: 'settings', icon: '⚙️', label: 'Settings' },
+// NAV
+const adminNav=[
+  {section:'Overview'},{id:'dashboard',icon:'&#128202;',label:'Dashboard'},
+  {section:'Receipts'},{id:'new-receipt',icon:'&#129534;',label:'New Receipt'},{id:'receipts',icon:'&#128203;',label:'Receipt History'},
+  {section:'Members'},{id:'members',icon:'&#128101;',label:'Members'},
+  {section:'Analytics'},{id:'reports',icon:'&#128200;',label:'Reports'},
+  {section:'System'},{id:'settings',icon:'&#9881;',label:'Settings'},
 ];
-const memberNav = [
-  { section: 'Overview' },
-  { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-  { section: 'My Account' },
-  { id: 'my-receipts', icon: '🧾', label: 'My Receipts' },
-  { section: 'Organization' },
-  { id: 'member-directory', icon: '👥', label: 'Members' },
+const memberNav=[
+  {section:'Overview'},{id:'dashboard',icon:'&#128202;',label:'Dashboard'},
+  {section:'My Account'},{id:'my-receipts',icon:'&#129534;',label:'My Receipts'},
+  {section:'Organization'},{id:'member-directory',icon:'&#128101;',label:'Members'},
 ];
-
-function setupSidebar() {
-  const nav = document.getElementById('sidebar-nav');
-  const items = currentUser.type === 'admin' ? adminNav : memberNav;
-  nav.innerHTML = items.map(item => {
-    if (item.section) return `<div class="nav-section">${item.section}</div>`;
-    return `<div class="nav-item" id="nav-${item.id}" onclick="navigate('${item.id}')">
-      <span class="nav-icon">${item.icon}</span>
-      <span>${item.label}</span>
-    </div>`;
+function setupSidebar(){
+  const items=currentUser.type==='admin'?adminNav:memberNav;
+  document.getElementById('sidebar-nav').innerHTML=items.map(item=>{
+    if(item.section)return`<div class="text-[10px] text-slatemuted px-5 mt-3.5 mb-1.5 tracking-wide font-bold uppercase">${item.section}</div>`;
+    return`<div class="nav-item flex items-center gap-3 px-5 py-2.5 cursor-pointer text-[14px] text-slatemuted border-l-[3px] border-transparent hover:bg-brass/[0.08] hover:text-slate-100 transition-all" id="nav-${item.id}" onclick="navigate('${item.id}')"><span class="text-lg w-5 text-center">${item.icon}</span><span>${item.label}</span></div>`;
   }).join('');
 }
+function navigate(page){
+  if(!currentUser)return;
+  const allowed=currentUser.type==='admin'?ADMIN_PAGES:MEMBER_PAGES;
+  if(!allowed.has(page)){showToast('Access denied.');return;}
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.remove('active');
+    n.classList.remove('bg-brass/[0.12]','text-brass','border-brass');
+    n.classList.add('text-slatemuted','border-transparent');
+  });
+  const pg=document.getElementById(`page-${page}`);if(pg)pg.classList.add('active');
+  const ni=document.getElementById(`nav-${page}`);
+  if(ni){
+    ni.classList.add('active','bg-brass/[0.12]','text-brass','border-brass');
+    ni.classList.remove('text-slatemuted','border-transparent');
+  }
+  closeSidebar();loadPage(page);
+}
+function loadPage(p){
+  if(p==='dashboard')renderDashboard();
+  if(p==='new-receipt')initNewReceipt();
+  if(p==='receipts'){renderReceiptsTable();populateMemberFilter();}
+  if(p==='members')renderMembers();
+  if(p==='reports')renderReports();
+  if(p==='settings')renderSettings();
+  if(p==='my-receipts')renderMyReceipts();
+  if(p==='member-directory')renderMemberDirectory();
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');}
 
-function navigate(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const pg = document.getElementById(`page-${page}`);
-  if (pg) pg.classList.add('active');
-  const ni = document.getElementById(`nav-${page}`);
-  if (ni) ni.classList.add('active');
-  closeSidebar();
-  loadPage(page);
+// Shared stat-card builder (Tailwind)
+function statCard(icon,label,value,sub){
+  return `<div class="bg-ink border border-brass/20 rounded-xl p-5">
+    <div class="text-2xl mb-2.5">${icon}</div>
+    <div class="text-[12px] text-slatemuted font-semibold tracking-wide uppercase">${label}</div>
+    <div class="text-2xl font-bold text-brass font-mono mt-1">${value}</div>
+    ${sub?`<div class="text-xs text-slatemuted mt-1">${sub}</div>`:''}
+  </div>`;
 }
 
-function loadPage(page) {
-  if (page === 'dashboard') renderDashboard();
-  if (page === 'new-receipt') initNewReceipt();
-  if (page === 'receipts') { renderReceiptsTable(); populateMemberFilter(); }
-  if (page === 'members') renderMembers();
-  if (page === 'reports') renderReports();
-  if (page === 'my-receipts') renderMyReceipts();
-  if (page === 'member-directory') renderMemberDirectory();
-  if (page === 'settings') renderSettings();
-}
-
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
-
-// ===========================
 // DASHBOARD
-// ===========================
-function renderDashboard() {
-  const receipts = getReceipts();
-  const members = getMembers();
-  const total = receipts.reduce((s,r) => s + Number(r.amount), 0);
-  const today = new Date().toISOString().split('T')[0];
-  const todayAmt = receipts.filter(r => r.date === today).reduce((s,r) => s + Number(r.amount), 0);
-  const monthStart = today.substring(0,7);
-  const monthAmt = receipts.filter(r => r.date.startsWith(monthStart)).reduce((s,r) => s + Number(r.amount), 0);
-
-  // Toggle "New Receipt" button on dashboard — admin only
-  const dashBtn = document.getElementById('dash-new-receipt-btn');
-  if (dashBtn) dashBtn.style.display = currentUser.type === 'admin' ? 'inline-flex' : 'none';
-
-  const statsEl = document.getElementById('dashboard-stats');
-  if (currentUser.type === 'admin') {
-    statsEl.innerHTML = `
-      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Collected</div><div class="stat-value">৳${total.toLocaleString()}</div><div class="stat-sub">All time</div></div>
-      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">This Month</div><div class="stat-value">৳${monthAmt.toLocaleString()}</div><div class="stat-sub">${monthStart}</div></div>
-      <div class="stat-card"><div class="stat-icon">📆</div><div class="stat-label">Today</div><div class="stat-value">৳${todayAmt.toLocaleString()}</div><div class="stat-sub">${today}</div></div>
-      <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">Total Receipts</div><div class="stat-value">${receipts.length}</div><div class="stat-sub">Transactions</div></div>
-      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Total Members</div><div class="stat-value">${members.length}</div><div class="stat-sub">Active</div></div>
-    `;
-  } else {
-    const myR = receipts.filter(r => r.memberId === currentUser.id);
-    const myT = myR.reduce((s,r) => s + Number(r.amount), 0);
-    const member = members.find(m => m.id === currentUser.id);
-    statsEl.innerHTML = `
-      <div class="stat-card"><div class="stat-icon">🏷️</div><div class="stat-label">Member ID</div><div class="stat-value" style="font-size:20px;">${currentUser.id}</div><div class="stat-sub">${member?.role||''}</div></div>
-      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Paid</div><div class="stat-value">৳${myT.toLocaleString()}</div><div class="stat-sub">All time</div></div>
-      <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">My Receipts</div><div class="stat-value">${myR.length}</div><div class="stat-sub">Transactions</div></div>
-      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Total Members</div><div class="stat-value">${members.length}</div><div class="stat-sub">In organization</div></div>
-    `;
+function renderDashboard(){
+  const receipts=getReceipts(),members=getMembers();
+  const today=new Date().toISOString().split('T')[0];
+  const monthStart=today.substring(0,7);
+  const todayAmt=receipts.filter(r=>r.date===today).reduce((s,r)=>s+Number(r.amount),0);
+  const monthAmt=receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
+  const dashBtn=document.getElementById('dash-new-btn');
+  const histBtn=document.getElementById('history-new-btn');
+  const showBtn=currentUser.type==='admin';
+  if(dashBtn){dashBtn.classList.toggle('hidden',!showBtn);dashBtn.classList.toggle('inline-flex',showBtn);}
+  if(histBtn){histBtn.classList.toggle('hidden',!showBtn);histBtn.classList.toggle('inline-flex',showBtn);}
+  const statsEl=document.getElementById('dashboard-stats');
+  if(currentUser.type==='admin'){
+    statsEl.innerHTML=
+      statCard('&#128197;','This Month','&#2547;'+monthAmt.toLocaleString(),monthStart)+
+      statCard('&#128198;','Today','&#2547;'+todayAmt.toLocaleString(),today)+
+      statCard('&#128101;','Members',members.length,'Active')+
+      statCard('&#129534;','Total Receipts',receipts.length,'All time');
+  }else{
+    const myR=receipts.filter(r=>r.memberId===currentUser.id);
+    const member=members.find(m=>m.id===currentUser.id);
+    statsEl.innerHTML=
+      statCard('&#127991;','Member ID',currentUser.id,member?.role||'')+
+      statCard('&#129534;','My Receipts',myR.length,'Total')+
+      statCard('&#128101;','Members',members.length,'In ZYRON');
   }
-
-  // Recent receipts
-  const recentEl = document.getElementById('recent-receipts-table');
-  const recentSource = currentUser.type === 'admin' ? receipts : receipts.filter(r => r.memberId === currentUser.id);
-  const recent = [...recentSource].sort((a,b) => b.id.localeCompare(a.id)).slice(0,8);
-
   renderMonthlySummary();
-
-  if (recent.length === 0) {
-    recentEl.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">No receipts yet.</td></tr>';
-    return;
-  }
-  recentEl.innerHTML = recent.map(r => `
-    <tr>
-      <td><span class="badge badge-gold">${r.receiptNo}</span></td>
-      <td>${r.memberName}</td>
-      <td style="color:var(--gold);font-weight:700;">৳${Number(r.amount).toLocaleString()}</td>
-      <td>${r.purpose}</td>
-      <td>${r.date}</td>
-      <td><span class="badge badge-green">Paid</span></td>
-    </tr>
-  `).join('');
+  const src=currentUser.type==='admin'?receipts:receipts.filter(r=>r.memberId===currentUser.id);
+  const recent=[...src].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,8);
+  const tbody=document.getElementById('recent-receipts-table');
+  tbody.innerHTML=recent.length===0?`<tr><td colspan="5" class="text-center text-slatemuted py-6">No receipts yet.</td></tr>`:
+    recent.map(r=>`<tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
+      <td class="px-4 py-3 font-mono"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${r.receiptNo}</span></td>
+      <td class="px-4 py-3">${r.memberName}</td>
+      <td class="px-4 py-3 text-brass font-bold font-mono">&#2547;${Number(r.amount).toLocaleString()}</td>
+      <td class="px-4 py-3">${r.purpose}${r.months&&r.months.length?` (${r.months.join(', ')})`:r.month?` (${r.month})`:''}</td>
+      <td class="px-4 py-3 font-mono text-slatemuted">${r.date}</td>
+    </tr>`).join('');
 }
 
-function renderMonthlySummary() {
-  const receipts = getReceipts();
-  const members = getMembers();
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-  // populate year selector (years seen in receipts, plus current year)
-  const yearsSet = new Set(receipts.map(r => Number(r.year)).filter(y => y));
+function renderMonthlySummary(){
+  const receipts=getReceipts(),members=getMembers();
+  const yearsSet=new Set(receipts.map(r=>Number(r.year)).filter(Boolean));
   yearsSet.add(new Date().getFullYear());
-  const years = [...yearsSet].sort((a,b) => b-a);
-  const yearSel = document.getElementById('dash-summary-year');
-  const prevSelected = yearSel.value;
-  yearSel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-  yearSel.value = prevSelected && years.includes(Number(prevSelected)) ? prevSelected : String(new Date().getFullYear());
-  const selectedYear = yearSel.value;
-
-  const grid = document.getElementById('monthly-summary-grid');
-  const monthlyReceipts = receipts.filter(r => r.purpose === 'Monthly Fee' && String(r.year) === String(selectedYear) && r.month);
-
-  if (currentUser.type === 'admin') {
-    // Org-wide: for each month, total amount collected & how many members paid
-    const totalMembers = members.length;
-    grid.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
-        ${months.map(m => {
-          const mReceipts = monthlyReceipts.filter(r => r.month === m);
-          const paidMemberIds = new Set(mReceipts.map(r => r.memberId));
-          const amt = mReceipts.reduce((s,r) => s + Number(r.amount), 0);
-          const paidCount = paidMemberIds.size;
-          const isFull = totalMembers > 0 && paidCount >= totalMembers;
-          return `
-            <div style="background:var(--navy3);border:1px solid ${isFull ? 'var(--success)' : amt>0 ? 'var(--gold)' : 'var(--border)'};border-radius:10px;padding:12px;text-align:center;">
-              <div style="font-size:12px;color:var(--text-muted);font-weight:700;letter-spacing:0.5px;">${m}</div>
-              <div style="font-size:17px;font-weight:700;color:${amt>0 ? 'var(--gold)' : 'var(--text-muted)'};margin-top:4px;">৳${amt.toLocaleString()}</div>
-              <div style="font-size:11px;color:${isFull ? '#4caf7d' : 'var(--text-muted)'};margin-top:2px;">${paidCount}/${totalMembers} paid</div>
-            </div>`;
-        }).join('')}
-      </div>
-    `;
-  } else {
-    // Member view: which months they've paid for, which are due
-    const myPaidMonths = new Set(monthlyReceipts.filter(r => r.memberId === currentUser.id).map(r => r.month));
-    grid.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;">
-        ${months.map(m => {
-          const paid = myPaidMonths.has(m);
-          return `
-            <div style="background:var(--navy3);border:1px solid ${paid ? 'var(--success)' : 'var(--border)'};border-radius:10px;padding:12px;text-align:center;">
-              <div style="font-size:12px;color:var(--text-muted);font-weight:700;letter-spacing:0.5px;">${m}</div>
-              <div style="font-size:13px;font-weight:700;margin-top:6px;color:${paid ? '#4caf7d' : '#e05252'};">${paid ? '✅ Paid' : '⏳ Due'}</div>
-            </div>`;
-        }).join('')}
-      </div>
-    `;
+  const years=[...yearsSet].sort((a,b)=>b-a);
+  const sel=document.getElementById('dash-year-sel');
+  const prev=sel.value;
+  sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  sel.value=prev&&years.includes(Number(prev))?prev:String(new Date().getFullYear());
+  const yr=sel.value;
+  const mR=receipts.filter(r=>r.purpose==='Monthly Fee'&&String(r.year)===String(yr));
+  const grid=document.getElementById('monthly-summary-grid');
+  if(currentUser.type==='admin'){
+    const tot=members.length;
+    grid.innerHTML=`<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">${
+      MONTHS.map(m=>{
+        const paid=new Set();
+        mR.forEach(r=>{
+          if(r.months&&r.months.includes(m))paid.add(r.memberId);
+          else if(r.month===m)paid.add(r.memberId);
+        });
+        const amt=mR.reduce((s,r)=>{
+          if(r.months&&r.months.includes(m)){
+            if(r.monthAmounts&&r.monthAmounts[m])return s+Number(r.monthAmounts[m]);
+            return s+Number(r.amount)/(r.months.length||1);
+          }
+          if(r.month===m)return s+Number(r.amount);
+          return s;
+        },0);
+        const full=tot>0&&paid.size>=tot;
+        const borderClass=full?'border-mint':amt>0?'border-brass':'border-brass/20';
+        return`<div class="month-cell bg-ink2 border ${borderClass} rounded-lg p-3 text-center">
+          <div class="text-[11px] text-slatemuted font-bold tracking-wide">${m}</div>
+          <div class="text-[15px] font-bold font-mono mt-0.5 ${amt>0?'text-brass':'text-slatemuted'}">&#2547;${Math.round(amt).toLocaleString()}</div>
+          <div class="text-[11px] mt-0.5 ${full?'text-mint':'text-slatemuted'}">${paid.size}/${tot}</div>
+        </div>`;}).join('')}</div>`;
+  }else{
+    const myPaid=new Set();
+    mR.filter(r=>r.memberId===currentUser.id).forEach(r=>{
+      if(r.months)r.months.forEach(m=>myPaid.add(m));
+      else if(r.month)myPaid.add(r.month);
+    });
+    grid.innerHTML=`<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">${
+      MONTHS.map(m=>{
+        const paid=myPaid.has(m);
+        return`<div class="month-cell bg-ink2 border ${paid?'border-mint':'border-brass/20'} rounded-lg p-3 text-center">
+          <div class="text-[11px] text-slatemuted font-bold tracking-wide">${m}</div>
+          <div class="text-[13px] font-bold mt-1.5 ${paid?'text-mint':'text-ember'}">${paid?'&#9989; Paid':'&#8987; Due'}</div>
+        </div>`;}).join('')}</div>`;
   }
 }
 
-// ===========================
+// =====================
+// MONTH CHECKBOX
+// =====================
+let selectedMonths = {};
+
+function buildMonthCheckboxGrid() {
+  const defaultAmt = 500;
+  const grid = document.getElementById('month-cb-grid');
+
+  grid.innerHTML = MONTHS.map((m, i) => `
+    <div class="month-cb-item flex flex-col bg-ink border border-brass/25 rounded-lg overflow-hidden cursor-pointer select-none" id="mcb-item-${i}" data-month="${m}" data-idx="${i}">
+      <div class="flex items-center gap-2 px-2.5 py-2 w-full pointer-events-none">
+        <div class="month-cb-check w-4 h-4 rounded border border-brass/30 bg-ink2 flex items-center justify-center flex-shrink-0 text-[10px] text-midnight" id="mcb-check-${i}"></div>
+        <div class="month-cb-name text-xs font-semibold text-slatemuted" id="mcb-name-${i}">${m}</div>
+      </div>
+      <div id="mcb-amt-wrap-${i}" class="px-2.5 pb-2 hidden">
+        <input type="number" class="month-cb-amount w-full px-2 py-1.5 bg-ink2 border border-brass/25 rounded-md text-slate-100 text-xs" id="mcb-amt-${i}"
+          placeholder="Amount" min="1" value="${defaultAmt}">
+      </div>
+    </div>
+  `).join('');
+
+  grid.onclick = function(e) {
+    if (e.target.tagName === 'INPUT') return;
+    const item = e.target.closest('.month-cb-item');
+    if (!item) return;
+    const month = item.dataset.month;
+    const idx = parseInt(item.dataset.idx);
+    toggleMonth(month, idx);
+  };
+
+  grid.oninput = function(e) {
+    if (e.target.tagName !== 'INPUT') return;
+    const idx = parseInt(e.target.id.replace('mcb-amt-', ''));
+    const month = MONTHS[idx];
+    if (selectedMonths.hasOwnProperty(month)) {
+      selectedMonths[month] = parseFloat(e.target.value) || 0;
+      updateMonthTotal();
+      updateMonthPills();
+    }
+  };
+
+  selectedMonths = {};
+  updateMonthTotal();
+  updateMonthPills();
+}
+
+function toggleMonth(month, idx) {
+  const wrap = document.getElementById('mcb-amt-wrap-' + idx);
+  if (selectedMonths.hasOwnProperty(month)) {
+    delete selectedMonths[month];
+    document.getElementById('mcb-item-' + idx).classList.remove('selected');
+    document.getElementById('mcb-check-' + idx).textContent = '';
+    wrap.classList.add('hidden');
+  } else {
+    const amtInput = document.getElementById('mcb-amt-' + idx);
+    const defAmt = parseFloat(amtInput ? amtInput.value : 500) || 500;
+    selectedMonths[month] = defAmt;
+    document.getElementById('mcb-item-' + idx).classList.add('selected');
+    document.getElementById('mcb-check-' + idx).innerHTML = '&#10003;';
+    wrap.classList.remove('hidden');
+  }
+  updateMonthTotal();
+  updateMonthPills();
+}
+
+function selectAllMonths(sel) {
+  const defaultAmt = 500;
+  MONTHS.forEach((m, i) => {
+    const wrap = document.getElementById('mcb-amt-wrap-' + i);
+    if (sel) {
+      const amtInput = document.getElementById('mcb-amt-' + i);
+      const val = parseFloat(amtInput ? amtInput.value : defaultAmt) || defaultAmt;
+      selectedMonths[m] = val;
+      document.getElementById('mcb-item-' + i).classList.add('selected');
+      document.getElementById('mcb-check-' + i).innerHTML = '&#10003;';
+      wrap.classList.remove('hidden');
+    } else {
+      delete selectedMonths[m];
+      document.getElementById('mcb-item-' + i).classList.remove('selected');
+      document.getElementById('mcb-check-' + i).textContent = '';
+      wrap.classList.add('hidden');
+    }
+  });
+  updateMonthTotal();
+  updateMonthPills();
+}
+
+function updateMonthTotal() {
+  const total = Object.values(selectedMonths).reduce((s, v) => s + Number(v), 0);
+  document.getElementById('month-total-display').textContent = '\u09F3 ' + total.toLocaleString();
+}
+
+function updateMonthPills() {
+  const pills = document.getElementById('month-selected-pills');
+  const months = MONTHS.filter(m => selectedMonths.hasOwnProperty(m));
+  if (months.length === 0) { pills.innerHTML = ''; return; }
+  pills.innerHTML = months.map(m =>
+    `<span class="bg-brass/15 border border-brass rounded-full px-2.5 py-0.5 text-[11px] text-brass font-bold">${m} &mdash; &#2547;${Number(selectedMonths[m]).toLocaleString()}</span>`
+  ).join('');
+}
+
+function updateSingleTotal(){
+  const v=parseFloat(document.getElementById('rcpt-amount-single').value)||0;
+  document.getElementById('single-total-display').textContent='\u09F3 '+v.toLocaleString();
+}
+
+function onPurposeChange(){
+  const p=document.getElementById('rcpt-purpose').value;
+  const isMonthly=p==='Monthly Fee';
+  document.getElementById('monthly-fee-section').classList.toggle('hidden',!isMonthly);
+  document.getElementById('registration-fee-section').classList.toggle('hidden',isMonthly);
+}
+
 // NEW RECEIPT
-// ===========================
-const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-function initNewReceipt() {
-  const members = getMembers();
-  const sel = document.getElementById('rcpt-member');
-  sel.innerHTML = '<option value="">-- Select Member --</option>' +
-    members.map(m => `<option value="${m.id}">${m.name} (${m.id})</option>`).join('');
-  const no = `ZY-RCP-${String(getCounter()).padStart(4,'0')}`;
-  document.getElementById('rcpt-no').value = no;
-  document.getElementById('rcpt-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('rcpt-member-id').value = '';
-  document.getElementById('rcpt-year').value = new Date().getFullYear();
-  document.getElementById('rcpt-month').value = MONTH_NAMES[new Date().getMonth()];
+function initNewReceipt(){
+  const members=getMembers();
+  const sel=document.getElementById('rcpt-member');
+  sel.innerHTML='<option value="">-- Select Member --</option>'+members.map(m=>`<option value="${m.id}">${m.name} (${m.id})</option>`).join('');
+  document.getElementById('rcpt-no').value=`ZY-RCP-${String(getCounter()).padStart(4,'0')}`;
+  document.getElementById('rcpt-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('rcpt-member-id').value='';
+  document.getElementById('rcpt-year').value=new Date().getFullYear();
+  buildMonthCheckboxGrid();
+  onPurposeChange();
 }
+function onMemberSelect(){document.getElementById('rcpt-member-id').value=document.getElementById('rcpt-member').value;}
 
-function onMemberSelect() {
-  const val = document.getElementById('rcpt-member').value;
-  document.getElementById('rcpt-member-id').value = val;
-}
-
-function getReceiptFormData() {
-  const memberId = document.getElementById('rcpt-member').value;
-  const members = getMembers();
-  const member = members.find(m => m.id === memberId);
-  return {
-    receiptNo: document.getElementById('rcpt-no').value,
-    date: document.getElementById('rcpt-date').value,
-    memberId,
-    memberName: member ? member.name : '',
-    memberRole: member ? member.role : '',
-    amount: document.getElementById('rcpt-amount').value,
-    method: document.getElementById('rcpt-method').value,
-    purpose: document.getElementById('rcpt-purpose').value,
-    month: document.getElementById('rcpt-month').value,
-    year: document.getElementById('rcpt-year').value,
-    receivedBy: document.getElementById('rcpt-by').value,
-    notes: document.getElementById('rcpt-notes').value,
+function getReceiptFormData(){
+  const id=document.getElementById('rcpt-member').value;
+  const m=getMembers().find(x=>x.id===id);
+  const purpose=document.getElementById('rcpt-purpose').value;
+  const year=document.getElementById('rcpt-year').value;
+  let months=[],monthAmounts={},amount=0;
+  if(purpose==='Monthly Fee'){
+    months=MONTHS.filter(mo=>selectedMonths.hasOwnProperty(mo));
+    months.forEach(mo=>{monthAmounts[mo]=selectedMonths[mo]||0;});
+    amount=Object.values(selectedMonths).reduce((s,v)=>s+Number(v),0);
+  }else{
+    amount=parseFloat(document.getElementById('rcpt-amount-single').value)||0;
+  }
+  return{
+    receiptNo:document.getElementById('rcpt-no').value,
+    date:document.getElementById('rcpt-date').value,
+    memberId:id,memberName:m?m.name:'',memberRole:m?m.role:'',
+    amount,purpose,months,monthAmounts,year,
+    method:document.getElementById('rcpt-method').value,
+    receivedBy:document.getElementById('rcpt-by').value,
+    notes:document.getElementById('rcpt-notes').value,
   };
 }
 
-function validateReceipt(d) {
-  if (!d.memberId) return 'Please select a member.';
-  if (!d.amount || Number(d.amount) <= 0) return 'Please enter a valid amount.';
-  if (!d.date) return 'Please select a date.';
-  if (d.purpose === 'Monthly Fee' && !d.month) return 'Please select the month this fee is for.';
+function validateReceipt(d){
+  if(!d.memberId)return'Please select a member.';
+  if(!d.amount||Number(d.amount)<=0)return'Please enter a valid amount.';
+  if(!d.date)return'Please select a date.';
+  if(d.purpose==='Monthly Fee'&&d.months.length===0)return'Please select at least one month.';
   return null;
 }
 
-function saveReceipt() {
-  const d = getReceiptFormData();
-  const err = validateReceipt(d);
-  if (err) { showToast('⚠️ ' + err); return; }
-  const receipts = getReceipts();
-  const id = incCounter();
-  const receipt = {
-    id: `id_${Date.now()}`,
-    receiptNo: `ZY-RCP-${String(id).padStart(4,'0')}`,
-    date: d.date, memberId: d.memberId, memberName: d.memberName,
-    memberRole: d.memberRole, amount: d.amount,
-    method: d.method, purpose: d.purpose, month: d.month, year: d.year,
-    receivedBy: d.receivedBy,
-    notes: d.notes, createdAt: new Date().toISOString(),
-  };
-  receipts.push(receipt);
-  ls_set(RECEIPTS_KEY, receipts);
-  showToast('✅ Receipt saved successfully!');
+function saveReceipt(){
+  const d=getReceiptFormData();
+  const err=validateReceipt(d);
+  if(err){showToast('&#9888; '+err);return;}
+  const receipts=getReceipts();
+  const n=incCounter();
+  receipts.push({
+    id:`id_${Date.now()}`,receiptNo:`ZY-RCP-${String(n).padStart(4,'0')}`,
+    date:d.date,memberId:d.memberId,memberName:d.memberName,memberRole:d.memberRole,
+    amount:d.amount,method:d.method,purpose:d.purpose,
+    months:d.months,monthAmounts:d.monthAmounts,year:d.year,
+    receivedBy:d.receivedBy,notes:d.notes,createdAt:new Date().toISOString()
+  });
+  ls_set(RECEIPTS_KEY,receipts);
+  showToast('&#9989; Receipt saved!');
   clearReceiptForm();
   initNewReceipt();
 }
 
-function clearReceiptForm() {
-  ['rcpt-amount','rcpt-notes'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('rcpt-member').value = '';
-  document.getElementById('rcpt-member-id').value = '';
+function clearReceiptForm(){
+  document.getElementById('rcpt-amount-single').value='';
+  document.getElementById('rcpt-notes').value='';
+  document.getElementById('rcpt-member').value='';
+  document.getElementById('rcpt-member-id').value='';
+  buildMonthCheckboxGrid();
 }
 
-function previewReceipt() {
-  const d = getReceiptFormData();
-  const err = validateReceipt(d);
-  if (err) { showToast('⚠️ ' + err); return; }
-  currentPendingReceipt = d;
-  document.getElementById('receipt-print-area').innerHTML = buildReceiptHTML(d);
+function previewReceipt(){
+  const d=getReceiptFormData();
+  const err=validateReceipt(d);
+  if(err){showToast('&#9888; '+err);return;}
+  currentPendingReceipt=d;
+  document.getElementById('receipt-print-area').innerHTML=buildReceiptHTML(d);
   openModal('preview-modal');
 }
 
-function buildReceiptHTML(r) {
-  const sig = getSignature();
-  return `
-  <div class="receipt-preview" id="receipt-html">
-    <div class="receipt-header">
-      <img src="${ZYRON_LOGO}" alt="ZYRON" style="width:70px;height:auto;object-fit:contain;margin:0 auto 6px;display:block;">
-      <div style="font-weight:900;font-size:22px;color:#0a1628;letter-spacing:3px;margin-bottom:2px;">ZYRON</div>
-      <div style="font-size:12px;color:#c9a84c;font-weight:700;letter-spacing:2px;">ORGANIZATION</div>
-      <div class="receipt-title">Money Receipt</div>
+function buildReceiptHTML(r){
+  const sig=getSig();
+  const monthsLine=r.months&&r.months.length>0
+    ?r.months.map(m=>`${m}${r.monthAmounts&&r.monthAmounts[m]?' (&#2547;'+Number(r.monthAmounts[m]).toLocaleString()+')':''}`).join(', ')
+    :(r.month||'');
+  return`<div class="bg-parchment text-[#1a1a1a] rounded-lg max-w-[460px] mx-auto font-sans overflow-hidden shadow-lg">
+    <div class="chit-edge"></div>
+    <div class="px-7 pt-2 pb-6">
+    <div class="text-center border-b-2 border-brass pb-2 mb-2">
+       <div class="flex justify-center -mb-5">
+    <img src="Adobe Express - file.png"
+         alt="ZYRON Logo"
+         class="w-20 h-20 object-contain">
+</div>
+      <div class="font-serif font-black text-xl tracking-[0.2em] text-[#0B1220]">ZYRON</div>
+      <div class="text-[11px] text-[#9c7d1e] font-bold tracking-[0.15em] uppercase mt-0.5">Organization</div>
+      <div class="text-base font-bold uppercase text-[#9c7d1e] mt-2.5 tracking-wide">Money Receipt</div>
     </div>
-    <div class="receipt-amount-box">
-      <div class="receipt-amount-label">AMOUNT RECEIVED</div>
-      <div class="receipt-amount-val">৳ ${Number(r.amount).toLocaleString()}</div>
-      <div style="font-size:11px;color:#666;margin-top:4px;">${numberToWords(Number(r.amount))} Taka Only</div>
+    <div class="text-center my-3.5 py-3 bg-brasspale rounded-lg">
+      <div class="text-[11px] text-[#666]">TOTAL AMOUNT RECEIVED</div>
+      <div class="text-[26px] font-bold text-[#0B1220] font-mono">&#2547; ${Number(r.amount).toLocaleString()}</div>
+      <div class="text-[11px] text-[#666] mt-0.5">${n2w(Number(r.amount))} Taka Only</div>
     </div>
-    <div style="margin-top:12px;">
-      <div class="receipt-row"><span class="key">Receipt No.</span><span class="val">${r.receiptNo}</span></div>
-      <div class="receipt-row"><span class="key">Date</span><span class="val">${r.date}</span></div>
-      <div class="receipt-row"><span class="key">Member Name</span><span class="val">${r.memberName}</span></div>
-      <div class="receipt-row"><span class="key">Member ID</span><span class="val">${r.memberId}</span></div>
-      <div class="receipt-row"><span class="key">Role / Position</span><span class="val">${r.memberRole || '—'}</span></div>
-      <div class="receipt-row"><span class="key">Purpose</span><span class="val">${r.purpose}${r.month ? ` (${r.month}${r.year ? ' '+r.year : ''})` : ''}</span></div>
-      <div class="receipt-row"><span class="key">Payment Method</span><span class="val">${r.method}</span></div>
-      <div class="receipt-row"><span class="key">Received By</span><span class="val">${r.receivedBy}</span></div>
-      ${r.notes ? `<div class="receipt-row"><span class="key">Notes</span><span class="val">${r.notes}</span></div>` : ''}
+    <div class="mt-3">
+      <div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Receipt No.</span><span class="font-semibold text-[#222] font-mono">${r.receiptNo}</span></div>
+      <div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Date</span><span class="font-semibold text-[#222]">${r.date}</span></div>
+      <div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Member Name</span><span class="font-semibold text-[#222]">${r.memberName}</span></div>
+      <div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Member ID</span><span class="font-semibold text-[#222] font-mono">${r.memberId}</span></div>
+      <div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Role</span><span class="font-semibold text-[#222]">${r.memberRole||'&#8212;'}</span></div>
+      <div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Purpose</span><span class="font-semibold text-[#222]">${r.purpose}</span></div>
+      ${monthsLine?`<div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Month(s)</span><span class="font-semibold text-[#222] text-right max-w-[200px] break-words">${monthsLine}</span></div>`:''}
+      ${r.year?`<div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Year</span><span class="font-semibold text-[#222] font-mono">${r.year}</span></div>`:''}
+      <div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Payment Method</span><span class="font-semibold text-[#222]">${r.method}</span></div>
+      <div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Received By</span><span class="font-semibold text-[#222]">${r.receivedBy}</span></div>
+      ${r.notes?`<div class="flex justify-between py-1.5 border-b border-dashed border-[#e5ddc6] text-[13px]"><span class="text-[#666]">Notes</span><span class="font-semibold text-[#222]">${r.notes}</span></div>`:''}
     </div>
-    <div class="receipt-sig">
-      <div style="text-align:center;">
-        <div style="width:120px;height:36px;"></div>
-        <div style="width:120px;border-top:1px solid #333;padding-top:4px;font-size:12px;color:#555;">Member Signature</div>
+    <div class="flex justify-between mt-7">
+      <div class="text-center">
+        <div class="w-[120px] h-9 flex items-end justify-center">${sig?`<img src="${sig}" class="max-w-[110px] max-h-[34px] object-contain">`:''}</div>
+        <div class="w-[120px] border-t border-[#333] pt-1 text-[12px] text-[#555]">Authorized Signature</div>
       </div>
-      <div style="text-align:center;">
-        <div style="width:120px;height:36px;display:flex;align-items:flex-end;justify-content:center;">
-          ${sig ? `<img src="${sig}" alt="Signature" style="max-width:110px;max-height:34px;object-fit:contain;">` : ''}
-        </div>
-        <div style="width:120px;border-top:1px solid #333;padding-top:4px;font-size:12px;color:#555;">Authorized Signature</div>
-      </div>
     </div>
-    <div class="receipt-footer">
-      ZYRON Organization — Official Money Receipt<br>
-      This is a computer-generated receipt. Generated on ${new Date().toLocaleString()}
+    <div class="text-center mt-3.5 text-[11px] text-[#888] border-t border-[#eee] pt-2.5">ZYRON Organization &#8212; Official Money Receipt<br>Generated: ${new Date().toLocaleString()}</div>
     </div>
   </div>`;
 }
 
-function downloadPDF() {
-  if (!currentPendingReceipt) return;
-  generatePDF(currentPendingReceipt);
-  closeModal('preview-modal');
-}
+function downloadPDF(){if(currentPendingReceipt){generatePDF(currentPendingReceipt);closeModal('preview-modal');}}
+function downloadViewedPDF(){if(currentViewReceipt){generatePDF(currentViewReceipt);closeModal('view-receipt-modal');}}
 
-function downloadViewedPDF() {
-  if (!currentViewReceipt) return;
-  generatePDF(currentViewReceipt);
-  closeModal('view-receipt-modal');
-}
-
-function generatePDF(r) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' });
-  const W = 148, M = 14;
-  let y = 14;
-
-  // Header
-  doc.setFillColor(10, 22, 40);
-  doc.rect(0, 0, W, 32, 'F');
-  try {
-    const logoW = 16, logoH = logoW * (163/260);
-    doc.addImage(ZYRON_LOGO, 'PNG', W/2 - logoW/2, 3, logoW, logoH);
-  } catch(e) {}
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(201, 168, 76);
-  doc.text('ZYRON ORGANIZATION', W/2, 21, { align: 'center' });
-  doc.setFontSize(8);
-  doc.setTextColor(200, 200, 200);
-  doc.text('Official Money Receipt', W/2, 26.5, { align: 'center' });
-  doc.setFontSize(7);
-  doc.text(`Receipt No: ${r.receiptNo}  |  Date: ${r.date}`, W/2, 30.5, { align: 'center' });
-
-  y = 42;
-
-  // Amount Box
-  doc.setFillColor(253, 243, 208);
-  doc.roundedRect(M, y, W - M*2, 22, 3, 3, 'F');
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.setFont('helvetica', 'normal');
-  doc.text('AMOUNT RECEIVED', W/2, y+7, { align: 'center' });
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(20);
-  doc.setTextColor(10, 22, 40);
-  doc.text(`BDT ${Number(r.amount).toLocaleString()}`, W/2, y+16, { align: 'center' });
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'italic');
-  doc.setTextColor(120, 120, 120);
-  doc.text(numberToWords(Number(r.amount)) + ' Taka Only', W/2, y+21, { align: 'center' });
-  y += 30;
-
-  // Details
-  doc.setFontSize(9);
-  const rows = [
-    ['Member Name', r.memberName],
-    ['Member ID', r.memberId],
-    ['Role / Position', r.memberRole || '—'],
-    ['Purpose', r.purpose + (r.month ? ` (${r.month}${r.year ? ' '+r.year : ''})` : '')],
-    ['Payment Method', r.method],
-    ['Received By', r.receivedBy],
+function generatePDF(r){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a5'});
+  const W=148,M=14;let y=14;
+  doc.setFillColor(11,18,32);doc.rect(0,0,W,30,'F');
+  doc.setFont('times','bold');doc.setFontSize(16);doc.setTextColor(201,162,39);
+  doc.text('ZYRON ORGANIZATION',W/2,13,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(200,200,200);doc.text('Official Money Receipt',W/2,20,{align:'center'});
+  doc.setFontSize(7);doc.text(`Receipt No: ${r.receiptNo}  |  Date: ${r.date}`,W/2,27,{align:'center'});
+  y=40;
+  doc.setFillColor(247,240,216);doc.roundedRect(M,y,W-M*2,22,3,3,'F');
+  doc.setFontSize(9);doc.setTextColor(100,100,100);doc.setFont('helvetica','normal');
+  doc.text('TOTAL AMOUNT RECEIVED',W/2,y+7,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(11,18,32);
+  doc.text(`BDT ${Number(r.amount).toLocaleString()}`,W/2,y+16,{align:'center'});
+  doc.setFontSize(7);doc.setFont('helvetica','italic');doc.setTextColor(120,120,120);
+  doc.text(n2w(Number(r.amount))+' Taka Only',W/2,y+21,{align:'center'});
+  y+=30;
+  const monthsStr=r.months&&r.months.length>0?r.months.join(', '):(r.month||'');
+  const rows=[
+    ['Member Name',r.memberName],['Member ID',r.memberId],['Role',r.memberRole||'--'],
+    ['Purpose',r.purpose],
+    ...(monthsStr?[['Month(s)',monthsStr]]:[]),
+    ...(r.year?[['Year',String(r.year)]]:[]),
+    ['Payment Method',r.method],['Received By',r.receivedBy],
   ];
-  if (r.notes) rows.push(['Notes', r.notes]);
-
-  rows.forEach(([k, v], i) => {
-    const rowY = y + i * 10;
-    if (i % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(M, rowY - 4, W - M*2, 10, 'F'); }
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 100, 100);
-    doc.text(k + ':', M + 3, rowY + 2);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(30, 30, 30);
-    doc.text(String(v), M + 55, rowY + 2);
+  if(r.notes)rows.push(['Notes',r.notes]);
+  doc.setFontSize(9);
+  rows.forEach(([k,v],i)=>{
+    const ry=y+i*10;
+    if(i%2===0){doc.setFillColor(248,248,248);doc.rect(M,ry-4,W-M*2,10,'F');}
+    doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);doc.text(k+':',M+3,ry+2);
+    doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+    const txt=String(v);doc.text(txt.length>28?txt.substring(0,26)+'...':txt,M+52,ry+2);
   });
-
-  y += rows.length * 10 + 10;
-
-  // Signature
-  const sig = getSignature();
-  if (sig) {
-    try {
-      const sigW = 35, sigH = 12;
-      doc.addImage(sig, W-M-45+5, y+2, sigW, sigH);
-    } catch(e) {}
-  }
+  y+=rows.length*10+12;
+  const sig=getSig();
+  if(sig){try{doc.addImage(sig,'PNG',W-M-45+5,y+1,32,11);}catch(e){}}
   doc.setDrawColor(100);
-  doc.line(M, y+16, M+45, y+16);
-  doc.line(W-M-45, y+16, W-M, y+16);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(100,100,100);
-  doc.text('Member Signature', M + 22, y+20, { align:'center' });
-  doc.text('Authorized Signature', W-M-22, y+20, { align:'center' });
-
-  // Footer
-  doc.setFillColor(10, 22, 40);
-  doc.rect(0, 200, W, 10, 'F');
-  doc.setFontSize(7);
-  doc.setTextColor(201, 168, 76);
-  doc.text('ZYRON Organization — Computer Generated Receipt', W/2, 206, { align: 'center' });
-
+  doc.line(M,y+16,M+45,y+16);doc.line(W-M-45,y+16,W-M,y+16);
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(100,100,100);
+  doc.text('Member Signature',M+22,y+20,{align:'center'});
+  doc.text('Authorized Signature',W-M-22,y+20,{align:'center'});
+  doc.setFillColor(11,18,32);doc.rect(0,199,W,11,'F');
+  doc.setFontSize(7);doc.setTextColor(201,162,39);
+  doc.text('ZYRON Organization \u2014 Computer Generated Receipt',W/2,206,{align:'center'});
   doc.save(`${r.receiptNo}_${r.memberName.replace(/\s/g,'_')}.pdf`);
-  showToast('📥 PDF downloaded!');
+  showToast('PDF downloaded!');
 }
 
-// ===========================
-// RECEIPT HISTORY TABLE
-// ===========================
-function populateMemberFilter() {
-  const members = getMembers();
-  const sel = document.getElementById('filter-member');
-  sel.innerHTML = '<option value="">All Members</option>' +
-    members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+// RECEIPT HISTORY
+function populateMemberFilter(){
+  const sel=document.getElementById('filter-member');
+  sel.innerHTML='<option value="">All Members</option>'+getMembers().map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
 }
-
-function renderReceiptsTable() {
-  let receipts = getReceipts();
-  const search = (document.getElementById('search-receipt')?.value || '').toLowerCase();
-  const purpose = document.getElementById('filter-purpose')?.value || '';
-  const memberId = document.getElementById('filter-member')?.value || '';
-
-  if (search) receipts = receipts.filter(r =>
-    r.memberName.toLowerCase().includes(search) ||
-    r.receiptNo.toLowerCase().includes(search) ||
-    r.purpose.toLowerCase().includes(search));
-  if (purpose) receipts = receipts.filter(r => r.purpose === purpose);
-  if (memberId) receipts = receipts.filter(r => r.memberId === memberId);
-
-  receipts = [...receipts].sort((a,b) => b.createdAt?.localeCompare(a.createdAt||''));
-
-  const total = receipts.length;
-  const pages = Math.ceil(total / PAGE_SIZE) || 1;
-  if (receiptPage > pages) receiptPage = 1;
-  const slice = receipts.slice((receiptPage-1)*PAGE_SIZE, receiptPage*PAGE_SIZE);
-
-  const tbody = document.getElementById('receipts-table-body');
-  const empty = document.getElementById('receipts-empty');
-  const pagination = document.getElementById('receipts-pagination');
-
-  if (slice.length === 0) {
-    tbody.innerHTML = '';
-    empty.style.display = 'block';
-    pagination.innerHTML = '';
-    return;
-  }
-  empty.style.display = 'none';
-
-  tbody.innerHTML = slice.map(r => `
-    <tr>
-      <td><span class="badge badge-gold">${r.receiptNo}</span></td>
-      <td>${r.date}</td>
-      <td>${r.memberName}<br><span style="font-size:11px;color:var(--text-muted);">${r.memberId}</span></td>
-      <td style="color:var(--gold);font-weight:700;">৳${Number(r.amount).toLocaleString()}</td>
-      <td>${r.purpose}</td>
-      <td>${r.month ? `<span class="badge badge-purple">${r.month}${r.year ? ' '+r.year : ''}</span>` : '<span class="text-muted">—</span>'}</td>
-      <td><span class="badge badge-blue">${r.method}</span></td>
-      <td><span class="badge badge-green">Paid</span></td>
-      <td>
-        <div class="flex-gap">
-          <button class="btn-sm btn-outline" style="padding:5px 10px;font-size:11px;" onclick="viewReceipt('${r.id}')">View</button>
-          <button class="btn-sm" style="background:var(--gold);color:var(--navy);padding:5px 10px;font-size:11px;" onclick="downloadReceiptPDF('${r.id}')">PDF</button>
-          ${currentUser.type==='admin' ? `<button class="btn-sm btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteReceipt('${r.id}')">Del</button>` : ''}
-        </div>
-      </td>
-    </tr>
-  `).join('');
-
-  pagination.innerHTML = `
-    <span>Showing ${(receiptPage-1)*PAGE_SIZE+1}–${Math.min(receiptPage*PAGE_SIZE, total)} of ${total} receipts</span>
-    <div class="flex-gap">
-      <button class="btn-outline" style="padding:5px 12px;" onclick="changePage(-1)" ${receiptPage===1?'disabled':''}>‹ Prev</button>
-      <span>Page ${receiptPage} of ${pages}</span>
-      <button class="btn-outline" style="padding:5px 12px;" onclick="changePage(1)" ${receiptPage===pages?'disabled':''}>Next ›</button>
-    </div>
-  `;
+function renderReceiptsTable(){
+  let receipts=getReceipts();
+  const search=(document.getElementById('search-receipt')?.value||'').toLowerCase();
+  const purpose=document.getElementById('filter-purpose')?.value||'';
+  const memberId=document.getElementById('filter-member')?.value||'';
+  if(currentUser.type==='member')receipts=receipts.filter(r=>r.memberId===currentUser.id);
+  if(search)receipts=receipts.filter(r=>r.memberName.toLowerCase().includes(search)||r.receiptNo.toLowerCase().includes(search));
+  if(purpose)receipts=receipts.filter(r=>r.purpose===purpose);
+  if(memberId)receipts=receipts.filter(r=>r.memberId===memberId);
+  receipts=[...receipts].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  const total=receipts.length;
+  const pages=Math.ceil(total/PAGE_SIZE)||1;
+  if(receiptPage>pages)receiptPage=1;
+  const slice=receipts.slice((receiptPage-1)*PAGE_SIZE,receiptPage*PAGE_SIZE);
+  const tbody=document.getElementById('receipts-table-body');
+  const empty=document.getElementById('receipts-empty');
+  const pagi=document.getElementById('receipts-pagination');
+  if(slice.length===0){tbody.innerHTML='';empty.classList.remove('hidden');pagi.innerHTML='';return;}
+  empty.classList.add('hidden');
+  tbody.innerHTML=slice.map(r=>{
+    const monthsDisplay=r.months&&r.months.length>0
+      ?r.months.map(m=>`<span class="inline-flex items-center px-2 py-0.5 m-0.5 rounded-full text-[11px] font-bold bg-[#a777e3]/20 text-[#a777e3]">${m.substring(0,3)}</span>`).join('')
+      :(r.month?`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#a777e3]/20 text-[#a777e3]">${r.month}${r.year?' '+r.year:''}</span>`:'<span class="text-slatemuted">&#8212;</span>');
+    return`<tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
+      <td class="px-4 py-3 font-mono"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${r.receiptNo}</span></td>
+      <td class="px-4 py-3 font-mono text-slatemuted">${r.date}</td>
+      <td class="px-4 py-3">${r.memberName}<br><span class="text-[11px] text-slatemuted font-mono">${r.memberId}</span></td>
+      <td class="px-4 py-3 text-brass font-bold font-mono">&#2547;${Number(r.amount).toLocaleString()}</td>
+      <td class="px-4 py-3">${r.purpose}</td>
+      <td class="px-4 py-3 max-w-[120px]">${monthsDisplay}${r.year&&r.months&&r.months.length>0?`<div class="text-[10px] text-slatemuted mt-0.5">${r.year}</div>`:''}</td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#6495ed]/20 text-[#6495ed]">${r.method}</span></td>
+      <td class="px-4 py-3"><div class="flex gap-1.5 flex-wrap">
+        <button class="border border-brass text-brass hover:bg-brass/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="viewReceipt('${r.id}')">View</button>
+        <button class="bg-brass text-midnight px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-brasslight transition-colors" onclick="downloadReceiptPDF('${r.id}')">PDF</button>
+        ${currentUser.type==='admin'?`<button class="bg-ember text-white px-2.5 py-1 rounded-md text-[11px] font-semibold hover:bg-ember/80 transition-colors" onclick="deleteReceipt('${r.id}')">Del</button>`:''}
+      </div></td>
+    </tr>`;}).join('');
+  pagi.innerHTML=`<span>Showing ${(receiptPage-1)*PAGE_SIZE+1}&ndash;${Math.min(receiptPage*PAGE_SIZE,total)} of ${total}</span>
+    <div class="flex items-center gap-2">
+      <button class="border border-brass text-brass px-3 py-1.5 rounded-md hover:bg-brass/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" onclick="changePage(-1)" ${receiptPage===1?'disabled':''}>&#8249;</button>
+      <span>${receiptPage}/${pages}</span>
+      <button class="border border-brass text-brass px-3 py-1.5 rounded-md hover:bg-brass/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" onclick="changePage(1)" ${receiptPage===pages?'disabled':''}>&#8250;</button>
+    </div>`;
 }
-
-function changePage(d) {
-  receiptPage += d;
-  renderReceiptsTable();
-}
-
-function viewReceipt(id) {
-  const receipts = getReceipts();
-  const r = receipts.find(x => x.id === id);
-  if (!r) return;
-  currentViewReceipt = r;
-  document.getElementById('view-receipt-content').innerHTML = buildReceiptHTML(r);
+function changePage(d){receiptPage+=d;renderReceiptsTable();}
+function viewReceipt(id){
+  const r=getReceipts().find(x=>x.id===id);if(!r)return;
+  if(currentUser.type==='member'&&r.memberId!==currentUser.id){showToast('Access denied.');return;}
+  currentViewReceipt=r;
+  document.getElementById('view-receipt-content').innerHTML=buildReceiptHTML(r);
   openModal('view-receipt-modal');
 }
-
-function downloadReceiptPDF(id) {
-  const receipts = getReceipts();
-  const r = receipts.find(x => x.id === id);
-  if (r) generatePDF(r);
+function downloadReceiptPDF(id){
+  const r=getReceipts().find(x=>x.id===id);if(!r)return;
+  if(currentUser.type==='member'&&r.memberId!==currentUser.id){showToast('Access denied.');return;}
+  generatePDF(r);
+}
+async function deleteReceipt(id){
+  if(currentUser.type!=='admin'){showToast('Admin only.');return;}
+  const ok=await confirmDialog('Delete Receipt','Delete this receipt? Cannot be undone.','Delete','ember');
+  if(!ok)return;
+  ls_set(RECEIPTS_KEY,getReceipts().filter(r=>r.id!==id));
+  renderReceiptsTable();showToast('Receipt deleted.');
+}
+function exportCSV(){
+  if(currentUser.type!=='admin'){showToast('Admin only.');return;}
+  const receipts=getReceipts();
+  const h=['Receipt No','Date','Member','ID','Amount','Purpose','Months','Year','Method','Received By','Notes'];
+  const rows=receipts.map(r=>[
+    r.receiptNo,r.date,r.memberName,r.memberId,r.amount,r.purpose,
+    (r.months&&r.months.length>0?r.months.join('; '):r.month||''),
+    r.year||'',r.method,r.receivedBy,r.notes||''
+  ]);
+  const csv=[h,...rows].map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='ZYRON_Receipts.csv';a.click();showToast('Exported!');
 }
 
-async function deleteReceipt(id) {
-  const ok = await confirmDialog('🗑️ Delete Receipt', 'Delete this receipt? This cannot be undone.', 'Delete', '#e05252');
-  if (!ok) return;
-  const receipts = getReceipts().filter(r => r.id !== id);
-  ls_set(RECEIPTS_KEY, receipts);
-  renderReceiptsTable();
-  showToast('🗑️ Receipt deleted.');
+// MEMBERS
+function renderMembers(){
+  const members=getMembers(),receipts=getReceipts();
+  document.getElementById('members-grid').innerHTML=members.map(m=>{
+    const tot=receipts.filter(r=>r.memberId===m.id).reduce((s,r)=>s+Number(r.amount),0);
+    return`<div class="bg-ink2 border border-brass/20 hover:border-brass rounded-xl p-5 text-center transition-colors">
+      <div class="w-[60px] h-[60px] rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3 text-midnight" style="background:${m.color}">${m.name[0].toUpperCase()}</div>
+      <div class="text-[15px] font-bold text-slate-100">${m.name}</div>
+      <div class="text-xs text-brass mt-1 mb-1.5">${m.role}</div>
+      <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
+      <div class="text-[15px] font-bold text-brasslight font-mono mt-2">&#2547;${tot.toLocaleString()}</div>
+      ${m.phone?`<div class="text-[11px] text-slatemuted mt-1">&#128222; ${m.phone}</div>`:''}
+      <div class="flex justify-center gap-2 mt-3">
+        <button class="border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editMember('${m.id}')">Edit</button>
+        <button class="bg-ember text-white hover:bg-ember/80 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="deleteMember('${m.id}')">Del</button>
+      </div>
+    </div>`;}).join('');
 }
-
-function exportCSV() {
-  const receipts = getReceipts();
-  const headers = ['Receipt No','Date','Member Name','Member ID','Amount','Purpose','Method','Received By','Notes'];
-  const rows = receipts.map(r => [r.receiptNo, r.date, r.memberName, r.memberId, r.amount, r.purpose, r.method, r.receivedBy, r.notes||'']);
-  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = 'ZYRON_Receipts.csv'; a.click();
-  showToast('📤 CSV exported!');
+function renderMemberDirectory(){
+  const members=getMembers();
+  document.getElementById('member-directory-grid').innerHTML=members.map(m=>`
+    <div class="bg-ink2 border border-brass/20 hover:border-brass rounded-xl p-5 text-center transition-colors">
+      <div class="w-[60px] h-[60px] rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3 text-midnight" style="background:${m.color}">${m.name[0].toUpperCase()}</div>
+      <div class="text-[15px] font-bold text-slate-100">${m.name}</div>
+      <div class="text-xs text-brass mt-1 mb-1.5">${m.role}</div>
+      <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
+    </div>`).join('');
 }
-
-// ===========================
-// MEMBERS (admin management page)
-// ===========================
-function renderMembers() {
-  const members = getMembers();
-  const receipts = getReceipts();
-  const isAdmin = currentUser.type === 'admin';
-  const grid = document.getElementById('members-grid');
-  if (document.getElementById('add-member-btn')) {
-    document.getElementById('add-member-btn').style.display = isAdmin ? 'inline-flex' : 'none';
-  }
-  grid.innerHTML = members.map(m => {
-    const total = receipts.filter(r => r.memberId === m.id).reduce((s,r) => s+Number(r.amount), 0);
-    return `
-    <div class="member-card">
-      <div class="member-avatar-lg" style="background:${m.color};">${m.name[0].toUpperCase()}</div>
-      <div class="member-name">${m.name}</div>
-      <div class="member-role">${m.role}</div>
-      <div class="member-id">${m.id}</div>
-      <div class="member-balance">৳${total.toLocaleString()}</div>
-      ${m.phone ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📞 ${m.phone}</div>` : ''}
-      ${isAdmin ? `
-      <div class="flex-gap" style="justify-content:center;margin-top:12px;">
-        <button class="btn-sm btn-outline" onclick="editMember('${m.id}')" style="padding:5px 12px;font-size:11px;">Edit</button>
-        <button class="btn-sm btn-danger" onclick="deleteMember('${m.id}')" style="padding:5px 12px;font-size:11px;">Del</button>
-      </div>` : ''}
-    </div>`;
-  }).join('');
-}
-
-// ===========================
-// MEMBER DIRECTORY (member-facing, read-only — shows names of all members)
-// ===========================
-function renderMemberDirectory() {
-  const members = getMembers();
-  const grid = document.getElementById('member-directory-grid');
-  grid.innerHTML = members.map(m => `
-    <div class="member-card">
-      <div class="member-avatar-lg" style="background:${m.color};">${m.name[0].toUpperCase()}</div>
-      <div class="member-name">${m.name}</div>
-      <div class="member-role">${m.role}</div>
-      <div class="member-id">${m.id}</div>
-    </div>
-  `).join('');
-}
-
-function openAddMemberModal() {
-  editingMemberId = null;
-  document.getElementById('member-modal-title').textContent = 'Add New Member';
-  ['m-name','m-role','m-phone','m-email','m-address','m-password'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('m-edit-id').value = '';
-  document.getElementById('m-password-section').style.display = 'none';
+function openAddMemberModal(){
+  editingMemberId=null;
+  document.getElementById('member-modal-title').textContent='Add New Member';
+  ['m-name','m-role','m-phone','m-email','m-address','m-password'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('m-edit-id').value='';
+  document.getElementById('m-pass-section').classList.add('hidden');
   openModal('member-modal');
 }
-
-function editMember(id) {
-  const members = getMembers();
-  const m = members.find(x => x.id === id);
-  if (!m) return;
-  editingMemberId = id;
-  document.getElementById('member-modal-title').textContent = 'Edit Member';
-  document.getElementById('m-name').value = m.name;
-  document.getElementById('m-role').value = m.role;
-  document.getElementById('m-phone').value = m.phone || '';
-  document.getElementById('m-email').value = m.email || '';
-  document.getElementById('m-address').value = m.address || '';
-  document.getElementById('m-edit-id').value = id;
-  document.getElementById('m-password').value = '';
-  document.getElementById('m-password-id').textContent = m.id;
-  document.getElementById('m-password-section').style.display = 'block';
-  openModal('member-modal');
+function editMember(id){
+  const m=getMembers().find(x=>x.id===id);if(!m)return;
+  editingMemberId=id;
+  document.getElementById('member-modal-title').textContent='Edit Member';
+  document.getElementById('m-name').value=m.name;document.getElementById('m-role').value=m.role;
+  document.getElementById('m-phone').value=m.phone||'';document.getElementById('m-email').value=m.email||'';
+  document.getElementById('m-address').value=m.address||'';document.getElementById('m-password').value='';
+  document.getElementById('m-pass-id').textContent=m.id;
+  document.getElementById('m-pass-section').classList.remove('hidden');
+  document.getElementById('m-edit-id').value=id;openModal('member-modal');
 }
-
-function saveMember() {
-  const name = document.getElementById('m-name').value.trim();
-  const role = document.getElementById('m-role').value.trim();
-  if (!name) { showToast('⚠️ Name is required.'); return; }
-  const members = getMembers();
-  if (editingMemberId) {
-    const idx = members.findIndex(m => m.id === editingMemberId);
-    if (idx !== -1) {
-      const newPassword = document.getElementById('m-password').value.trim();
-      members[idx] = { ...members[idx], name, role,
-        phone: document.getElementById('m-phone').value,
-        email: document.getElementById('m-email').value,
-        address: document.getElementById('m-address').value,
-      };
-      if (newPassword) {
-        if (newPassword.length < 4) { showToast('⚠️ Password must be at least 4 characters.'); return; }
-        members[idx].password = newPassword;
-      }
+function saveMember(){
+  const name=document.getElementById('m-name').value.trim();
+  const role=document.getElementById('m-role').value.trim();
+  if(!name){showToast('Name required.');return;}
+  const members=getMembers();
+  if(editingMemberId){
+    const idx=members.findIndex(m=>m.id===editingMemberId);
+    if(idx!==-1){
+      const np=document.getElementById('m-password').value.trim();
+      if(np&&np.length<4){showToast('Password min 4 chars.');return;}
+      members[idx]={...members[idx],name,role,phone:document.getElementById('m-phone').value,email:document.getElementById('m-email').value,address:document.getElementById('m-address').value};
+      if(np)members[idx].password=np;
     }
-    showToast('✅ Member updated!');
-  } else {
-    const newId = `ZY-${String(members.length + 1).padStart(3,'0')}`;
-    members.push({
-      id: newId, name, role,
-      phone: document.getElementById('m-phone').value,
-      email: document.getElementById('m-email').value,
-      address: document.getElementById('m-address').value,
-      color: MEMBER_COLORS[members.length % MEMBER_COLORS.length],
-      password: 'zyron123',
-      joinDate: new Date().toISOString().split('T')[0],
-    });
-    showToast(`✅ Member added! ID: ${newId}`);
+    showToast('Member updated!');
+  }else{
+    const newId=`ZY-${String(members.length+1).padStart(3,'0')}`;
+    members.push({id:newId,name,role,phone:document.getElementById('m-phone').value,email:document.getElementById('m-email').value,address:document.getElementById('m-address').value,color:COLORS[members.length%COLORS.length],password:'zyron123',joinDate:new Date().toISOString().split('T')[0]});
+    showToast(`Added! ID: ${newId}`);
   }
-  ls_set(MEMBERS_KEY, members);
-  closeModal('member-modal');
-  renderMembers();
+  ls_set(MEMBERS_KEY,members);closeModal('member-modal');renderMembers();
+}
+async function deleteMember(id){
+  const ok=await confirmDialog('Delete Member','Delete this member? Their receipts remain.','Delete','ember');
+  if(!ok)return;
+  ls_set(MEMBERS_KEY,getMembers().filter(m=>m.id!==id));
+  renderMembers();showToast('Deleted.');
 }
 
-async function deleteMember(id) {
-  const ok = await confirmDialog('🗑️ Delete Member', 'Delete this member? Their receipts will remain.', 'Delete', '#e05252');
-  if (!ok) return;
-  const members = getMembers().filter(m => m.id !== id);
-  ls_set(MEMBERS_KEY, members);
-  renderMembers();
-  showToast('🗑️ Member deleted.');
-}
-
-// ===========================
 // REPORTS
-// ===========================
-function renderReports() {
-  const receipts = getReceipts();
-  const members = getMembers();
-  const total = receipts.reduce((s,r) => s+Number(r.amount),0);
-  const today = new Date().toISOString().split('T')[0];
-  const monthStart = today.substring(0,7);
-  const monthAmt = receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
-
-  document.getElementById('report-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Collection</div><div class="stat-value">৳${total.toLocaleString()}</div></div>
-    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">This Month</div><div class="stat-value">৳${monthAmt.toLocaleString()}</div></div>
-    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">Total Receipts</div><div class="stat-value">${receipts.length}</div></div>
-    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Members</div><div class="stat-value">${members.length}</div></div>
-  `;
-
-  // Member-wise
-  const memberTable = document.getElementById('report-member-table');
-  memberTable.innerHTML = members.map(m => {
-    const mR = receipts.filter(r => r.memberId === m.id);
-    const mT = mR.reduce((s,r)=>s+Number(r.amount),0);
-    const last = mR.sort((a,b)=>b.date.localeCompare(a.date))[0];
-    return `<tr>
-      <td><div class="flex-gap"><div class="user-avatar" style="width:30px;height:30px;font-size:12px;background:${m.color};">${m.name[0]}</div>${m.name}</div></td>
-      <td><span class="badge badge-gold">${m.role}</span></td>
-      <td>${mR.length}</td>
-      <td style="color:var(--gold);font-weight:700;">৳${mT.toLocaleString()}</td>
-      <td>${last ? last.date : '—'}</td>
-    </tr>`;
-  }).join('');
-
-  // Purpose breakdown
-  const purposes = {};
-  receipts.forEach(r => { purposes[r.purpose] = (purposes[r.purpose]||0) + Number(r.amount); });
-  const purposeEl = document.getElementById('purpose-breakdown');
-  if (Object.keys(purposes).length === 0) { purposeEl.innerHTML = '<p class="text-muted">No data yet.</p>'; return; }
-  const maxAmt = Math.max(...Object.values(purposes));
-  purposeEl.innerHTML = Object.entries(purposes).sort((a,b)=>b[1]-a[1]).map(([p,a]) => `
-    <div style="margin-bottom:14px;">
-      <div class="flex-gap" style="justify-content:space-between;margin-bottom:5px;">
-        <span style="font-size:13px;">${p}</span>
-        <span style="font-size:13px;font-weight:700;color:var(--gold);">৳${a.toLocaleString()}</span>
-      </div>
-      <div style="height:8px;background:var(--navy3);border-radius:4px;">
-        <div style="height:8px;background:var(--gold);border-radius:4px;width:${(a/maxAmt*100).toFixed(1)}%;transition:width 0.5s;"></div>
-      </div>
-    </div>
-  `).join('');
+function renderReports(){
+  const receipts=getReceipts(),members=getMembers();
+  const today=new Date().toISOString().split('T')[0];
+  const monthStart=today.substring(0,7);
+  const monthAmt=receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
+  document.getElementById('report-stats').innerHTML=
+    statCard('&#128197;','This Month','&#2547;'+monthAmt.toLocaleString())+
+    statCard('&#129534;','Total Receipts',receipts.length)+
+    statCard('&#128101;','Members',members.length);
+  document.getElementById('report-member-table').innerHTML=members.map(m=>{
+    const mR=receipts.filter(r=>r.memberId===m.id);
+    const mT=mR.reduce((s,r)=>s+Number(r.amount),0);
+    const last=[...mR].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    return`<tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
+      <td class="px-4 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-midnight" style="background:${m.color}">${m.name[0]}</div>${m.name}</div></td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${m.role}</span></td>
+      <td class="px-4 py-3">${mR.length}</td>
+      <td class="px-4 py-3 text-brass font-bold font-mono">&#2547;${mT.toLocaleString()}</td>
+      <td class="px-4 py-3 font-mono text-slatemuted">${last?last.date:'&#8212;'}</td>
+    </tr>`;}).join('');
 }
 
-// ===========================
-// MY RECEIPTS (member)
-// ===========================
-function renderMyReceipts() {
-  const receipts = getReceipts().filter(r => r.memberId === currentUser.id);
-  const total = receipts.reduce((s,r)=>s+Number(r.amount),0);
-  const monthStart = new Date().toISOString().substring(0,7);
-  const monthAmt = receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
-
-  document.getElementById('my-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Total Paid</div><div class="stat-value">৳${total.toLocaleString()}</div></div>
-    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">This Month</div><div class="stat-value">৳${monthAmt.toLocaleString()}</div></div>
-    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-label">Total Receipts</div><div class="stat-value">${receipts.length}</div></div>
-  `;
-
-  const tbody = document.getElementById('my-receipts-table');
-  if (receipts.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No receipts yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = [...receipts].sort((a,b)=>b.date.localeCompare(a.date)).map(r => `
-    <tr>
-      <td><span class="badge badge-gold">${r.receiptNo}</span></td>
-      <td>${r.date}</td>
-      <td style="color:var(--gold);font-weight:700;">৳${Number(r.amount).toLocaleString()}</td>
-      <td>${r.purpose}</td>
-      <td>${r.month ? `<span class="badge badge-purple">${r.month}${r.year ? ' '+r.year : ''}</span>` : '<span class="text-muted">—</span>'}</td>
-      <td><span class="badge badge-blue">${r.method}</span></td>
-      <td>
-        <button class="btn-sm" style="background:var(--gold);color:var(--navy);padding:5px 10px;font-size:11px;" onclick="downloadReceiptPDF('${r.id}')">⬇ PDF</button>
-        <button class="btn-sm btn-outline" onclick="viewReceipt('${r.id}')" style="padding:5px 10px;font-size:11px;">View</button>
-      </td>
-    </tr>
-  `).join('');
+// MY RECEIPTS
+function renderMyReceipts(){
+  const receipts=getReceipts().filter(r=>r.memberId===currentUser.id);
+  const total=receipts.reduce((s,r)=>s+Number(r.amount),0);
+  const monthAmt=receipts.filter(r=>r.date.startsWith(new Date().toISOString().substring(0,7))).reduce((s,r)=>s+Number(r.amount),0);
+  document.getElementById('my-stats').innerHTML=
+    statCard('&#128176;','Total Paid','&#2547;'+total.toLocaleString())+
+    statCard('&#128197;','This Month','&#2547;'+monthAmt.toLocaleString())+
+    statCard('&#129534;','Total Receipts',receipts.length);
+  const tbody=document.getElementById('my-receipts-table');
+  if(!receipts.length){tbody.innerHTML='<tr><td colspan="7" class="text-center text-slatemuted py-6">No receipts yet.</td></tr>';return;}
+  tbody.innerHTML=[...receipts].sort((a,b)=>b.date.localeCompare(a.date)).map(r=>{
+    const monthsDisplay=r.months&&r.months.length>0
+      ?r.months.map(m=>`<span class="inline-flex items-center px-2 py-0.5 m-0.5 rounded-full text-[11px] font-bold bg-[#a777e3]/20 text-[#a777e3]">${m.substring(0,3)}</span>`).join('')
+      :(r.month?`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#a777e3]/20 text-[#a777e3]">${r.month}${r.year?' '+r.year:''}</span>`:'&#8212;');
+    return`<tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
+      <td class="px-4 py-3 font-mono"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${r.receiptNo}</span></td>
+      <td class="px-4 py-3 font-mono text-slatemuted">${r.date}</td>
+      <td class="px-4 py-3 text-brass font-bold font-mono">&#2547;${Number(r.amount).toLocaleString()}</td>
+      <td class="px-4 py-3">${r.purpose}</td>
+      <td class="px-4 py-3">${monthsDisplay}</td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#6495ed]/20 text-[#6495ed]">${r.method}</span></td>
+      <td class="px-4 py-3"><div class="flex gap-1.5 flex-wrap">
+        <button class="bg-brass text-midnight hover:bg-brasslight px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors" onclick="downloadReceiptPDF('${r.id}')">&#11015; PDF</button>
+        <button class="border border-brass text-brass hover:bg-brass/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="viewReceipt('${r.id}')">View</button>
+      </div></td>
+    </tr>`;}).join('');
 }
 
-// ===========================
 // SETTINGS
-// ===========================
-function renderSettings() {
-  const sig = getSignature();
-  const wrap = document.getElementById('signature-current-wrap');
-  const img = document.getElementById('signature-current-img');
-  if (sig) {
-    img.src = sig;
-    wrap.style.display = 'block';
-  } else {
-    wrap.style.display = 'none';
-  }
+function renderSettings(){
+  const sig=getSig();
+  document.getElementById('sig-preview-wrap').classList.toggle('hidden',!sig);
+  if(sig)document.getElementById('sig-preview-img').src=sig;
+}
+function handleSigUpload(e){
+  const f=e.target.files[0];if(!f||!f.type.startsWith('image/')){showToast('Image only.');return;}
+  const r=new FileReader();r.onload=ev=>{ls_set(SIG_KEY,ev.target.result);renderSettings();showToast('Signature uploaded!');e.target.value='';};
+  r.readAsDataURL(f);
+}
+async function removeSig(){
+  if(!getSig()){showToast('No signature yet.');return;}
+  const ok=await confirmDialog('Remove','Remove treasurer signature?','Remove','ember');
+  if(!ok)return;localStorage.removeItem(SIG_KEY);renderSettings();showToast('Removed.');
+}
+function changeAdminPass(){
+  const c=document.getElementById('curr-pass').value,n=document.getElementById('new-pass').value,cf=document.getElementById('conf-pass').value;
+  const creds=getAdminCreds();
+  if(c!==creds.password){showToast('Wrong current password.');return;}
+  if(n.length<6){showToast('Min 6 chars.');return;}
+  if(n!==cf){showToast('Passwords do not match.');return;}
+  ls_set(ADMIN_KEY,{...creds,password:n});showToast('Password updated!');
+  ['curr-pass','new-pass','conf-pass'].forEach(id=>document.getElementById(id).value='');
+}
+async function clearAllData(){
+  const ok=await confirmDialog('Clear All','DELETE ALL RECEIPTS permanently?','Delete All','ember');
+  if(!ok)return;ls_set(RECEIPTS_KEY,[]);ls_set(COUNTER_KEY,1);showToast('All receipts cleared.');
 }
 
-function handleSignatureUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) { showToast('⚠️ Please upload an image file.'); return; }
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    setSignature(e.target.result);
-    renderSettings();
-    showToast('✅ Treasurer signature uploaded!');
-    event.target.value = '';
-  };
-  reader.onerror = function() { showToast('❌ Failed to read image.'); };
-  reader.readAsDataURL(file);
-}
-
-async function removeSignature() {
-  if (!getSignature()) { showToast('ℹ️ No signature uploaded yet.'); return; }
-  const ok = await confirmDialog('🗑️ Remove Signature', 'Remove the treasurer signature from receipts?', 'Remove', '#e05252');
-  if (!ok) return;
-  clearSignature();
-  renderSettings();
-  showToast('🗑️ Signature removed.');
-}
-
-function changeAdminPass() {
-  const curr = document.getElementById('curr-pass').value;
-  const newP = document.getElementById('new-pass').value;
-  const conf = document.getElementById('conf-pass').value;
-  const creds = getAdminCreds();
-  if (curr !== creds.password) { showToast('❌ Current password is wrong.'); return; }
-  if (newP.length < 6) { showToast('⚠️ Password must be at least 6 chars.'); return; }
-  if (newP !== conf) { showToast('⚠️ Passwords do not match.'); return; }
-  ls_set(ADMIN_CREDS_KEY, { ...creds, password: newP });
-  showToast('✅ Password updated!');
-  ['curr-pass','new-pass','conf-pass'].forEach(id => document.getElementById(id).value = '');
-}
-
-async function clearAllData() {
-  const ok = await confirmDialog('⚠️ Clear All Data', 'DELETE ALL RECEIPTS permanently? This cannot be undone!', 'Delete All', '#e05252');
-  if (!ok) return;
-  ls_set(RECEIPTS_KEY, []);
-  ls_set(COUNTER_KEY, 1);
-  showToast('🗑️ All receipts cleared.');
-}
-
-// ===========================
-// MODAL HELPERS
-// ===========================
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-// Custom confirm dialog (replaces browser confirm() which is blocked in some contexts)
-let _confirmResolve = null;
-function confirmDialog(title, msg, okLabel, okColor) {
-  return new Promise(resolve => {
-    _confirmResolve = resolve;
-    document.getElementById('confirm-title').textContent = title;
-    document.getElementById('confirm-msg').textContent = msg;
-    const btn = document.getElementById('confirm-ok-btn');
-    btn.textContent = okLabel || 'Confirm';
-    btn.style.background = okColor || '#e05252';
+// MODALS
+function openModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+let _cr=null;
+function confirmDialog(title,msg,okLabel,okColor){
+  return new Promise(resolve=>{
+    _cr=resolve;
+    document.getElementById('confirm-title').textContent=title;
+    document.getElementById('confirm-msg').textContent=msg;
+    const btn=document.getElementById('confirm-ok-btn');
+    btn.textContent=okLabel||'Confirm';
+    btn.classList.remove('bg-ember','bg-brass','hover:bg-ember/80','hover:bg-brasslight','text-midnight','text-white');
+    if(okColor==='brass'){btn.classList.add('bg-brass','text-midnight','hover:bg-brasslight');}
+    else{btn.classList.add('bg-ember','text-white','hover:bg-ember/80');}
     openModal('confirm-modal');
   });
 }
-function confirmResolve(val) {
-  closeModal('confirm-modal');
-  if (_confirmResolve) { _confirmResolve(val); _confirmResolve = null; }
-}
-
-// Close modal on overlay click (but NOT the confirm modal)
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('modal-overlay') && e.target.id !== 'confirm-modal') {
-    e.target.classList.add('hidden');
-  }
+function confirmResolve(v){closeModal('confirm-modal');if(_cr){_cr(v);_cr=null;}}
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('modal-overlay')&&e.target.id!=='confirm-modal')e.target.classList.add('hidden');
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));
 });
 
-// ===========================
 // TOAST
-// ===========================
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+let _tt;
+function showToast(msg){
+  const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// ===========================
-// NUMBER TO WORDS (BDT)
-// ===========================
-function numberToWords(n) {
-  if (n === 0) return 'Zero';
-  const ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine',
-    'Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
-  const tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-  function convert(num) {
-    if (num < 20) return ones[num];
-    if (num < 100) return tens[Math.floor(num/10)] + (num%10 ? ' '+ones[num%10] : '');
-    if (num < 1000) return ones[Math.floor(num/100)] + ' Hundred' + (num%100 ? ' '+convert(num%100) : '');
-    if (num < 100000) return convert(Math.floor(num/1000)) + ' Thousand' + (num%1000 ? ' '+convert(num%1000) : '');
-    if (num < 10000000) return convert(Math.floor(num/100000)) + ' Lakh' + (num%100000 ? ' '+convert(num%100000) : '');
-    return convert(Math.floor(num/10000000)) + ' Crore' + (num%10000000 ? ' '+convert(num%10000000) : '');
+// NUMBER TO WORDS
+function n2w(n){
+  if(n===0)return'Zero';
+  const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function c(n){
+    if(n<20)return ones[n];if(n<100)return tens[Math.floor(n/10)]+(n%10?' '+ones[n%10]:'');
+    if(n<1000)return ones[Math.floor(n/100)]+' Hundred'+(n%100?' '+c(n%100):'');
+    if(n<100000)return c(Math.floor(n/1000))+' Thousand'+(n%1000?' '+c(n%1000):'');
+    if(n<10000000)return c(Math.floor(n/100000))+' Lakh'+(n%100000?' '+c(n%100000):'');
+    return c(Math.floor(n/10000000))+' Crore'+(n%10000000?' '+c(n%10000000):'');
   }
-  return convert(Math.floor(n));
+  return c(Math.floor(n));
 }
 
-// ===========================
-// INIT
-// ===========================
-initStorage();
-document.getElementById('auth-logo').src = ZYRON_LOGO;
+if(!ls_get(MEMBERS_KEY))initDefaultMembers();
 
-// Keyboard shortcuts
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => m.classList.add('hidden'));
-  }
-});
 </script>
 </body>
 </html>
