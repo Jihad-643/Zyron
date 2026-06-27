@@ -427,13 +427,48 @@
       </div>
     </div>
 
-    <!-- MEMBER DIRECTORY -->
+   <!-- MEMBER DIRECTORY -->
     <div class="page" id="page-member-directory">
       <div class="mb-6 pb-4 border-b border-brass/20">
         <div class="font-display font-bold text-2xl text-brass">Members</div>
         <div class="text-[13px] text-slatemuted mt-0.5">ZYRON Organization — all members</div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="member-directory-grid"></div>
+    </div>
+
+    <!-- COMMITTEE -->
+<div class="page" id="page-committee">
+  <div class="mb-6 pb-4 border-b border-brass/20">
+    <div class="font-display font-bold text-2xl text-brass">Committee</div>
+    <div class="text-[13px] text-slatemuted mt-0.5">ZYRON Organization — নেতৃত্ব</div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="committee-grid"></div>
+</div>
+
+    <!-- MEMBER SETTINGS -->
+    <div class="page" id="page-member-settings">
+      <div class="mb-6 pb-4 border-b border-brass/20">
+        <div class="font-display font-bold text-2xl text-brass">Settings</div>
+        <div class="text-[13px] text-slatemuted mt-0.5">Change your password</div>
+      </div>
+      <div class="bg-ink border border-brass/20 rounded-xl p-6 max-w-lg">
+        <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Change Password</div>
+        <div class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Current Password</label>
+            <input type="password" id="m-curr-pass" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">New Password</label>
+            <input type="password" id="m-new-pass" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Confirm Password</label>
+            <input type="password" id="m-conf-pass" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          </div>
+        </div>
+        <button onclick="changeMemberPass()" class="mt-4 bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Update Password</button>
+      </div>
     </div>
 
   </main>
@@ -523,8 +558,8 @@ const ADMIN_KEY='zyron_admin',MEMBERS_KEY='zyron_members',RECEIPTS_KEY='zyron_re
 const PAGE_SIZE=15;
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const COLORS=['#C9A227','#4FAE8E','#6495ed','#a777e3','#D6573F','#52b0e0','#e05299','#7daf52','#cc8855','#52e0c4'];
-const ADMIN_PAGES=new Set(['dashboard','new-receipt','receipts','members','reports','settings']);
-const MEMBER_PAGES=new Set(['dashboard','my-receipts','member-directory']);
+const ADMIN_PAGES=new Set(['dashboard','new-receipt','receipts','members','reports','settings','committee']);
+const MEMBER_PAGES=new Set(['dashboard','my-receipts','member-directory','member-settings','committee']);
 
 let currentUser=null,currentViewReceipt=null,currentPendingReceipt=null,editingMemberId=null,receiptPage=1;
 
@@ -583,7 +618,7 @@ function adminLogin(){
 }
 function memberLogin(){
   const id=document.getElementById('user-id-input').value.trim().toUpperCase();
-  const p=document.getElementById('user-pass').value;
+  const p=document.getElementById('user-pass').value.trim();
   const m=getMembers().find(x=>x.id===id&&x.password===p);
   if(m){currentUser={type:'member',name:m.name,role:m.role,id:m.id};enterApp();}
   else document.getElementById('auth-error').textContent='Invalid Member ID or password.';
@@ -620,12 +655,15 @@ const adminNav=[
   {section:'Receipts'},{id:'new-receipt',icon:'&#129534;',label:'New Receipt'},{id:'receipts',icon:'&#128203;',label:'Receipt History'},
   {section:'Members'},{id:'members',icon:'&#128101;',label:'Members'},
   {section:'Analytics'},{id:'reports',icon:'&#128200;',label:'Reports'},
+  {section:'Organization'},{id:'committee',icon:'&#127775;',label:'Committee'},
   {section:'System'},{id:'settings',icon:'&#9881;',label:'Settings'},
 ];
 const memberNav=[
   {section:'Overview'},{id:'dashboard',icon:'&#128202;',label:'Dashboard'},
   {section:'My Account'},{id:'my-receipts',icon:'&#129534;',label:'My Receipts'},
   {section:'Organization'},{id:'member-directory',icon:'&#128101;',label:'Members'},
+  {section:'Committee'},{id:'committee',icon:'&#127775;',label:'Committee'}, // ✅ নতুন
+  {section:'Account'},{id:'member-settings',icon:'&#9881;',label:'Settings'},
 ];
 function setupSidebar(){
   const items=currentUser.type==='admin'?adminNav:memberNav;
@@ -665,6 +703,8 @@ function loadPage(p){
   if(p==='settings')renderSettings();
   if(p==='my-receipts')renderMyReceipts();
   if(p==='member-directory')renderMemberDirectory();
+  if(p==='member-settings')renderMemberSettings();
+  if(p==='committee')renderCommittee();
 }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');}
@@ -879,8 +919,8 @@ function onPurposeChange(){
   const isMonthly=p==='Monthly Fee';
   document.getElementById('monthly-fee-section').classList.toggle('hidden',!isMonthly);
   document.getElementById('registration-fee-section').classList.toggle('hidden',isMonthly);
+  document.getElementById('rcpt-year-wrap').classList.toggle('hidden',!isMonthly);
 }
-
 function initNewReceipt(){
   const members=getMembers();
   const sel=document.getElementById('rcpt-member');
@@ -889,6 +929,8 @@ function initNewReceipt(){
   document.getElementById('rcpt-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('rcpt-member-id').value='';
   document.getElementById('rcpt-year').value=new Date().getFullYear();
+  document.getElementById('rcpt-purpose').value='Monthly Fee';
+  document.getElementById('rcpt-method').value='Cash';
   buildMonthCheckboxGrid();
   onPurposeChange();
 }
@@ -931,9 +973,11 @@ function saveReceipt(){
   const err=validateReceipt(d);
   if(err){showToast('&#9888; '+err);return;}
   const receipts=getReceipts();
-  const n=incCounter();
+  const n = incCounter();
+  const receiptNo = `ZY-RCP-${String(n).padStart(4,'0')}`;
+  document.getElementById('rcpt-no').value = receiptNo;
   receipts.push({
-    id:`id_${Date.now()}`,receiptNo:`ZY-RCP-${String(n).padStart(4,'0')}`,
+    id:`id_${Date.now()}`,receiptNo:receiptNo,
     date:d.date,memberId:d.memberId,memberName:d.memberName,memberRole:d.memberRole,
     amount:d.amount,method:d.method,purpose:d.purpose,
     months:d.months,monthAmounts:d.monthAmounts,year:d.year,
@@ -947,12 +991,18 @@ function saveReceipt(){
 
 function clearReceiptForm(){
   document.getElementById('rcpt-amount-single').value='';
+  document.getElementById('single-total-display').textContent='\u09F3 0';
   document.getElementById('rcpt-notes').value='';
   document.getElementById('rcpt-member').value='';
   document.getElementById('rcpt-member-id').value='';
+  document.getElementById('rcpt-purpose').value='Monthly Fee';
+  document.getElementById('rcpt-method').value='Cash';
+  document.getElementById('rcpt-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('rcpt-year').value=new Date().getFullYear();
+  document.getElementById('rcpt-by').value='Jihadul Islam (Treasurer)';
   buildMonthCheckboxGrid();
+  onPurposeChange();
 }
-
 function previewReceipt(){
   const d=getReceiptFormData();
   const err=validateReceipt(d);
@@ -1153,11 +1203,17 @@ function renderMembers(){
       <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
       <div class="text-[15px] font-bold text-brasslight font-mono mt-2">&#2547;${tot.toLocaleString()}</div>
       ${m.phone?`<div class="text-[11px] text-slatemuted mt-1">&#128222; ${m.phone}</div>`:''}
-      <div class="flex justify-center gap-2 mt-3">
-        <button class="border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editMember('${m.id}')">Edit</button>
-        <button class="bg-ember text-white hover:bg-ember/80 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="deleteMember('${m.id}')">Del</button>
-      </div>
+     <div class="flex justify-center gap-2 mt-3">
+  <button class="border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editMember('${m.id}')">Edit</button>
+  <button class="bg-ember text-white hover:bg-ember/80 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="deleteMember('${m.id}')">Del</button>
+  <button class="bg-ink2 border border-brass/30 text-slatemuted hover:text-brass px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="showMemberPass('${m.id}')">&#128273; Pass</button>
+</div>
     </div>`;}).join('');
+}
+function showMemberPass(id){
+  const m=getMembers().find(x=>x.id===id);
+  if(!m)return;
+  showToast('&#128273; '+m.name+': '+m.password);
 }
 function renderMemberDirectory(){
   const members=getMembers();
@@ -1168,6 +1224,14 @@ function renderMemberDirectory(){
       <div class="text-xs text-brass mt-1 mb-1.5">${m.role}</div>
       <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
     </div>`).join('');
+}
+function generateMemberId(members) {
+  const nums = members.map(m => {
+    const match = m.id.match(/^ZY-(\d+)$/);
+    return match ? parseInt(match[1], 10) : 0;
+  });
+  const max = nums.length ? Math.max(...nums) : 0;
+  return `ZY-${String(max + 1).padStart(3, '0')}`;
 }
 function openAddMemberModal(){
   editingMemberId=null;
@@ -1203,7 +1267,7 @@ function saveMember(){
     }
     showToast('Member updated!');
   }else{
-    const newId=`ZY-${String(members.length+1).padStart(3,'0')}`;
+    const newId = generateMemberId(members);
     members.push({id:newId,name,role,phone:document.getElementById('m-phone').value,email:document.getElementById('m-email').value,address:document.getElementById('m-address').value,color:COLORS[members.length%COLORS.length],password:'zyron123',joinDate:new Date().toISOString().split('T')[0]});
     showToast(`Added! ID: ${newId}`);
   }
@@ -1289,6 +1353,60 @@ function changeAdminPass(){
   if(n!==cf){showToast('Passwords do not match.');return;}
   ls_set(ADMIN_KEY,{...creds,password:n});showToast('Password updated!');
   ['curr-pass','new-pass','conf-pass'].forEach(id=>document.getElementById(id).value='');
+}
+
+const COMMITTEE_KEY='zyron_committee';
+function getCommittee(){
+  return ls_get(COMMITTEE_KEY)||[
+    {name:'Rakib Bin Rashed',role:'President',color:'#C9A227'},
+    {name:'Rakibul Islam Fahim',role:'General Secretary',color:'#4FAE8E'},
+    {name:'Jihadul Islam',role:'Treasurer',color:'#6495ed'},
+  ];
+}
+function renderCommittee(){
+  const committee=getCommittee();
+  const isAdmin=currentUser.type==='admin';
+  document.getElementById('committee-grid').innerHTML=committee.map((m,i)=>`
+    <div class="bg-ink border border-brass/20 rounded-xl p-6 text-center">
+      <div class="w-[70px] h-[70px] rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4 text-midnight" style="background:${m.color}">${m.name[0]}</div>
+      <div class="font-display font-bold text-lg text-slate-100">${m.name}</div>
+      <div class="text-sm text-brass mt-1.5 font-semibold">${m.role}</div>
+      ${isAdmin?`<button class="mt-3 border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editCommitteeMember(${i})">✏️ Edit</button>`:''}
+    </div>`).join('');
+}
+function editCommitteeMember(i){
+  const committee=getCommittee();
+  const m=committee[i];
+  const name=prompt('Name:',m.name);
+  if(name===null)return;
+  const role=prompt('Role:',m.role);
+  if(role===null)return;
+  committee[i]={...m,name:name.trim()||m.name,role:role.trim()||m.role};
+  ls_set(COMMITTEE_KEY,committee);
+  renderCommittee();
+  showToast('&#9989; Committee updated!');
+}
+
+function renderMemberSettings(){
+  ['m-curr-pass','m-new-pass','m-conf-pass'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.value='';
+  });
+}
+function changeMemberPass(){
+  const c=document.getElementById('m-curr-pass').value.trim();
+  const n=document.getElementById('m-new-pass').value.trim();
+  const cf=document.getElementById('m-conf-pass').value.trim();
+  const members=getMembers();
+  const idx=members.findIndex(m=>m.id===currentUser.id);
+  if(idx===-1){showToast('Member not found.');return;}
+  if(c!==members[idx].password){showToast('Wrong current password.');return;}
+  if(n.length<4){showToast('Min 4 characters.');return;}
+  if(n!==cf){showToast('Passwords do not match.');return;}
+  members[idx].password=n;
+  ls_set(MEMBERS_KEY,members);
+  showToast('&#9989; Password updated!');
+  ['m-curr-pass','m-new-pass','m-conf-pass'].forEach(id=>document.getElementById(id).value='');
 }
 async function clearAllData(){
   const ok=await confirmDialog('Clear All','DELETE ALL RECEIPTS permanently?','Delete All','ember');
