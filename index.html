@@ -97,13 +97,11 @@
 <!-- ==================== AUTH SCREEN ==================== -->
 <div id="auth-screen" class="flex items-center justify-center min-h-screen px-4" style="background-image: radial-gradient(ellipse at 20% 30%, rgba(201,162,39,.07) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(201,162,39,.05) 0%, transparent 60%);">
   <div class="stamp-corner bg-ink border border-brass/25 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl">
-    <div class="flex justify-center  p-0 -mb-16">
-    <img src="Adobe Express - file.png"
-     alt="ZYRON Logo"
-     class="w-56 h-56 object-contain">
-</div>
+    <div class="flex justify-center p-0 -mb-16">
+      <img src="Adobe Express - file.png" alt="ZYRON Logo" class="w-56 h-56 object-contain">
+    </div>
     <div class="font-display font-bold text-3xl text-brass tracking-[0.15em]">ZYRON</div>
-    <div class="font-mono text-[11px] text-slatemuted mt-1 tracking-[0.25em] uppercase">Organization </div>
+    <div class="font-mono text-[11px] text-slatemuted mt-1 tracking-[0.25em] uppercase">Organization</div>
 
     <div class="flex mt-7 mb-5 border border-brass/25 rounded-lg overflow-hidden">
       <button class="auth-tab active flex-1 py-2.5 text-sm font-semibold bg-brass text-midnight transition-all" onclick="switchAuthTab('admin')" data-tab="admin">Admin Login</button>
@@ -143,11 +141,9 @@
 <div id="app" class="hidden">
   <aside class="sidebar fixed left-0 top-0 bottom-0 w-60 bg-ink border-r border-brass/20 flex flex-col z-[100]" id="sidebar">
     <div class="flex items-center gap-3 px-5 py-4 border-b border-brass/20">
-     <div class="flex justify-center mb-0">
-   <img src="Adobe Express - file.png"
-     alt="ZYRON Logo"
-     class="w-48 h-48 object-contain">
-</div>
+      <div class="flex justify-center mb-0">
+        <img src="Adobe Express - file.png" alt="ZYRON Logo" class="w-48 h-48 object-contain">
+      </div>
       <div>
         <div class="font-display font-bold text-base text-brass leading-tight">ZYRON</div>
         <div class="font-mono text-[10px] text-slatemuted tracking-wide">Organization</div>
@@ -155,7 +151,7 @@
     </div>
     <nav class="flex-1 py-4 overflow-y-auto" id="sidebar-nav"></nav>
     <div class="flex items-center gap-2.5 px-5 py-3.5 border-t border-brass/20">
-      <div class="w-8.5 h-8.5 w-[34px] h-[34px] rounded-full bg-brass text-midnight flex items-center justify-center font-bold text-sm flex-shrink-0" id="sidebar-avatar">A</div>
+      <div class="w-[34px] h-[34px] rounded-full bg-brass text-midnight flex items-center justify-center font-bold text-sm flex-shrink-0" id="sidebar-avatar">A</div>
       <div class="min-w-0">
         <div class="text-[13px] font-semibold text-slate-100 truncate" id="sidebar-username">Admin</div>
         <div class="text-[11px] text-brass truncate" id="sidebar-role">Administrator</div>
@@ -287,8 +283,8 @@
 
         <div class="flex gap-2.5 flex-wrap mt-6">
           <button onclick="saveReceipt()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128190; Save Receipt</button>
-          <button onclick="previewReceipt()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4.5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128065;&#65039; Preview</button>
-          <button onclick="clearReceiptForm()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4.5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128260; Clear</button>
+          <button onclick="previewReceipt()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128065;&#65039; Preview</button>
+          <button onclick="clearReceiptForm()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128260; Clear</button>
         </div>
       </div>
     </div>
@@ -311,7 +307,7 @@
           <select id="filter-member" onchange="renderReceiptsTable()" class="flex-1 min-w-[160px] max-w-[260px] px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
             <option value="">All Members</option>
           </select>
-          <button onclick="exportCSV()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4.5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128228; Export CSV</button>
+          <button onclick="exportCSV()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128228; Export CSV</button>
         </div>
         <div class="overflow-x-auto rounded-lg border border-brass/15">
           <table class="w-full text-[13px] border-collapse">
@@ -459,9 +455,9 @@
 <!-- PREVIEW MODAL -->
 <div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="preview-modal">
   <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-    <div class="font-display font-bold text-lg text-brass mb-4.5">Receipt Preview</div>
+    <div class="font-display font-bold text-lg text-brass mb-4">Receipt Preview</div>
     <div id="receipt-print-area"></div>
-    <div class="flex gap-3 justify-end mt-4.5">
+    <div class="flex gap-3 justify-end mt-4">
       <button onclick="closeModal('preview-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Close</button>
       <button onclick="downloadPDF()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">&#11015; Download PDF</button>
     </div>
@@ -471,7 +467,7 @@
 <!-- MEMBER MODAL -->
 <div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="member-modal">
   <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-    <div class="font-display font-bold text-lg text-brass mb-4.5" id="member-modal-title">Add Member</div>
+    <div class="font-display font-bold text-lg text-brass mb-4" id="member-modal-title">Add Member</div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Full Name</label>
@@ -495,7 +491,7 @@
       </div>
     </div>
     <div id="m-pass-section" class="hidden">
-      <hr class="border-brass/20 my-4.5">
+      <hr class="border-brass/20 my-4">
       <div>
         <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Reset Login Password</label>
         <input type="text" id="m-password" placeholder="Leave blank to keep current" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
@@ -503,7 +499,7 @@
       <div class="text-slatemuted text-[13px] mt-1.5">Login ID: <span id="m-pass-id" class="text-brass font-bold"></span></div>
     </div>
     <input type="hidden" id="m-edit-id">
-    <div class="flex gap-3 justify-end mt-4.5">
+    <div class="flex gap-3 justify-end mt-4">
       <button onclick="closeModal('member-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Cancel</button>
       <button onclick="saveMember()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Save Member</button>
     </div>
@@ -513,15 +509,14 @@
 <!-- VIEW RECEIPT MODAL -->
 <div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="view-receipt-modal">
   <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-    <div class="font-display font-bold text-lg text-brass mb-4.5">Receipt Details</div>
+    <div class="font-display font-bold text-lg text-brass mb-4">Receipt Details</div>
     <div id="view-receipt-content"></div>
-    <div class="flex gap-3 justify-end mt-4.5">
+    <div class="flex gap-3 justify-end mt-4">
       <button onclick="closeModal('view-receipt-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Close</button>
       <button onclick="downloadViewedPDF()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">&#11015; Download PDF</button>
     </div>
   </div>
 </div>
-
 
 <script>
 const ADMIN_KEY='zyron_admin',MEMBERS_KEY='zyron_members',RECEIPTS_KEY='zyron_receipts',COUNTER_KEY='zyron_counter',SIG_KEY='zyron_sig';
@@ -596,8 +591,9 @@ function memberLogin(){
 function enterApp(){
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('app').classList.remove('hidden');
-  setupSidebar();updateSidebarUser();
-  navigate('dashboard');
+  setupSidebar();
+  updateSidebarUser();
+  setTimeout(()=>navigate('dashboard'),50);
 }
 async function logout(){
   const ok=await confirmDialog('Logout','Logout from ZYRON?','Logout','ember');
@@ -605,9 +601,12 @@ async function logout(){
   currentUser=null;
   document.getElementById('auth-screen').style.display='flex';
   document.getElementById('app').classList.add('hidden');
-  document.getElementById('admin-user').value='admin';document.getElementById('admin-pass').value='zyron2024';
-  document.getElementById('user-id-input').value='';document.getElementById('user-pass').value='';
-  document.getElementById('auth-error').textContent='';switchAuthTab('admin');
+  document.getElementById('admin-user').value='admin';
+  document.getElementById('admin-pass').value='zyron2024';
+  document.getElementById('user-id-input').value='';
+  document.getElementById('user-pass').value='';
+  document.getElementById('auth-error').textContent='';
+  switchAuthTab('admin');
 }
 function updateSidebarUser(){
   document.getElementById('sidebar-avatar').textContent=currentUser.name[0].toUpperCase();
@@ -635,24 +634,28 @@ function setupSidebar(){
     return`<div class="nav-item flex items-center gap-3 px-5 py-2.5 cursor-pointer text-[14px] text-slatemuted border-l-[3px] border-transparent hover:bg-brass/[0.08] hover:text-slate-100 transition-all" id="nav-${item.id}" onclick="navigate('${item.id}')"><span class="text-lg w-5 text-center">${item.icon}</span><span>${item.label}</span></div>`;
   }).join('');
 }
+
+// ✅ FIXED: Single navigate() — no duplicate
 function navigate(page){
   if(!currentUser)return;
   const allowed=currentUser.type==='admin'?ADMIN_PAGES:MEMBER_PAGES;
   if(!allowed.has(page)){showToast('Access denied.');return;}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>{
-    n.classList.remove('active');
-    n.classList.remove('bg-brass/[0.12]','text-brass','border-brass');
+    n.classList.remove('active','bg-brass/[0.12]','text-brass','border-brass');
     n.classList.add('text-slatemuted','border-transparent');
   });
-  const pg=document.getElementById(`page-${page}`);if(pg)pg.classList.add('active');
+  const pg=document.getElementById(`page-${page}`);
+  if(pg) pg.classList.add('active');
   const ni=document.getElementById(`nav-${page}`);
   if(ni){
     ni.classList.add('active','bg-brass/[0.12]','text-brass','border-brass');
     ni.classList.remove('text-slatemuted','border-transparent');
   }
-  closeSidebar();loadPage(page);
+  closeSidebar();
+  loadPage(page);
 }
+
 function loadPage(p){
   if(p==='dashboard')renderDashboard();
   if(p==='new-receipt')initNewReceipt();
@@ -666,7 +669,6 @@ function loadPage(p){
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');}
 
-// Shared stat-card builder (Tailwind)
 function statCard(icon,label,value,sub){
   return `<div class="bg-ink border border-brass/20 rounded-xl p-5">
     <div class="text-2xl mb-2.5">${icon}</div>
@@ -676,199 +678,195 @@ function statCard(icon,label,value,sub){
   </div>`;
 }
 
-// DASHBOARD
 function renderDashboard(){
-  const receipts=getReceipts(),members=getMembers();
-  const today=new Date().toISOString().split('T')[0];
-  const monthStart=today.substring(0,7);
-  const todayAmt=receipts.filter(r=>r.date===today).reduce((s,r)=>s+Number(r.amount),0);
-  const monthAmt=receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
-  const dashBtn=document.getElementById('dash-new-btn');
-  const histBtn=document.getElementById('history-new-btn');
-  const showBtn=currentUser.type==='admin';
-  if(dashBtn){dashBtn.classList.toggle('hidden',!showBtn);dashBtn.classList.toggle('inline-flex',showBtn);}
-  if(histBtn){histBtn.classList.toggle('hidden',!showBtn);histBtn.classList.toggle('inline-flex',showBtn);}
-  const statsEl=document.getElementById('dashboard-stats');
-  if(currentUser.type==='admin'){
-    statsEl.innerHTML=
-      statCard('&#128197;','This Month','&#2547;'+monthAmt.toLocaleString(),monthStart)+
-      statCard('&#128198;','Today','&#2547;'+todayAmt.toLocaleString(),today)+
-      statCard('&#128101;','Members',members.length,'Active')+
-      statCard('&#129534;','Total Receipts',receipts.length,'All time');
-  }else{
-    const myR=receipts.filter(r=>r.memberId===currentUser.id);
-    const member=members.find(m=>m.id===currentUser.id);
-    statsEl.innerHTML=
-      statCard('&#127991;','Member ID',currentUser.id,member?.role||'')+
-      statCard('&#129534;','My Receipts',myR.length,'Total')+
-      statCard('&#128101;','Members',members.length,'In ZYRON');
+  try{
+    const receipts=getReceipts(),members=getMembers();
+    const today=new Date().toISOString().split('T')[0];
+    const monthStart=today.substring(0,7);
+    const todayAmt=receipts.filter(r=>r.date===today).reduce((s,r)=>s+Number(r.amount),0);
+    const monthAmt=receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
+    const dashBtn=document.getElementById('dash-new-btn');
+    const histBtn=document.getElementById('history-new-btn');
+    const showBtn=currentUser.type==='admin';
+    if(dashBtn){dashBtn.classList.toggle('hidden',!showBtn);dashBtn.classList.toggle('inline-flex',showBtn);}
+    if(histBtn){histBtn.classList.toggle('hidden',!showBtn);histBtn.classList.toggle('inline-flex',showBtn);}
+    const statsEl=document.getElementById('dashboard-stats');
+    if(!statsEl)return;
+    if(currentUser.type==='admin'){
+      statsEl.innerHTML=
+        statCard('&#128197;','This Month','&#2547;'+monthAmt.toLocaleString(),monthStart)+
+        statCard('&#128198;','Today','&#2547;'+todayAmt.toLocaleString(),today)+
+        statCard('&#128101;','Members',members.length,'Active')+
+        statCard('&#129534;','Total Receipts',receipts.length,'All time');
+    }else{
+      const myR=receipts.filter(r=>r.memberId===currentUser.id);
+      const member=members.find(m=>m.id===currentUser.id);
+      statsEl.innerHTML=
+        statCard('&#127991;','Member ID',currentUser.id,member?.role||'')+
+        statCard('&#129534;','My Receipts',myR.length,'Total')+
+        statCard('&#128101;','Members',members.length,'In ZYRON');
+    }
+    renderMonthlySummary();
+    const src=currentUser.type==='admin'?receipts:receipts.filter(r=>r.memberId===currentUser.id);
+    const recent=[...src].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,8);
+    const tbody=document.getElementById('recent-receipts-table');
+    tbody.innerHTML=recent.length===0?`<tr><td colspan="5" class="text-center text-slatemuted py-6">No receipts yet.</td></tr>`:
+      recent.map(r=>`<tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
+        <td class="px-4 py-3 font-mono"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${r.receiptNo}</span></td>
+        <td class="px-4 py-3">${r.memberName}</td>
+        <td class="px-4 py-3 text-brass font-bold font-mono">&#2547;${Number(r.amount).toLocaleString()}</td>
+        <td class="px-4 py-3">${r.purpose}${r.months&&r.months.length?` (${r.months.join(', ')})`:r.month?` (${r.month})`:''}</td>
+        <td class="px-4 py-3 font-mono text-slatemuted">${r.date}</td>
+      </tr>`).join('');
+  }catch(e){
+    console.error('renderDashboard error:',e);
+    showToast('&#9888; Dashboard error');
   }
-  renderMonthlySummary();
-  const src=currentUser.type==='admin'?receipts:receipts.filter(r=>r.memberId===currentUser.id);
-  const recent=[...src].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,8);
-  const tbody=document.getElementById('recent-receipts-table');
-  tbody.innerHTML=recent.length===0?`<tr><td colspan="5" class="text-center text-slatemuted py-6">No receipts yet.</td></tr>`:
-    recent.map(r=>`<tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
-      <td class="px-4 py-3 font-mono"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${r.receiptNo}</span></td>
-      <td class="px-4 py-3">${r.memberName}</td>
-      <td class="px-4 py-3 text-brass font-bold font-mono">&#2547;${Number(r.amount).toLocaleString()}</td>
-      <td class="px-4 py-3">${r.purpose}${r.months&&r.months.length?` (${r.months.join(', ')})`:r.month?` (${r.month})`:''}</td>
-      <td class="px-4 py-3 font-mono text-slatemuted">${r.date}</td>
-    </tr>`).join('');
 }
 
+// ✅ FIXED: Single renderMonthlySummary() — no duplicate
 function renderMonthlySummary(){
-  const receipts=getReceipts(),members=getMembers();
-  const yearsSet=new Set(receipts.map(r=>Number(r.year)).filter(Boolean));
-  yearsSet.add(new Date().getFullYear());
-  const years=[...yearsSet].sort((a,b)=>b-a);
-  const sel=document.getElementById('dash-year-sel');
-  const prev=sel.value;
-  sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
-  sel.value=prev&&years.includes(Number(prev))?prev:String(new Date().getFullYear());
-  const yr=sel.value;
-  const mR=receipts.filter(r=>r.purpose==='Monthly Fee'&&String(r.year)===String(yr));
-  const grid=document.getElementById('monthly-summary-grid');
-  if(currentUser.type==='admin'){
-    const tot=members.length;
-    grid.innerHTML=`<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">${
-      MONTHS.map(m=>{
-        const paid=new Set();
-        mR.forEach(r=>{
-          if(r.months&&r.months.includes(m))paid.add(r.memberId);
-          else if(r.month===m)paid.add(r.memberId);
-        });
-        const amt=mR.reduce((s,r)=>{
-          if(r.months&&r.months.includes(m)){
-            if(r.monthAmounts&&r.monthAmounts[m])return s+Number(r.monthAmounts[m]);
-            return s+Number(r.amount)/(r.months.length||1);
-          }
-          if(r.month===m)return s+Number(r.amount);
-          return s;
-        },0);
-        const full=tot>0&&paid.size>=tot;
-        const borderClass=full?'border-mint':amt>0?'border-brass':'border-brass/20';
-        return`<div class="month-cell bg-ink2 border ${borderClass} rounded-lg p-3 text-center">
-          <div class="text-[11px] text-slatemuted font-bold tracking-wide">${m}</div>
-          <div class="text-[15px] font-bold font-mono mt-0.5 ${amt>0?'text-brass':'text-slatemuted'}">&#2547;${Math.round(amt).toLocaleString()}</div>
-          <div class="text-[11px] mt-0.5 ${full?'text-mint':'text-slatemuted'}">${paid.size}/${tot}</div>
-        </div>`;}).join('')}</div>`;
-  }else{
-    const myPaid=new Set();
-    mR.filter(r=>r.memberId===currentUser.id).forEach(r=>{
-      if(r.months)r.months.forEach(m=>myPaid.add(m));
-      else if(r.month)myPaid.add(r.month);
-    });
-    grid.innerHTML=`<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">${
-      MONTHS.map(m=>{
-        const paid=myPaid.has(m);
-        return`<div class="month-cell bg-ink2 border ${paid?'border-mint':'border-brass/20'} rounded-lg p-3 text-center">
-          <div class="text-[11px] text-slatemuted font-bold tracking-wide">${m}</div>
-          <div class="text-[13px] font-bold mt-1.5 ${paid?'text-mint':'text-ember'}">${paid?'&#9989; Paid':'&#8987; Due'}</div>
-        </div>`;}).join('')}</div>`;
+  try{
+    const receipts=getReceipts(),members=getMembers();
+    const yearsSet=new Set(receipts.map(r=>Number(r.year)).filter(Boolean));
+    yearsSet.add(new Date().getFullYear());
+    const years=[...yearsSet].sort((a,b)=>b-a);
+    const sel=document.getElementById('dash-year-sel');
+    if(!sel)return;
+    const prev=Number(sel.value)||new Date().getFullYear();
+    sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    const targetYear=years.includes(prev)?prev:new Date().getFullYear();
+    sel.value=String(targetYear);
+    const yr=String(targetYear);
+    const mR=receipts.filter(r=>r.purpose==='Monthly Fee'&&String(r.year)===yr);
+    const grid=document.getElementById('monthly-summary-grid');
+    if(!grid)return;
+    if(currentUser.type==='admin'){
+      const tot=members.length;
+      grid.innerHTML=`<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">${
+        MONTHS.map(m=>{
+          const paid=new Set();
+          mR.forEach(r=>{
+            if(r.months&&r.months.includes(m))paid.add(r.memberId);
+            else if(r.month===m)paid.add(r.memberId);
+          });
+          const amt=mR.reduce((s,r)=>{
+            if(r.months&&r.months.includes(m)){
+              if(r.monthAmounts&&r.monthAmounts[m])return s+Number(r.monthAmounts[m]);
+              return s+Number(r.amount)/(r.months.length||1);
+            }
+            if(r.month===m)return s+Number(r.amount);
+            return s;
+          },0);
+          const full=tot>0&&paid.size>=tot;
+          const borderClass=full?'border-mint':amt>0?'border-brass':'border-brass/20';
+          return`<div class="month-cell bg-ink2 border ${borderClass} rounded-lg p-3 text-center">
+            <div class="text-[11px] text-slatemuted font-bold tracking-wide">${m}</div>
+            <div class="text-[15px] font-bold font-mono mt-0.5 ${amt>0?'text-brass':'text-slatemuted'}">&#2547;${Math.round(amt).toLocaleString()}</div>
+            <div class="text-[11px] mt-0.5 ${full?'text-mint':'text-slatemuted'}">${paid.size}/${tot}</div>
+          </div>`;}).join('')}</div>`;
+    }else{
+      const myPaid=new Set();
+      mR.filter(r=>r.memberId===currentUser.id).forEach(r=>{
+        if(r.months)r.months.forEach(m=>myPaid.add(m));
+        else if(r.month)myPaid.add(r.month);
+      });
+      grid.innerHTML=`<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5">${
+        MONTHS.map(m=>{
+          const paid=myPaid.has(m);
+          return`<div class="month-cell bg-ink2 border ${paid?'border-mint':'border-brass/20'} rounded-lg p-3 text-center">
+            <div class="text-[11px] text-slatemuted font-bold tracking-wide">${m}</div>
+            <div class="text-[13px] font-bold mt-1.5 ${paid?'text-mint':'text-ember'}">${paid?'&#9989; Paid':'&#8987; Due'}</div>
+          </div>`;}).join('')}</div>`;
+    }
+  }catch(e){
+    console.error('renderMonthlySummary error:',e);
   }
 }
 
-// =====================
 // MONTH CHECKBOX
-// =====================
-let selectedMonths = {};
+let selectedMonths={};
 
-function buildMonthCheckboxGrid() {
-  const defaultAmt = 500;
-  const grid = document.getElementById('month-cb-grid');
-
-  grid.innerHTML = MONTHS.map((m, i) => `
+function buildMonthCheckboxGrid(){
+  const defaultAmt=500;
+  const grid=document.getElementById('month-cb-grid');
+  grid.innerHTML=MONTHS.map((m,i)=>`
     <div class="month-cb-item flex flex-col bg-ink border border-brass/25 rounded-lg overflow-hidden cursor-pointer select-none" id="mcb-item-${i}" data-month="${m}" data-idx="${i}">
       <div class="flex items-center gap-2 px-2.5 py-2 w-full pointer-events-none">
         <div class="month-cb-check w-4 h-4 rounded border border-brass/30 bg-ink2 flex items-center justify-center flex-shrink-0 text-[10px] text-midnight" id="mcb-check-${i}"></div>
         <div class="month-cb-name text-xs font-semibold text-slatemuted" id="mcb-name-${i}">${m}</div>
       </div>
       <div id="mcb-amt-wrap-${i}" class="px-2.5 pb-2 hidden">
-        <input type="number" class="month-cb-amount w-full px-2 py-1.5 bg-ink2 border border-brass/25 rounded-md text-slate-100 text-xs" id="mcb-amt-${i}"
-          placeholder="Amount" min="1" value="${defaultAmt}">
+        <input type="number" class="month-cb-amount w-full px-2 py-1.5 bg-ink2 border border-brass/25 rounded-md text-slate-100 text-xs" id="mcb-amt-${i}" placeholder="Amount" min="1" value="${defaultAmt}">
       </div>
-    </div>
-  `).join('');
-
-  grid.onclick = function(e) {
-    if (e.target.tagName === 'INPUT') return;
-    const item = e.target.closest('.month-cb-item');
-    if (!item) return;
-    const month = item.dataset.month;
-    const idx = parseInt(item.dataset.idx);
-    toggleMonth(month, idx);
+    </div>`).join('');
+  grid.onclick=function(e){
+    if(e.target.tagName==='INPUT')return;
+    const item=e.target.closest('.month-cb-item');
+    if(!item)return;
+    toggleMonth(item.dataset.month,parseInt(item.dataset.idx));
   };
-
-  grid.oninput = function(e) {
-    if (e.target.tagName !== 'INPUT') return;
-    const idx = parseInt(e.target.id.replace('mcb-amt-', ''));
-    const month = MONTHS[idx];
-    if (selectedMonths.hasOwnProperty(month)) {
-      selectedMonths[month] = parseFloat(e.target.value) || 0;
-      updateMonthTotal();
-      updateMonthPills();
+  grid.oninput=function(e){
+    if(e.target.tagName!=='INPUT')return;
+    const idx=parseInt(e.target.id.replace('mcb-amt-',''));
+    const month=MONTHS[idx];
+    if(selectedMonths.hasOwnProperty(month)){
+      selectedMonths[month]=parseFloat(e.target.value)||0;
+      updateMonthTotal();updateMonthPills();
     }
   };
-
-  selectedMonths = {};
-  updateMonthTotal();
-  updateMonthPills();
+  selectedMonths={};
+  updateMonthTotal();updateMonthPills();
 }
 
-function toggleMonth(month, idx) {
-  const wrap = document.getElementById('mcb-amt-wrap-' + idx);
-  if (selectedMonths.hasOwnProperty(month)) {
+function toggleMonth(month,idx){
+  const wrap=document.getElementById('mcb-amt-wrap-'+idx);
+  if(selectedMonths.hasOwnProperty(month)){
     delete selectedMonths[month];
-    document.getElementById('mcb-item-' + idx).classList.remove('selected');
-    document.getElementById('mcb-check-' + idx).textContent = '';
+    document.getElementById('mcb-item-'+idx).classList.remove('selected');
+    document.getElementById('mcb-check-'+idx).textContent='';
     wrap.classList.add('hidden');
-  } else {
-    const amtInput = document.getElementById('mcb-amt-' + idx);
-    const defAmt = parseFloat(amtInput ? amtInput.value : 500) || 500;
-    selectedMonths[month] = defAmt;
-    document.getElementById('mcb-item-' + idx).classList.add('selected');
-    document.getElementById('mcb-check-' + idx).innerHTML = '&#10003;';
+  }else{
+    const amtInput=document.getElementById('mcb-amt-'+idx);
+    const defAmt=parseFloat(amtInput?amtInput.value:500)||500;
+    selectedMonths[month]=defAmt;
+    document.getElementById('mcb-item-'+idx).classList.add('selected');
+    document.getElementById('mcb-check-'+idx).innerHTML='&#10003;';
     wrap.classList.remove('hidden');
   }
-  updateMonthTotal();
-  updateMonthPills();
+  updateMonthTotal();updateMonthPills();
 }
 
-function selectAllMonths(sel) {
-  const defaultAmt = 500;
-  MONTHS.forEach((m, i) => {
-    const wrap = document.getElementById('mcb-amt-wrap-' + i);
-    if (sel) {
-      const amtInput = document.getElementById('mcb-amt-' + i);
-      const val = parseFloat(amtInput ? amtInput.value : defaultAmt) || defaultAmt;
-      selectedMonths[m] = val;
-      document.getElementById('mcb-item-' + i).classList.add('selected');
-      document.getElementById('mcb-check-' + i).innerHTML = '&#10003;';
+function selectAllMonths(sel){
+  MONTHS.forEach((m,i)=>{
+    const wrap=document.getElementById('mcb-amt-wrap-'+i);
+    if(sel){
+      const amtInput=document.getElementById('mcb-amt-'+i);
+      const val=parseFloat(amtInput?amtInput.value:500)||500;
+      selectedMonths[m]=val;
+      document.getElementById('mcb-item-'+i).classList.add('selected');
+      document.getElementById('mcb-check-'+i).innerHTML='&#10003;';
       wrap.classList.remove('hidden');
-    } else {
+    }else{
       delete selectedMonths[m];
-      document.getElementById('mcb-item-' + i).classList.remove('selected');
-      document.getElementById('mcb-check-' + i).textContent = '';
+      document.getElementById('mcb-item-'+i).classList.remove('selected');
+      document.getElementById('mcb-check-'+i).textContent='';
       wrap.classList.add('hidden');
     }
   });
-  updateMonthTotal();
-  updateMonthPills();
+  updateMonthTotal();updateMonthPills();
 }
 
-function updateMonthTotal() {
-  const total = Object.values(selectedMonths).reduce((s, v) => s + Number(v), 0);
-  document.getElementById('month-total-display').textContent = '\u09F3 ' + total.toLocaleString();
+function updateMonthTotal(){
+  const total=Object.values(selectedMonths).reduce((s,v)=>s+Number(v),0);
+  document.getElementById('month-total-display').textContent='\u09F3 '+total.toLocaleString();
 }
 
-function updateMonthPills() {
-  const pills = document.getElementById('month-selected-pills');
-  const months = MONTHS.filter(m => selectedMonths.hasOwnProperty(m));
-  if (months.length === 0) { pills.innerHTML = ''; return; }
-  pills.innerHTML = months.map(m =>
-    `<span class="bg-brass/15 border border-brass rounded-full px-2.5 py-0.5 text-[11px] text-brass font-bold">${m} &mdash; &#2547;${Number(selectedMonths[m]).toLocaleString()}</span>`
-  ).join('');
+function updateMonthPills(){
+  const pills=document.getElementById('month-selected-pills');
+  const months=MONTHS.filter(m=>selectedMonths.hasOwnProperty(m));
+  if(months.length===0){pills.innerHTML='';return;}
+  pills.innerHTML=months.map(m=>`<span class="bg-brass/15 border border-brass rounded-full px-2.5 py-0.5 text-[11px] text-brass font-bold">${m} &mdash; &#2547;${Number(selectedMonths[m]).toLocaleString()}</span>`).join('');
 }
 
 function updateSingleTotal(){
@@ -883,7 +881,6 @@ function onPurposeChange(){
   document.getElementById('registration-fee-section').classList.toggle('hidden',isMonthly);
 }
 
-// NEW RECEIPT
 function initNewReceipt(){
   const members=getMembers();
   const sel=document.getElementById('rcpt-member');
@@ -974,11 +971,9 @@ function buildReceiptHTML(r){
     <div class="chit-edge"></div>
     <div class="px-7 pt-2 pb-6">
     <div class="text-center border-b-2 border-brass pb-2 mb-2">
-       <div class="flex justify-center -mb-5">
-    <img src="Adobe Express - file.png"
-         alt="ZYRON Logo"
-         class="w-20 h-20 object-contain">
-</div>
+      <div class="flex justify-center -mb-5">
+        <img src="Adobe Express - file.png" alt="ZYRON Logo" class="w-20 h-20 object-contain">
+      </div>
       <div class="font-serif font-black text-xl tracking-[0.2em] text-[#0B1220]">ZYRON</div>
       <div class="text-[11px] text-[#9c7d1e] font-bold tracking-[0.15em] uppercase mt-0.5">Organization</div>
       <div class="text-base font-bold uppercase text-[#9c7d1e] mt-2.5 tracking-wide">Money Receipt</div>
@@ -1065,7 +1060,6 @@ function generatePDF(r){
   showToast('PDF downloaded!');
 }
 
-// RECEIPT HISTORY
 function populateMemberFilter(){
   const sel=document.getElementById('filter-member');
   sel.innerHTML='<option value="">All Members</option>'+getMembers().map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
@@ -1148,7 +1142,6 @@ function exportCSV(){
   a.download='ZYRON_Receipts.csv';a.click();showToast('Exported!');
 }
 
-// MEMBERS
 function renderMembers(){
   const members=getMembers(),receipts=getReceipts();
   document.getElementById('members-grid').innerHTML=members.map(m=>{
@@ -1223,7 +1216,6 @@ async function deleteMember(id){
   renderMembers();showToast('Deleted.');
 }
 
-// REPORTS
 function renderReports(){
   const receipts=getReceipts(),members=getMembers();
   const today=new Date().toISOString().split('T')[0];
@@ -1246,7 +1238,6 @@ function renderReports(){
     </tr>`;}).join('');
 }
 
-// MY RECEIPTS
 function renderMyReceipts(){
   const receipts=getReceipts().filter(r=>r.memberId===currentUser.id);
   const total=receipts.reduce((s,r)=>s+Number(r.amount),0);
@@ -1275,7 +1266,6 @@ function renderMyReceipts(){
     </tr>`;}).join('');
 }
 
-// SETTINGS
 function renderSettings(){
   const sig=getSig();
   document.getElementById('sig-preview-wrap').classList.toggle('hidden',!sig);
@@ -1305,7 +1295,6 @@ async function clearAllData(){
   if(!ok)return;ls_set(RECEIPTS_KEY,[]);ls_set(COUNTER_KEY,1);showToast('All receipts cleared.');
 }
 
-// MODALS
 function openModal(id){document.getElementById(id).classList.remove('hidden');}
 function closeModal(id){document.getElementById(id).classList.add('hidden');}
 let _cr=null;
@@ -1330,14 +1319,12 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape')document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));
 });
 
-// TOAST
 let _tt;
 function showToast(msg){
   const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');
   clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// NUMBER TO WORDS
 function n2w(n){
   if(n===0)return'Zero';
   const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
@@ -1353,7 +1340,6 @@ function n2w(n){
 }
 
 if(!ls_get(MEMBERS_KEY))initDefaultMembers();
-
 </script>
 </body>
 </html>
