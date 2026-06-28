@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZYRON Organization - Money Receipt Management System</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -563,8 +565,23 @@ const MEMBER_PAGES=new Set(['dashboard','my-receipts','member-directory','member
 
 let currentUser=null,currentViewReceipt=null,currentPendingReceipt=null,editingMemberId=null,receiptPage=1;
 
+const firebaseConfig={
+  apiKey:"AIzaSyDrcxOeeedIIZSFuZlUT712hdRaj5gmiVY",
+  authDomain:"zyron-org.firebaseapp.com",
+  databaseURL:"https://zyron-org-default-rtdb.firebaseio.com",
+  projectId:"zyron-org",
+  storageBucket:"zyron-org.firebasestorage.app",
+  messagingSenderId:"190313828668",
+  appId:"1:190313828668:web:a92421256ac41f5052ce39"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
 const ls_get=k=>{try{return JSON.parse(localStorage.getItem(k));}catch{return null;}};
-const ls_set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const ls_set=(k,v)=>{
+  localStorage.setItem(k,JSON.stringify(v));
+  db.ref(k).set(v);
+};
 
 function getAdminCreds(){return ls_get(ADMIN_KEY)||{username:'admin',password:'zyron2024'};}
 function getMembers(){return ls_get(MEMBERS_KEY)||initDefaultMembers();}
@@ -1457,7 +1474,24 @@ function n2w(n){
   return c(Math.floor(n));
 }
 
-if(!ls_get(MEMBERS_KEY))initDefaultMembers();
+db.ref('/').once('value').then(snapshot=>{
+  const data=snapshot.val();
+  if(data){
+    Object.keys(data).forEach(k=>{
+      localStorage.setItem(k,JSON.stringify(data[k]));
+    });
+  }
+  if(!ls_get(MEMBERS_KEY))initDefaultMembers();
+});
+
+db.ref('/').on('value',snapshot=>{
+  const data=snapshot.val();
+  if(data){
+    Object.keys(data).forEach(k=>{
+      localStorage.setItem(k,JSON.stringify(data[k]));
+    });
+  }
+});
 </script>
 </body>
 </html>
