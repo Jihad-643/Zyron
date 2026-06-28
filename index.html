@@ -83,7 +83,7 @@
   @media (max-width: 768px) {
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
-    .main-content { margin-left: 0 !important; }
+    .main-content { margin-left: 0 !important; padding-top: 4rem !important; }
   }
 
   #toast { transition: opacity .3s, transform .3s; }
@@ -142,15 +142,14 @@
 <!-- ==================== MAIN APP ==================== -->
 <div id="app" class="hidden">
   <aside class="sidebar fixed left-0 top-0 bottom-0 w-60 bg-ink border-r border-brass/20 flex flex-col z-[100]" id="sidebar">
-    <div class="flex items-center gap-3 px-5 py-4 border-b border-brass/20">
-      <div class="flex justify-center mb-0">
-        <img src="Adobe Express - file.png" alt="ZYRON Logo" class="w-48 h-48 object-contain">
-      </div>
-      <div>
-        <div class="font-display font-bold text-base text-brass leading-tight">ZYRON</div>
-        <div class="font-mono text-[10px] text-slatemuted tracking-wide">Organization</div>
-      </div>
-    </div>
+    <div class="flex flex-col items-center gap-1.5 px-5 py-4 border-b border-brass/20">
+  <img src="Adobe Express - file.png" alt="ZYRON Logo" class="w-30 h-30 object-contain">
+  <div class="text-center">
+    <div class="font-display  font-bold text-2xl text-brass leading-tight ">ZYRON</div>
+    <div class="font-mono  text-[15px] text-slatemuted tracking-wide">Organization</div>
+    <div class=" text-[10px] text-start py-4 font-bold "> Unity • Savings • Investment • Growth</div>
+  </div>
+</div>
     <nav class="flex-1 py-4 overflow-y-auto" id="sidebar-nav"></nav>
     <div class="flex items-center gap-2.5 px-5 py-3.5 border-t border-brass/20">
       <div class="w-[34px] h-[34px] rounded-full bg-brass text-midnight flex items-center justify-center font-bold text-sm flex-shrink-0" id="sidebar-avatar">A</div>
@@ -284,7 +283,7 @@
         </div>
 
         <div class="flex gap-2.5 flex-wrap mt-6">
-          <button onclick="saveReceipt()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128190; Save Receipt</button>
+          <button onclick="saveReceipt()" id="save-receipt-btn" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128190; Save Receipt</button>
           <button onclick="previewReceipt()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128065;&#65039; Preview</button>
           <button onclick="clearReceiptForm()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128260; Clear</button>
         </div>
@@ -453,6 +452,13 @@
         <div class="font-display font-bold text-2xl text-brass">Settings</div>
         <div class="text-[13px] text-slatemuted mt-0.5">Change your password</div>
       </div>
+      <div class="bg-ink border border-brass/20 rounded-xl p-6 max-w-lg mb-5">
+        <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Profile Photo</div>
+        <div id="ms-photo-preview-wrap" class="hidden mb-3.5">
+          <img id="ms-photo-preview" src="" class="w-20 h-20 rounded-full object-cover">
+        </div>
+        <input type="file" id="ms-photo" accept="image/*" onchange="handleSelfPhotoUpload(event)" class="w-full text-sm text-slatemuted">
+      </div>
       <div class="bg-ink border border-brass/20 rounded-xl p-6 max-w-lg">
         <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Change Password</div>
         <div class="space-y-3.5">
@@ -476,6 +482,27 @@
   </main>
 </div>
 
+<!-- COMMITTEE MODAL -->
+<div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="committee-modal">
+  <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-sm shadow-2xl">
+    <div class="font-display font-bold text-lg text-brass mb-4">Edit Committee Member</div>
+    <div class="space-y-3.5">
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Full Name</label>
+        <input type="text" id="cm-name" placeholder="Full name" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+      </div>
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Role</label>
+        <input type="text" id="cm-role" placeholder="e.g. President" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+      </div>
+    </div>
+    <input type="hidden" id="cm-edit-idx">
+    <div class="flex gap-3 justify-end mt-5">
+      <button onclick="closeModal('committee-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Cancel</button>
+      <button onclick="saveCommitteeMember()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Save</button>
+    </div>
+  </div>
+</div>
 <!-- CONFIRM MODAL -->
 <div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="confirm-modal">
   <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-sm text-center shadow-2xl">
@@ -526,6 +553,13 @@
         <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Address</label>
         <input type="text" id="m-address" placeholder="Address" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
+      <div class="md:col-span-2">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Profile Photo</label>
+        <div id="m-photo-preview-wrap" class="hidden mb-2.5">
+          <img id="m-photo-preview" src="" class="w-16 h-16 rounded-full object-cover border border-brass/30">
+        </div>
+        <input type="file" id="m-photo" accept="image/*" onchange="handleMemberPhotoUpload(event)" class="w-full text-sm text-slatemuted">
+      </div>
     </div>
     <div id="m-pass-section" class="hidden">
       <hr class="border-brass/20 my-4">
@@ -533,7 +567,11 @@
         <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Reset Login Password</label>
         <input type="text" id="m-password" placeholder="Leave blank to keep current" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
-      <div class="text-slatemuted text-[13px] mt-1.5">Login ID: <span id="m-pass-id" class="text-brass font-bold"></span></div>
+      <div class="mt-3">
+  <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Change Login ID</label>
+  <input type="text" id="m-new-id" placeholder="Leave blank to keep current" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+  <div class="text-slatemuted text-[13px] mt-1.5">Current ID: <span id="m-pass-id" class="text-brass font-bold"></span></div>
+</div>
     </div>
     <input type="hidden" id="m-edit-id">
     <div class="flex gap-3 justify-end mt-4">
@@ -563,7 +601,7 @@ const COLORS=['#C9A227','#4FAE8E','#6495ed','#a777e3','#D6573F','#52b0e0','#e052
 const ADMIN_PAGES=new Set(['dashboard','new-receipt','receipts','members','reports','settings','committee']);
 const MEMBER_PAGES=new Set(['dashboard','my-receipts','member-directory','member-settings','committee']);
 
-let currentUser=null,currentViewReceipt=null,currentPendingReceipt=null,editingMemberId=null,receiptPage=1;
+let currentUser=null,currentViewReceipt=null,currentPendingReceipt=null,editingMemberId=null,receiptPage=1,editingReceiptId=null;
 const firebaseConfig={
   apiKey:"AIzaSyDrcxOeeedIIZSFuZlUT712hdRaj5gmiVY",
   authDomain:"zyron-org.firebaseapp.com",
@@ -600,7 +638,7 @@ function initDefaultMembers(){
   const members=list.map((m,i)=>({
     id:`ZY-${String(i+1).padStart(3,'0')}`,name:m.name,role:m.role,
     phone:'',email:'',address:'',color:COLORS[i%COLORS.length],
-    password:'zyron123',joinDate:'2024-01-01'
+    password:'zyron123',joinDate:'2024-01-01',photo:''
   }));
   ls_set(MEMBERS_KEY,members);
   return members;
@@ -659,7 +697,13 @@ async function logout(){
   switchAuthTab('admin');
 }
 function updateSidebarUser(){
-  document.getElementById('sidebar-avatar').textContent=currentUser.name[0].toUpperCase();
+  const m = getMembers().find(x=>x.id===currentUser.id);
+  const avatarEl = document.getElementById('sidebar-avatar');
+  if(currentUser.type==='member' && m && m.photo){
+    avatarEl.innerHTML = `<img src="${m.photo}" class="w-full h-full rounded-full object-cover">`;
+  } else {
+    avatarEl.textContent = currentUser.name[0].toUpperCase();
+  }
   document.getElementById('sidebar-username').textContent=currentUser.name;
   document.getElementById('sidebar-role').textContent=currentUser.role;
 }
@@ -721,9 +765,17 @@ function loadPage(p){
   if(p==='member-settings')renderMemberSettings();
   if(p==='committee')renderCommittee();
 }
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
-function closeSidebar(){document.getElementById('sidebar').classList.remove('open');}
-
+function toggleSidebar(){
+  const sidebar = document.getElementById('sidebar');
+  const isOpen = sidebar.classList.toggle('open');
+  const hamburger = document.querySelector('.hamburger');
+  if(hamburger) hamburger.innerHTML = isOpen ? '&#10005;' : '&#9776;';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  const hamburger = document.querySelector('.hamburger');
+  if(hamburger) hamburger.innerHTML = '&#9776;';
+}
 function statCard(icon,label,value,sub){
   return `<div class="bg-ink border border-brass/20 rounded-xl p-5">
     <div class="text-2xl mb-2.5">${icon}</div>
@@ -936,17 +988,65 @@ function onPurposeChange(){
   document.getElementById('registration-fee-section').classList.toggle('hidden',isMonthly);
   document.getElementById('rcpt-year-wrap').classList.toggle('hidden',!isMonthly);
 }
+function editReceipt(id){
+  const r=getReceipts().find(x=>x.id===id);
+  if(!r)return;
+  if(currentUser.type!=='admin'){showToast('Admin only.');return;}
+  editingReceiptId=id;
+  navigate('new-receipt');
+
+  const members=getMembers();
+  const sel=document.getElementById('rcpt-member');
+  sel.innerHTML='<option value="">-- Select Member --</option>'+members.map(m=>`<option value="${m.id}">${m.name} (${m.id})</option>`).join('');
+
+  document.getElementById('rcpt-no').value=r.receiptNo;
+  document.getElementById('rcpt-date').value=r.date;
+  document.getElementById('rcpt-member').value=r.memberId;
+  document.getElementById('rcpt-member-id').value=r.memberId;
+  document.getElementById('rcpt-method').value=r.method;
+  document.getElementById('rcpt-purpose').value=r.purpose;
+  document.getElementById('rcpt-by').value=r.receivedBy;
+  document.getElementById('rcpt-notes').value=r.notes||'';
+  document.getElementById('rcpt-year').value=r.year||new Date().getFullYear();
+  onPurposeChange();
+
+  if(r.purpose==='Monthly Fee'){
+    selectedMonths={};
+    buildMonthCheckboxGrid();
+    if(r.months&&r.months.length){
+      r.months.forEach(m=>{
+        const idx=MONTHS.indexOf(m);
+        if(idx===-1)return;
+        const amt=(r.monthAmounts&&r.monthAmounts[m])?r.monthAmounts[m]:500;
+        selectedMonths[m]=amt;
+        document.getElementById('mcb-item-'+idx).classList.add('selected');
+        document.getElementById('mcb-check-'+idx).innerHTML='&#10003;';
+        document.getElementById('mcb-amt-wrap-'+idx).classList.remove('hidden');
+        document.getElementById('mcb-amt-'+idx).value=amt;
+      });
+    }
+    updateMonthTotal();updateMonthPills();
+  }else{
+    document.getElementById('rcpt-amount-single').value=r.amount;
+    updateSingleTotal();
+  }
+  document.getElementById('save-receipt-btn').innerHTML='&#9999;&#65039; Update Receipt';
+  showToast('&#9999;&#65039; Editing receipt '+r.receiptNo);
+}
 function initNewReceipt(){
   const members=getMembers();
   const sel=document.getElementById('rcpt-member');
   sel.innerHTML='<option value="">-- Select Member --</option>'+members.map(m=>`<option value="${m.id}">${m.name} (${m.id})</option>`).join('');
-  document.getElementById('rcpt-no').value=`ZY-RCP-${String(getCounter()).padStart(4,'0')}`;
+  buildMonthCheckboxGrid();
+  if(editingReceiptId){
+    return;
+  }
+  document.getElementById('rcpt-no').value=`ZY-RCP-${String(getCounter()-1).padStart(4,'0')}`;
   document.getElementById('rcpt-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('rcpt-member-id').value='';
   document.getElementById('rcpt-year').value=new Date().getFullYear();
   document.getElementById('rcpt-purpose').value='Monthly Fee';
   document.getElementById('rcpt-method').value='Cash';
-  buildMonthCheckboxGrid();
   onPurposeChange();
 }
 function onMemberSelect(){document.getElementById('rcpt-member-id').value=document.getElementById('rcpt-member').value;}
@@ -988,6 +1088,25 @@ function saveReceipt(){
   const err=validateReceipt(d);
   if(err){showToast('&#9888; '+err);return;}
   const receipts=getReceipts();
+  if(editingReceiptId){
+    const idx=receipts.findIndex(r=>r.id===editingReceiptId);
+    if(idx!==-1){
+      receipts[idx]={
+        ...receipts[idx],
+        date:d.date,memberId:d.memberId,memberName:d.memberName,memberRole:d.memberRole,
+        amount:d.amount,method:d.method,purpose:d.purpose,
+        months:d.months,monthAmounts:d.monthAmounts,year:d.year,
+        receivedBy:d.receivedBy,notes:d.notes
+      };
+      ls_set(RECEIPTS_KEY,receipts);
+      showToast('&#9989; Receipt updated!');
+    }
+    editingReceiptId=null;
+    clearReceiptForm();
+    initNewReceipt();
+    navigate('receipts');
+    return;
+  }
   const n = incCounter();
   const receiptNo = `ZY-RCP-${String(n).padStart(4,'0')}`;
   document.getElementById('rcpt-no').value = receiptNo;
@@ -1005,6 +1124,10 @@ function saveReceipt(){
 }
 
 function clearReceiptForm(){
+  editingReceiptId=null;
+  const btn=document.getElementById('save-receipt-btn');
+  if(btn) btn.innerHTML='&#128190; Save Receipt';
+  document.getElementById('rcpt-no').value=`ZY-RCP-${String(getCounter()).padStart(4,'0')}`;
   document.getElementById('rcpt-amount-single').value='';
   document.getElementById('single-total-display').textContent='\u09F3 0';
   document.getElementById('rcpt-notes').value='';
@@ -1163,6 +1286,7 @@ function renderReceiptsTable(){
       <td class="px-4 py-3"><div class="flex gap-1.5 flex-wrap">
         <button class="border border-brass text-brass hover:bg-brass/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="viewReceipt('${r.id}')">View</button>
         <button class="bg-brass text-midnight px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-brasslight transition-colors" onclick="downloadReceiptPDF('${r.id}')">PDF</button>
+        ${currentUser.type==='admin'?`<button class="border border-[#6495ed] text-[#6495ed] hover:bg-[#6495ed]/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editReceipt('${r.id}')">Edit</button>`:''}
         ${currentUser.type==='admin'?`<button class="bg-ember text-white px-2.5 py-1 rounded-md text-[11px] font-semibold hover:bg-ember/80 transition-colors" onclick="deleteReceipt('${r.id}')">Del</button>`:''}
       </div></td>
     </tr>`;}).join('');
@@ -1212,7 +1336,7 @@ function renderMembers(){
   document.getElementById('members-grid').innerHTML=members.map(m=>{
     const tot=receipts.filter(r=>r.memberId===m.id).reduce((s,r)=>s+Number(r.amount),0);
     return`<div class="bg-ink2 border border-brass/20 hover:border-brass rounded-xl p-5 text-center transition-colors">
-      <div class="w-[60px] h-[60px] rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3 text-midnight" style="background:${m.color}">${m.name[0].toUpperCase()}</div>
+      ${m.photo?`<img src="${m.photo}" class="w-[60px] h-[60px] rounded-full object-cover mx-auto mb-3">`:`<div class="w-[60px] h-[60px] rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3 text-midnight" style="background:${m.color}">${m.name[0].toUpperCase()}</div>`}
       <div class="text-[15px] font-bold text-slate-100">${m.name}</div>
       <div class="text-xs text-brass mt-1 mb-1.5">${m.role}</div>
       <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
@@ -1232,9 +1356,9 @@ function showMemberPass(id){
 }
 function renderMemberDirectory(){
   const members=getMembers();
-  document.getElementById('member-directory-grid').innerHTML=members.map(m=>`
+ document.getElementById('member-directory-grid').innerHTML=members.map(m=>`
     <div class="bg-ink2 border border-brass/20 hover:border-brass rounded-xl p-5 text-center transition-colors">
-      <div class="w-[60px] h-[60px] rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3 text-midnight" style="background:${m.color}">${m.name[0].toUpperCase()}</div>
+      ${m.photo?`<img src="${m.photo}" class="w-[60px] h-[60px] rounded-full object-cover mx-auto mb-3">`:`<div class="w-[60px] h-[60px] rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3 text-midnight" style="background:${m.color}">${m.name[0].toUpperCase()}</div>`}
       <div class="text-[15px] font-bold text-slate-100">${m.name}</div>
       <div class="text-xs text-brass mt-1 mb-1.5">${m.role}</div>
       <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
@@ -1248,24 +1372,88 @@ function generateMemberId(members) {
   const max = nums.length ? Math.max(...nums) : 0;
   return `ZY-${String(max + 1).padStart(3, '0')}`;
 }
+let tempMemberPhoto = null;
+
+function compressImage(dataUrl, maxSize, cb){
+  const img = new Image();
+  img.onload = function(){
+    let w = img.width, h = img.height;
+    if(w > h){ if(w > maxSize){ h = Math.round(h * maxSize / w); w = maxSize; } }
+    else{ if(h > maxSize){ w = Math.round(w * maxSize / h); h = maxSize; } }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    cb(canvas.toDataURL('image/jpeg', 0.8));
+  };
+  img.src = dataUrl;
+}
+
+function handleMemberPhotoUpload(e){
+  const f = e.target.files[0];
+  if(!f || !f.type.startsWith('image/')){ showToast('Image only.'); return; }
+  const r = new FileReader();
+  r.onload = ev => {
+    compressImage(ev.target.result, 200, compressed => {
+      tempMemberPhoto = compressed;
+      document.getElementById('m-photo-preview').src = compressed;
+      document.getElementById('m-photo-preview-wrap').classList.remove('hidden');
+    });
+  };
+  r.readAsDataURL(f);
+}
+
+function handleSelfPhotoUpload(e){
+  const f = e.target.files[0];
+  if(!f || !f.type.startsWith('image/')){ showToast('Image only.'); return; }
+  const r = new FileReader();
+  r.onload = ev => {
+    compressImage(ev.target.result, 200, compressed => {
+      const members = getMembers();
+      const idx = members.findIndex(m=>m.id===currentUser.id);
+      if(idx===-1) return;
+      members[idx].photo = compressed;
+      ls_set(MEMBERS_KEY, members);
+      document.getElementById('ms-photo-preview').src = compressed;
+      document.getElementById('ms-photo-preview-wrap').classList.remove('hidden');
+      updateSidebarUser();
+      showToast('✅ Photo updated!');
+      e.target.value='';
+    });
+  };
+  r.readAsDataURL(f);
+}
 function openAddMemberModal(){
   editingMemberId=null;
+  tempMemberPhoto=null;
   document.getElementById('member-modal-title').textContent='Add New Member';
   ['m-name','m-role','m-phone','m-email','m-address','m-password'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('m-edit-id').value='';
   document.getElementById('m-pass-section').classList.add('hidden');
+  document.getElementById('m-photo-preview-wrap').classList.add('hidden');
+  document.getElementById('m-photo').value='';
+  document.getElementById('m-new-id').value='';
   openModal('member-modal');
 }
 function editMember(id){
   const m=getMembers().find(x=>x.id===id);if(!m)return;
   editingMemberId=id;
+  tempMemberPhoto = m.photo || null;
   document.getElementById('member-modal-title').textContent='Edit Member';
   document.getElementById('m-name').value=m.name;document.getElementById('m-role').value=m.role;
   document.getElementById('m-phone').value=m.phone||'';document.getElementById('m-email').value=m.email||'';
   document.getElementById('m-address').value=m.address||'';document.getElementById('m-password').value='';
   document.getElementById('m-pass-id').textContent=m.id;
   document.getElementById('m-pass-section').classList.remove('hidden');
-  document.getElementById('m-edit-id').value=id;openModal('member-modal');
+  document.getElementById('m-edit-id').value=id;
+  document.getElementById('m-photo').value='';
+  document.getElementById('m-new-id').value='';
+  if(m.photo){
+    document.getElementById('m-photo-preview').src=m.photo;
+    document.getElementById('m-photo-preview-wrap').classList.remove('hidden');
+  } else {
+    document.getElementById('m-photo-preview-wrap').classList.add('hidden');
+  }
+  openModal('member-modal');
 }
 function saveMember(){
   const name=document.getElementById('m-name').value.trim();
@@ -1277,19 +1465,31 @@ function saveMember(){
     if(idx!==-1){
       const np=document.getElementById('m-password').value.trim();
       if(np&&np.length<4){showToast('Password min 4 chars.');return;}
-      members[idx]={...members[idx],name,role,phone:document.getElementById('m-phone').value,email:document.getElementById('m-email').value,address:document.getElementById('m-address').value};
+      members[idx]={...members[idx],name,role,phone:document.getElementById('m-phone').value,email:document.getElementById('m-email').value,address:document.getElementById('m-address').value,photo:tempMemberPhoto||members[idx].photo||''};
       if(np)members[idx].password=np;
+      const newId=document.getElementById('m-new-id').value.trim().toUpperCase();
+if(newId&&newId!==members[idx].id){
+  const duplicate=members.some((x,i)=>x.id===newId&&i!==idx);
+  if(duplicate){showToast('This ID already exists.');return;}
+  members[idx].id=newId;
+}
     }
     showToast('Member updated!');
   }else{
     const newId = generateMemberId(members);
-    members.push({id:newId,name,role,phone:document.getElementById('m-phone').value,email:document.getElementById('m-email').value,address:document.getElementById('m-address').value,color:COLORS[members.length%COLORS.length],password:'zyron123',joinDate:new Date().toISOString().split('T')[0]});
+    members.push({id:newId,name,role,phone:document.getElementById('m-phone').value,email:document.getElementById('m-email').value,address:document.getElementById('m-address').value,color:COLORS[members.length%COLORS.length],password:'zyron123',joinDate:new Date().toISOString().split('T')[0],photo:tempMemberPhoto||''});
     showToast(`Added! ID: ${newId}`);
   }
   ls_set(MEMBERS_KEY,members);closeModal('member-modal');renderMembers();
 }
 async function deleteMember(id){
-  const ok=await confirmDialog('Delete Member','Delete this member? Their receipts remain.','Delete','ember');
+  const m=getMembers().find(x=>x.id===id);
+  if(!m)return;
+  const receiptCount=getReceipts().filter(r=>r.memberId===id).length;
+  const msg=receiptCount>0
+    ?`Delete ${m.name}? They have ${receiptCount} receipt(s) — those will remain.`
+    :`Delete ${m.name}?`;
+  const ok=await confirmDialog('Delete Member',msg,'Delete','ember');
   if(!ok)return;
   ls_set(MEMBERS_KEY,getMembers().filter(m=>m.id!==id));
   renderMembers();showToast('Deleted.');
@@ -1352,7 +1552,15 @@ function renderSettings(){
 }
 function handleSigUpload(e){
   const f=e.target.files[0];if(!f||!f.type.startsWith('image/')){showToast('Image only.');return;}
-  const r=new FileReader();r.onload=ev=>{ls_set(SIG_KEY,ev.target.result);renderSettings();showToast('Signature uploaded!');e.target.value='';};
+  const r=new FileReader();
+  r.onload=ev=>{
+    compressImage(ev.target.result, 400, compressed=>{
+      ls_set(SIG_KEY, compressed);
+      renderSettings();
+      showToast('Signature uploaded!');
+      e.target.value='';
+    });
+  };
   r.readAsDataURL(f);
 }
 async function removeSig(){
@@ -1372,18 +1580,22 @@ function changeAdminPass(){
 
 const COMMITTEE_KEY='zyron_committee';
 function getCommittee(){
-  return ls_get(COMMITTEE_KEY)||[
-    {name:'Rakib Bin Rashed',role:'President',color:'#C9A227'},
-    {name:'Rakibul Islam Fahim',role:'General Secretary',color:'#4FAE8E'},
-    {name:'Jihadul Islam',role:'Treasurer',color:'#6495ed'},
+  const stored=ls_get(COMMITTEE_KEY);
+  if(stored&&stored[0]&&stored[0].memberId)return stored;
+  const fresh=[
+    {name:'Rakib Bin Rashed',role:'President',color:'#C9A227',memberId:'ZY-006'},
+    {name:'Rakibul Islam Fahim',role:'General Secretary',color:'#4FAE8E',memberId:'ZY-001'},
+    {name:'Jihadul Islam',role:'Treasurer',color:'#6495ed',memberId:'ZY-005'},
   ];
+  ls_set(COMMITTEE_KEY,fresh);
+  return fresh;
 }
 function renderCommittee(){
   const committee=getCommittee();
   const isAdmin=currentUser.type==='admin';
   document.getElementById('committee-grid').innerHTML=committee.map((m,i)=>`
     <div class="bg-ink border border-brass/20 rounded-xl p-6 text-center">
-      <div class="w-[70px] h-[70px] rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4 text-midnight" style="background:${m.color}">${m.name[0]}</div>
+     ${(()=>{const mem=getMembers().find(x=>x.id===m.memberId);return mem&&mem.photo?`<img src="${mem.photo}" class="w-[70px] h-[70px] rounded-full object-cover mx-auto mb-4">`:`<div class="w-[70px] h-[70px] rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4 text-midnight" style="background:${m.color}">${m.name[0]}</div>`;})()}
       <div class="font-display font-bold text-lg text-slate-100">${m.name}</div>
       <div class="text-sm text-brass mt-1.5 font-semibold">${m.role}</div>
       ${isAdmin?`<button class="mt-3 border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editCommitteeMember(${i})">✏️ Edit</button>`:''}
@@ -1392,12 +1604,20 @@ function renderCommittee(){
 function editCommitteeMember(i){
   const committee=getCommittee();
   const m=committee[i];
-  const name=prompt('Name:',m.name);
-  if(name===null)return;
-  const role=prompt('Role:',m.role);
-  if(role===null)return;
-  committee[i]={...m,name:name.trim()||m.name,role:role.trim()||m.role};
+  document.getElementById('cm-edit-idx').value=i;
+  document.getElementById('cm-name').value=m.name;
+  document.getElementById('cm-role').value=m.role;
+  openModal('committee-modal');
+}
+function saveCommitteeMember(){
+  const i=parseInt(document.getElementById('cm-edit-idx').value);
+  const name=document.getElementById('cm-name').value.trim();
+  const role=document.getElementById('cm-role').value.trim();
+  if(!name){showToast('Name required.');return;}
+  const committee=getCommittee();
+  committee[i]={...committee[i],name,role};
   ls_set(COMMITTEE_KEY,committee);
+  closeModal('committee-modal');
   renderCommittee();
   showToast('&#9989; Committee updated!');
 }
@@ -1407,6 +1627,13 @@ function renderMemberSettings(){
     const el=document.getElementById(id);
     if(el)el.value='';
   });
+  const m = getMembers().find(x=>x.id===currentUser.id);
+  if(m && m.photo){
+    document.getElementById('ms-photo-preview').src = m.photo;
+    document.getElementById('ms-photo-preview-wrap').classList.remove('hidden');
+  } else {
+    document.getElementById('ms-photo-preview-wrap').classList.add('hidden');
+  }
 }
 function changeMemberPass(){
   const c=document.getElementById('m-curr-pass').value.trim();
@@ -1489,14 +1716,6 @@ if(currentUser){
   updateSidebarUser();
   setTimeout(()=>navigate('dashboard'),50);
 }
-db.ref('/').on('value',snapshot=>{
-  const data=snapshot.val();
-  if(data){
-    Object.keys(data).forEach(k=>{
-      localStorage.setItem(k,JSON.stringify(data[k]));
-    });
-  }
-});
 </script>
 </body>
 </html>
