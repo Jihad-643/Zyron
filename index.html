@@ -90,6 +90,249 @@
 
   #toast { transition: opacity .3s, transform .3s; }
   #toast.show { opacity: 1 !important; transform: translateY(0) !important; }
+  /* ===== PAGE TRANSITION ===== */
+  .page.active {
+    animation: pageIn .35s ease;
+  }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== CARD HOVER ===== */
+  .bg-ink, .bg-ink2 {
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  #dashboard-stats > div:hover,
+  #report-stats > div:hover,
+  #members-grid > div:hover,
+  #member-directory-grid > div:hover,
+  #committee-grid > div:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(201,162,39,0.12);
+  }
+
+  /* ===== STAGGER CARD ENTRANCE ===== */
+  #dashboard-stats > div,
+  #members-grid > div,
+  #member-directory-grid > div,
+  #committee-grid > div,
+  #report-stats > div {
+    animation: cardIn .4s ease backwards;
+  }
+  #dashboard-stats > div:nth-child(1), #members-grid > div:nth-child(1) { animation-delay: .05s; }
+  #dashboard-stats > div:nth-child(2), #members-grid > div:nth-child(2) { animation-delay: .1s; }
+  #dashboard-stats > div:nth-child(3), #members-grid > div:nth-child(3) { animation-delay: .15s; }
+  #dashboard-stats > div:nth-child(4), #members-grid > div:nth-child(4) { animation-delay: .2s; }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(15px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ===== MODAL ANIMATION ===== */
+  .modal-overlay:not(.hidden) {
+    animation: overlayIn .25s ease;
+  }
+  .modal-overlay:not(.hidden) > div {
+    animation: modalPop .28s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(.92) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* ===== BUTTON FEEDBACK ===== */
+  button {
+    transition: transform .12s ease, box-shadow .12s ease, background-color .2s ease;
+  }
+  button:active {
+    transform: scale(.96);
+  }
+  .save-success {
+    animation: savePulse .3s ease;
+  }
+  @keyframes savePulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  /* ===== TOAST BOUNCE ===== */
+  #toast.show {
+    animation: toastBounce .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes toastBounce {
+    0%   { transform: translateY(20px) scale(.9); opacity: 0; }
+    60%  { transform: translateY(-4px) scale(1.02); }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  /* ===== MONTH CHECKBOX SELECT ===== */
+  .month-cb-item {
+    transition: all .18s ease, transform .15s ease;
+  }
+  .month-cb-item:hover {
+    transform: translateY(-2px);
+  }
+  .month-cb-item.selected {
+    animation: monthPop .25s ease;
+  }
+  @keyframes monthPop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+
+  /* ===== NAV ITEM HOVER SHIFT ===== */
+  .nav-item {
+    transition: all .2s ease;
+  }
+  .nav-item:hover {
+    padding-left: 22px;
+  }
+
+  /* ===== TABLE ROW FADE-IN ===== */
+  tbody tr {
+    animation: rowIn .3s ease;
+  }
+  @keyframes rowIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ===== AUTH LOGO FLOAT ===== */
+  #auth-screen img {
+    animation: logoFloat 3s ease-in-out infinite;
+  }
+  @keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  /* ===== HAMBURGER ROTATE ===== */
+  .hamburger {
+    transition: transform .25s ease, background .2s ease;
+  }
+  .hamburger:hover {
+    transform: rotate(90deg);
+  }
+
+  /* ===== AUTH TAB SLIDE ===== */
+  #admin-login-form, #user-login-form {
+    animation: formSlide .3s ease;
+  }
+  @keyframes formSlide {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  /* ===== PAGE TRANSITION ===== */
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+  animation: pageIn .35s ease;
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== CARD / STAT HOVER ===== */
+.bg-ink, .bg-ink2 {
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+#dashboard-stats > div:hover,
+#report-stats > div:hover,
+#members-grid > div:hover,
+#member-directory-grid > div:hover,
+#committee-grid > div:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(201,162,39,0.12);
+}
+
+/* ===== MODAL ANIMATION ===== */
+.modal-overlay {
+  transition: opacity .25s ease;
+}
+.modal-overlay:not(.hidden) {
+  animation: overlayIn .25s ease;
+}
+.modal-overlay:not(.hidden) > div {
+  animation: modalPop .28s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(.92) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ===== BUTTON FEEDBACK ===== */
+button {
+  transition: transform .12s ease, box-shadow .12s ease, background-color .2s ease;
+}
+button:active {
+  transform: scale(.96);
+}
+
+/* ===== TOAST SLIDE-IN ===== */
+#toast {
+  transition: opacity .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ===== MONTH CHECKBOX SELECT ===== */
+.month-cb-item {
+  transition: all .18s ease, transform .15s ease;
+}
+.month-cb-item:hover {
+  transform: translateY(-2px);
+}
+.month-cb-item.selected {
+  animation: monthPop .25s ease;
+}
+@keyframes monthPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+/* ===== NAV ITEM ===== */
+.nav-item {
+  transition: all .2s ease;
+}
+.nav-item:hover {
+  padding-left: 22px;
+}
+
+/* ===== SIDEBAR SLIDE (mobile) ===== */
+.sidebar {
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+
+/* ===== TABLE ROW FADE-IN ===== */
+tbody tr {
+  animation: rowIn .3s ease;
+}
+@keyframes rowIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ===== LOGO PULSE ON AUTH SCREEN ===== */
+#auth-screen img {
+  animation: logoFloat 3s ease-in-out infinite;
+}
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
 </style>
 </head>
 <body class="min-h-screen text-slate-100 bg-midnight">
@@ -442,7 +685,7 @@
 <div class="page" id="page-committee">
   <div class="mb-6 pb-4 border-b border-brass/20">
     <div class="font-display font-bold text-2xl text-brass">Committee</div>
-    <div class="text-[13px] text-slatemuted mt-0.5">ZYRON Organization — নেতৃত্ব</div>
+    <div class="text-[13px] text-slatemuted mt-0.5">ZYRON Organization — Leader</div>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="committee-grid"></div>
 </div>
@@ -486,7 +729,7 @@
 <!-- COMMITTEE MODAL -->
 <div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="committee-modal">
   <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-sm shadow-2xl">
-    <div class="font-display font-bold text-lg text-brass mb-4">&#127775; Committee তে যোগ করো</div>
+    <div class="font-display font-bold text-lg text-brass mb-4">&#127775; Add to Committee</div>
     <div class="space-y-3.5">
       <div>
         <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Member</label>
@@ -796,6 +1039,19 @@ function closeSidebar(){
   const hamburger = document.querySelector('.hamburger');
   if(hamburger) hamburger.innerHTML = '&#9776;';
 }
+function animateNumber(el, finalValue, prefix='', duration=800){
+  const start = 0;
+  const startTime = performance.now();
+  function tick(now){
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = progress; // linear, equal speed throughout
+    const current = Math.round(start + (finalValue - start) * eased);
+    el.textContent = prefix + current.toLocaleString();
+    if(progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 function statCard(icon,label,value,sub){
   return `<div class="bg-ink border border-brass/20 rounded-xl p-5">
     <div class="text-2xl mb-2.5">${icon}</div>
@@ -833,7 +1089,16 @@ function renderDashboard(){
         statCard('&#129534;','My Receipts',myR.length,'Total')+
         statCard('&#128101;','Members',members.length,'In ZYRON');
     }
+        setTimeout(()=>{
+      document.querySelectorAll('#dashboard-stats .font-mono').forEach(el=>{
+        const text = el.textContent;
+        const num = parseInt(text.replace(/[^\d]/g,'')) || 0;
+        const prefix = text.match(/^[^\d]*/)[0];
+        animateNumber(el, num, prefix);
+      });
+    }, 50);
     renderMonthlySummary();
+    
     const currentYear=new Date().getFullYear();
 const currentMonth=MONTHS[new Date().getMonth()];
 if(currentUser.type==='admin'){
@@ -1769,7 +2034,7 @@ function renderCommittee(){
   const isAdmin=currentUser.type==='admin';
   const grid=document.getElementById('committee-grid');
   if(committee.length===0){
-    grid.innerHTML=`<div class="col-span-3 text-center text-slatemuted py-10">কোনো committee member assign করা হয়নি।<br>${isAdmin?'Members পেজ থেকে assign করো।':''}</div>`;
+    grid.innerHTML=`<div class="col-span-3 text-center text-slatemuted py-10">No committee members assigned yet.<br>${isAdmin?'Go to Members page to assign committee roles.':''}</div>`;
     return;
   }
   grid.innerHTML=committee.map((c,i)=>{
