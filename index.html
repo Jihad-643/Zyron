@@ -564,7 +564,6 @@ const ADMIN_PAGES=new Set(['dashboard','new-receipt','receipts','members','repor
 const MEMBER_PAGES=new Set(['dashboard','my-receipts','member-directory','member-settings','committee']);
 
 let currentUser=null,currentViewReceipt=null,currentPendingReceipt=null,editingMemberId=null,receiptPage=1;
-
 const firebaseConfig={
   apiKey:"AIzaSyDrcxOeeedIIZSFuZlUT712hdRaj5gmiVY",
   authDomain:"zyron-org.firebaseapp.com",
@@ -574,14 +573,11 @@ const firebaseConfig={
   messagingSenderId:"190313828668",
   appId:"1:190313828668:web:a92421256ac41f5052ce39"
 };
+const ls_get=k=>{try{return JSON.parse(localStorage.getItem(k));}catch{return null;}};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
-
-const ls_get=k=>{try{return JSON.parse(localStorage.getItem(k));}catch{return null;}};
-const ls_set=(k,v)=>{
-  localStorage.setItem(k,JSON.stringify(v));
-  db.ref(k).set(v);
-};
+const ls_set=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));db.ref(k).set(v);};
+currentUser=ls_get('zyron_session')||null;
 
 function getAdminCreds(){return ls_get(ADMIN_KEY)||{username:'admin',password:'zyron2024'};}
 function getMembers(){return ls_get(MEMBERS_KEY)||initDefaultMembers();}
@@ -643,6 +639,7 @@ function memberLogin(){
 function enterApp(){
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('app').classList.remove('hidden');
+  ls_set('zyron_session', currentUser);
   setupSidebar();
   updateSidebarUser();
   setTimeout(()=>navigate('dashboard'),50);
@@ -651,6 +648,7 @@ async function logout(){
   const ok=await confirmDialog('Logout','Logout from ZYRON?','Logout','ember');
   if(!ok)return;
   currentUser=null;
+  localStorage.removeItem('zyron_session');
   document.getElementById('auth-screen').style.display='flex';
   document.getElementById('app').classList.add('hidden');
   document.getElementById('admin-user').value='admin';
@@ -1484,6 +1482,13 @@ db.ref('/').once('value').then(snapshot=>{
   if(!ls_get(MEMBERS_KEY))initDefaultMembers();
 });
 
+if(currentUser){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').classList.remove('hidden');
+  setupSidebar();
+  updateSidebarUser();
+  setTimeout(()=>navigate('dashboard'),50);
+}
 db.ref('/').on('value',snapshot=>{
   const data=snapshot.val();
   if(data){
