@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1041,7 +1042,7 @@ function initNewReceipt(){
   if(editingReceiptId){
     return;
   }
-  document.getElementById('rcpt-no').value=`ZY-RCP-${String(getCounter()-1).padStart(4,'0')}`;
+  document.getElementById('rcpt-no').value=`ZY-RCP-${String(getCounter()).padStart(4,'0')}`;
   document.getElementById('rcpt-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('rcpt-member-id').value='';
   document.getElementById('rcpt-year').value=new Date().getFullYear();
@@ -1107,9 +1108,8 @@ function saveReceipt(){
     navigate('receipts');
     return;
   }
-  const n = incCounter();
-  const receiptNo = `ZY-RCP-${String(n).padStart(4,'0')}`;
-  document.getElementById('rcpt-no').value = receiptNo;
+  const receiptNo = `ZY-RCP-${String(getCounter()).padStart(4,'0')}`;
+  incCounter();
   receipts.push({
     id:`id_${Date.now()}`,receiptNo:receiptNo,
     date:d.date,memberId:d.memberId,memberName:d.memberName,memberRole:d.memberRole,
@@ -1467,11 +1467,17 @@ function saveMember(){
       if(np&&np.length<4){showToast('Password min 4 chars.');return;}
       members[idx]={...members[idx],name,role,phone:document.getElementById('m-phone').value,email:document.getElementById('m-email').value,address:document.getElementById('m-address').value,photo:tempMemberPhoto||members[idx].photo||''};
       if(np)members[idx].password=np;
-      const newId=document.getElementById('m-new-id').value.trim().toUpperCase();
+    const newId=document.getElementById('m-new-id').value.trim().toUpperCase();
 if(newId&&newId!==members[idx].id){
   const duplicate=members.some((x,i)=>x.id===newId&&i!==idx);
   if(duplicate){showToast('This ID already exists.');return;}
+  const oldId=members[idx].id;
   members[idx].id=newId;
+  const receipts=getReceipts();
+  receipts.forEach(r=>{
+    if(r.memberId===oldId)r.memberId=newId;
+  });
+  ls_set(RECEIPTS_KEY,receipts);
 }
     }
     showToast('Member updated!');
@@ -1676,7 +1682,15 @@ document.addEventListener('click',e=>{
   if(e.target.classList.contains('modal-overlay')&&e.target.id!=='confirm-modal')e.target.classList.add('hidden');
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));
+  if(e.key==='Escape'){
+    document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m=>{
+      if(m.id==='confirm-modal'){
+        confirmResolve(false);
+      }else{
+        m.classList.add('hidden');
+      }
+    });
+  }
 });
 
 let _tt;
