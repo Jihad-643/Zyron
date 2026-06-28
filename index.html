@@ -8,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -309,8 +310,8 @@
           <select id="filter-member" onchange="renderReceiptsTable()" class="flex-1 min-w-[160px] max-w-[260px] px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
             <option value="">All Members</option>
           </select>
-          <button onclick="exportCSV()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128228; Export CSV</button>
-        </div>
+<button onclick="exportCSV()" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-[13px] px-4 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#128228; Export CSV</button>
+<button onclick="bulkDownloadPDF()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-[13px] px-4 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">&#11015; Bulk PDF</button>        </div>
         <div class="overflow-x-auto rounded-lg border border-brass/15">
           <table class="w-full text-[13px] border-collapse">
             <thead class="bg-ink2">
@@ -421,8 +422,7 @@
         <div class="overflow-x-auto rounded-lg border border-brass/15">
           <table class="w-full text-[13px] border-collapse">
             <thead class="bg-ink2">
-              <tr><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Receipt #</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Amount</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Purpose</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Months</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Method</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Action</th></tr>
-            </thead>
+<tr><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15"><input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this)" class="w-4 h-4 accent-brass cursor-pointer"></th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Receipt #</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Member</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Amount</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Purpose</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Months</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Method</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Actions</th></tr>            </thead>
             <tbody id="my-receipts-table"></tbody>
           </table>
         </div>
@@ -486,21 +486,40 @@
 <!-- COMMITTEE MODAL -->
 <div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="committee-modal">
   <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-sm shadow-2xl">
-    <div class="font-display font-bold text-lg text-brass mb-4">Edit Committee Member</div>
+    <div class="font-display font-bold text-lg text-brass mb-4">&#127775; Committee তে যোগ করো</div>
     <div class="space-y-3.5">
       <div>
-        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Full Name</label>
-        <input type="text" id="cm-name" placeholder="Full name" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Member</label>
+        <div id="cm-member-preview" class="hidden flex items-center gap-3 mb-2 p-2.5 bg-ink2 rounded-lg">
+          <div id="cm-member-avatar" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-midnight flex-shrink-0"></div>
+          <div>
+            <div id="cm-member-name" class="text-sm font-bold text-slate-100"></div>
+            <div id="cm-member-id" class="text-[11px] text-slatemuted font-mono"></div>
+          </div>
+        </div>
       </div>
       <div>
-        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Role</label>
-        <input type="text" id="cm-role" placeholder="e.g. President" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Committee Role</label>
+        <select id="cm-role-select" onchange="onCommitteeRoleSelect()" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          <option value="President">President</option>
+          <option value="General Secretary">General Secretary</option>
+          <option value="Treasurer">Treasurer</option>
+          <option value="Vice President">Vice President</option>
+          <option value="Joint Secretary">Joint Secretary</option>
+          <option value="Organising Secretary">Organising Secretary</option>
+          <option value="Member">Member</option>
+          <option value="custom">Custom...</option>
+        </select>
+      </div>
+      <div id="cm-custom-role-wrap" class="hidden">
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Custom Role</label>
+        <input type="text" id="cm-custom-role" placeholder="e.g. Cultural Secretary" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
       </div>
     </div>
-    <input type="hidden" id="cm-edit-idx">
+    <input type="hidden" id="cm-member-id-val">
     <div class="flex gap-3 justify-end mt-5">
       <button onclick="closeModal('committee-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Cancel</button>
-      <button onclick="saveCommitteeMember()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Save</button>
+      <button onclick="saveCommitteeAssign()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">&#9989; Save</button>
     </div>
   </div>
 </div>
@@ -815,6 +834,42 @@ function renderDashboard(){
         statCard('&#128101;','Members',members.length,'In ZYRON');
     }
     renderMonthlySummary();
+    const currentYear=new Date().getFullYear();
+const currentMonth=MONTHS[new Date().getMonth()];
+if(currentUser.type==='admin'){
+  const dueMembers=members.filter(m=>{
+    const paid=new Set();
+    receipts.filter(r=>r.memberId===m.id&&r.purpose==='Monthly Fee'&&String(r.year)===String(currentYear)).forEach(r=>{
+      if(r.months)r.months.forEach(mo=>paid.add(mo));
+      else if(r.month)paid.add(r.month);
+    });
+    return!paid.has(currentMonth);
+  });
+  const dueSection=document.createElement('div');
+  dueSection.className='bg-ink border border-ember/30 rounded-xl p-6 mb-5';
+  dueSection.innerHTML=`
+    <div class="font-display font-bold text-base text-ember mb-4 pb-3 border-b border-ember/20">
+      ⚠️ ${currentMonth} ${currentYear} — বকেয়া Members (${dueMembers.length}জন)
+    </div>
+    ${dueMembers.length===0
+      ?'<div class="text-mint text-sm">✅ সবাই এই মাসের টাকা দিয়েছে!</div>'
+      :`<div class="flex flex-wrap gap-2">
+        ${dueMembers.map(m=>`
+          <div class="flex items-center gap-2 bg-ember/10 border border-ember/20 rounded-lg px-3 py-2">
+            ${m.photo
+              ?`<img src="${m.photo}" class="w-7 h-7 rounded-full object-cover">`
+              :`<div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-midnight flex-shrink-0" style="background:${m.color}">${m.name[0]}</div>`}
+            <div>
+              <div class="text-sm font-semibold text-slate-100">${m.name}</div>
+              <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
+            </div>
+          </div>`).join('')}
+      </div>`}`;
+  const dashboardEl=document.getElementById('page-dashboard');
+  const recentSection=dashboardEl.querySelector('.bg-ink.border.border-brass\\/20.rounded-xl.p-6');
+  if(recentSection)dashboardEl.querySelector('main, .main-content, #page-dashboard').insertBefore(dueSection,recentSection);
+  statsEl.parentNode.insertBefore(dueSection,statsEl.nextSibling.nextSibling);
+}
     const src=currentUser.type==='admin'?receipts:receipts.filter(r=>r.memberId===currentUser.id);
     const recent=[...src].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,8);
     const tbody=document.getElementById('recent-receipts-table');
@@ -1198,15 +1253,33 @@ function buildReceiptHTML(r){
 function downloadPDF(){if(currentPendingReceipt){generatePDF(currentPendingReceipt);closeModal('preview-modal');}}
 function downloadViewedPDF(){if(currentViewReceipt){generatePDF(currentViewReceipt);closeModal('view-receipt-modal');}}
 
-function generatePDF(r){
+async function getLogoBase64(){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      canvas.width=img.width;
+      canvas.height=img.height;
+      canvas.getContext('2d').drawImage(img,0,0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror=function(){resolve(null);};
+    img.src='Adobe Express - file.png';
+  });
+}
+async function generatePDF(r){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a5'});
   const W=148,M=14;let y=14;
-  doc.setFillColor(11,18,32);doc.rect(0,0,W,30,'F');
-  doc.setFont('times','bold');doc.setFontSize(16);doc.setTextColor(201,162,39);
-  doc.text('ZYRON ORGANIZATION',W/2,13,{align:'center'});
-  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(200,200,200);doc.text('Official Money Receipt',W/2,20,{align:'center'});
-  doc.setFontSize(7);doc.text(`Receipt No: ${r.receiptNo}  |  Date: ${r.date}`,W/2,27,{align:'center'});
+  const logoBase64=await getLogoBase64();
+  doc.setFillColor(11,18,32);doc.rect(0,0,W,38,'F');
+  if(logoBase64){try{doc.addImage(logoBase64,'PNG',W/2-8,1,16,16);}catch(e){}}
+  doc.setFont('times','bold');doc.setFontSize(14);doc.setTextColor(201,162,39);
+  doc.text('ZYRON ORGANIZATION',W/2,21,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(200,200,200);
+  doc.text('Official Money Receipt',W/2,27,{align:'center'});
+  doc.setFontSize(7);doc.text(`Receipt No: ${r.receiptNo}  |  Date: ${r.date}`,W/2,33,{align:'center'});
   y=40;
   doc.setFillColor(247,240,216);doc.roundedRect(M,y,W-M*2,22,3,3,'F');
   doc.setFontSize(9);doc.setTextColor(100,100,100);doc.setFont('helvetica','normal');
@@ -1276,6 +1349,7 @@ function renderReceiptsTable(){
       ?r.months.map(m=>`<span class="inline-flex items-center px-2 py-0.5 m-0.5 rounded-full text-[11px] font-bold bg-[#a777e3]/20 text-[#a777e3]">${m.substring(0,3)}</span>`).join('')
       :(r.month?`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#a777e3]/20 text-[#a777e3]">${r.month}${r.year?' '+r.year:''}</span>`:'<span class="text-slatemuted">&#8212;</span>');
     return`<tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
+      <td class="px-4 py-3"><input type="checkbox" class="receipt-cb w-4 h-4 accent-brass cursor-pointer" value="${r.id}"></td>
       <td class="px-4 py-3 font-mono"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${r.receiptNo}</span></td>
       <td class="px-4 py-3 font-mono text-slatemuted">${r.date}</td>
       <td class="px-4 py-3">${r.memberName}<br><span class="text-[11px] text-slatemuted font-mono">${r.memberId}</span></td>
@@ -1285,7 +1359,7 @@ function renderReceiptsTable(){
       <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#6495ed]/20 text-[#6495ed]">${r.method}</span></td>
       <td class="px-4 py-3"><div class="flex gap-1.5 flex-wrap">
         <button class="border border-brass text-brass hover:bg-brass/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="viewReceipt('${r.id}')">View</button>
-        <button class="bg-brass text-midnight px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-brasslight transition-colors" onclick="downloadReceiptPDF('${r.id}')">PDF</button>
+       <button class="bg-brass text-midnight px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-brasslight transition-colors" onclick="downloadReceiptPDF('${r.id}')">PDF</button>
         ${currentUser.type==='admin'?`<button class="border border-[#6495ed] text-[#6495ed] hover:bg-[#6495ed]/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editReceipt('${r.id}')">Edit</button>`:''}
         ${currentUser.type==='admin'?`<button class="bg-ember text-white px-2.5 py-1 rounded-md text-[11px] font-semibold hover:bg-ember/80 transition-colors" onclick="deleteReceipt('${r.id}')">Del</button>`:''}
       </div></td>
@@ -1317,6 +1391,7 @@ async function deleteReceipt(id){
   ls_set(RECEIPTS_KEY,getReceipts().filter(r=>r.id!==id));
   renderReceiptsTable();showToast('Receipt deleted.');
 }
+
 function exportCSV(){
   if(currentUser.type!=='admin'){showToast('Admin only.');return;}
   const receipts=getReceipts();
@@ -1342,10 +1417,11 @@ function renderMembers(){
       <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
       <div class="text-[15px] font-bold text-brasslight font-mono mt-2">&#2547;${tot.toLocaleString()}</div>
       ${m.phone?`<div class="text-[11px] text-slatemuted mt-1">&#128222; ${m.phone}</div>`:''}
-     <div class="flex justify-center gap-2 mt-3">
+    <div class="flex justify-center gap-2 mt-3 flex-wrap">
   <button class="border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editMember('${m.id}')">Edit</button>
   <button class="bg-ember text-white hover:bg-ember/80 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="deleteMember('${m.id}')">Del</button>
   <button class="bg-ink2 border border-brass/30 text-slatemuted hover:text-brass px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="showMemberPass('${m.id}')">&#128273; Pass</button>
+  <button class="bg-brass/20 border border-brass/40 text-brass hover:bg-brass/30 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="openAssignCommitteeModal('${m.id}')">&#127775; Committee</button>
 </div>
     </div>`;}).join('');
 }
@@ -1527,10 +1603,39 @@ function renderMyReceipts(){
   const receipts=getReceipts().filter(r=>r.memberId===currentUser.id);
   const total=receipts.reduce((s,r)=>s+Number(r.amount),0);
   const monthAmt=receipts.filter(r=>r.date.startsWith(new Date().toISOString().substring(0,7))).reduce((s,r)=>s+Number(r.amount),0);
+  const currentYear=new Date().getFullYear();
+  const paidMonths=new Set();
+  receipts.filter(r=>r.purpose==='Monthly Fee'&&String(r.year)===String(currentYear)).forEach(r=>{
+    if(r.months)r.months.forEach(m=>paidMonths.add(m));
+    else if(r.month)paidMonths.add(r.month);
+  });
+  const dueMonths=MONTHS.filter(m=>!paidMonths.has(m));
   document.getElementById('my-stats').innerHTML=
     statCard('&#128176;','Total Paid','&#2547;'+total.toLocaleString())+
     statCard('&#128197;','This Month','&#2547;'+monthAmt.toLocaleString())+
-    statCard('&#129534;','Total Receipts',receipts.length);
+    statCard('&#129534;','Total Receipts',receipts.length)+
+    statCard('&#9888;&#65039;','Due Months',dueMonths.length+' months',currentYear);
+  const myReceiptsEl=document.getElementById('page-my-receipts');
+  const oldDue=document.getElementById('my-due-section');
+  if(oldDue)oldDue.remove();
+  const dueSection=document.createElement('div');
+  dueSection.id='my-due-section';
+  dueSection.className='bg-ink border border-ember/30 rounded-xl p-6 mb-5';
+  dueSection.innerHTML=`
+    <div class="font-display font-bold text-base text-ember mb-4 pb-3 border-b border-ember/20">
+      ⚠️ Due Months of ${currentYear}
+    </div>
+    ${dueMonths.length===0
+      ?'<div class="text-mint text-sm">✅ All months paid for this year!</div>'
+      :`<div class="flex flex-wrap gap-2">
+        ${dueMonths.map(m=>`
+          <span class="bg-ember/10 border border-ember/30 text-ember font-bold text-xs px-3 py-1.5 rounded-lg">
+            ❌ ${m}
+          </span>`).join('')}
+      </div>
+      <div class="mt-3 text-[13px] text-slatemuted">Total <span class="text-ember font-bold">${dueMonths.length}</span> months due.</div>`}`;
+  const tableSection=myReceiptsEl.querySelector('.bg-ink.border.border-brass\\/20.rounded-xl.p-6');
+  if(tableSection)myReceiptsEl.insertBefore(dueSection,tableSection);
   const tbody=document.getElementById('my-receipts-table');
   if(!receipts.length){tbody.innerHTML='<tr><td colspan="7" class="text-center text-slatemuted py-6">No receipts yet.</td></tr>';return;}
   tbody.innerHTML=[...receipts].sort((a,b)=>b.date.localeCompare(a.date)).map(r=>{
@@ -1547,10 +1652,10 @@ function renderMyReceipts(){
       <td class="px-4 py-3"><div class="flex gap-1.5 flex-wrap">
         <button class="bg-brass text-midnight hover:bg-brasslight px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors" onclick="downloadReceiptPDF('${r.id}')">&#11015; PDF</button>
         <button class="border border-brass text-brass hover:bg-brass/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="viewReceipt('${r.id}')">View</button>
+        
       </div></td>
     </tr>`;}).join('');
 }
-
 function renderSettings(){
   const sig=getSig();
   document.getElementById('sig-preview-wrap').classList.toggle('hidden',!sig);
@@ -1586,48 +1691,107 @@ function changeAdminPass(){
 
 const COMMITTEE_KEY='zyron_committee';
 function getCommittee(){
-  const stored=ls_get(COMMITTEE_KEY);
-  if(stored&&stored[0]&&stored[0].memberId)return stored;
-  const fresh=[
-    {name:'Rakib Bin Rashed',role:'President',color:'#C9A227',memberId:'ZY-006'},
-    {name:'Rakibul Islam Fahim',role:'General Secretary',color:'#4FAE8E',memberId:'ZY-001'},
-    {name:'Jihadul Islam',role:'Treasurer',color:'#6495ed',memberId:'ZY-005'},
-  ];
-  ls_set(COMMITTEE_KEY,fresh);
-  return fresh;
+  return ls_get(COMMITTEE_KEY)||[];
+}
+function saveCommittee(data){
+  ls_set(COMMITTEE_KEY,data);
+}
+function openAssignCommitteeModal(memberId){
+  const m=getMembers().find(x=>x.id===memberId);
+  if(!m)return;
+  document.getElementById('cm-member-id-val').value=memberId;
+  const preview=document.getElementById('cm-member-preview');
+  preview.classList.remove('hidden');
+  const avatar=document.getElementById('cm-member-avatar');
+  if(m.photo){
+    avatar.innerHTML=`<img src="${m.photo}" class="w-10 h-10 rounded-full object-cover">`;
+  }else{
+    avatar.style.background=m.color;
+    avatar.textContent=m.name[0].toUpperCase();
+  }
+  document.getElementById('cm-member-name').textContent=m.name;
+  document.getElementById('cm-member-id').textContent=m.id;
+  const committee=getCommittee();
+  const existing=committee.find(x=>x.memberId===memberId);
+  const roleSelect=document.getElementById('cm-role-select');
+  if(existing){
+    const predefined=['President','General Secretary','Treasurer','Vice President','Joint Secretary','Organising Secretary','Member'];
+    if(predefined.includes(existing.committeeRole)){
+      roleSelect.value=existing.committeeRole;
+    }else{
+      roleSelect.value='custom';
+      document.getElementById('cm-custom-role').value=existing.committeeRole;
+      document.getElementById('cm-custom-role-wrap').classList.remove('hidden');
+    }
+  }else{
+    roleSelect.value='President';
+    document.getElementById('cm-custom-role-wrap').classList.add('hidden');
+  }
+  openModal('committee-modal');
+}
+
+function onCommitteeRoleSelect(){
+  const val=document.getElementById('cm-role-select').value;
+  document.getElementById('cm-custom-role-wrap').classList.toggle('hidden',val!=='custom');
+}
+
+function saveCommitteeAssign(){
+  const memberId=document.getElementById('cm-member-id-val').value;
+  const roleSelect=document.getElementById('cm-role-select').value;
+  const committeeRole=roleSelect==='custom'
+    ?document.getElementById('cm-custom-role').value.trim()
+    :roleSelect;
+  if(!committeeRole){showToast('&#9888; Role লিখো।');return;}
+  const m=getMembers().find(x=>x.id===memberId);
+  if(!m)return;
+  const committee=getCommittee();
+  const existing=committee.findIndex(x=>x.memberId===memberId);
+  if(existing!==-1){
+    committee[existing].committeeRole=committeeRole;
+  }else{
+    committee.push({memberId,committeeRole});
+  }
+  saveCommittee(committee);
+  closeModal('committee-modal');
+  renderMembers();
+  showToast(`&#9989; ${m.name} — ${committeeRole} হিসেবে assign হয়েছে!`);
+}
+
+function removeFromCommittee(memberId){
+  const committee=getCommittee().filter(x=>x.memberId!==memberId);
+  saveCommittee(committee);
+  renderCommittee();
+  showToast('&#9989; Committee থেকে remove হয়েছে।');
 }
 function renderCommittee(){
   const committee=getCommittee();
+  const members=getMembers();
   const isAdmin=currentUser.type==='admin';
-  document.getElementById('committee-grid').innerHTML=committee.map((m,i)=>`
-    <div class="bg-ink border border-brass/20 rounded-xl p-6 text-center">
-     ${(()=>{const mem=getMembers().find(x=>x.id===m.memberId);return mem&&mem.photo?`<img src="${mem.photo}" class="w-[70px] h-[70px] rounded-full object-cover mx-auto mb-4">`:`<div class="w-[70px] h-[70px] rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4 text-midnight" style="background:${m.color}">${m.name[0]}</div>`;})()}
-      <div class="font-display font-bold text-lg text-slate-100">${m.name}</div>
-      <div class="text-sm text-brass mt-1.5 font-semibold">${m.role}</div>
-      ${isAdmin?`<button class="mt-3 border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editCommitteeMember(${i})">✏️ Edit</button>`:''}
-    </div>`).join('');
+  const grid=document.getElementById('committee-grid');
+  if(committee.length===0){
+    grid.innerHTML=`<div class="col-span-3 text-center text-slatemuted py-10">কোনো committee member assign করা হয়নি।<br>${isAdmin?'Members পেজ থেকে assign করো।':''}</div>`;
+    return;
+  }
+  grid.innerHTML=committee.map((c,i)=>{
+    const mem=members.find(x=>x.id===c.memberId);
+    if(!mem)return'';
+    return`<div class="bg-ink border border-brass/20 rounded-xl p-6 text-center">
+      ${mem.photo
+        ?`<img src="${mem.photo}" class="w-[70px] h-[70px] rounded-full object-cover mx-auto mb-4">`
+        :`<div class="w-[70px] h-[70px] rounded-full flex items-center justify-center font-bold text-2xl mx-auto mb-4 text-midnight" style="background:${mem.color}">${mem.name[0]}</div>`}
+      <div class="font-display font-bold text-lg text-slate-100">${mem.name}</div>
+      <div class="text-sm text-brass mt-1.5 font-semibold">${c.committeeRole}</div>
+      <div class="text-[11px] text-slatemuted font-mono mt-1">${mem.id}</div>
+      ${isAdmin?`<button onclick="removeFromCommittee('${mem.id}')" class="mt-3 bg-ember/20 text-ember border border-ember/30 hover:bg-ember/30 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors">✕ Remove</button>`:''}
+    </div>`;
+  }).join('');
 }
 function editCommitteeMember(i){
-  const committee=getCommittee();
-  const m=committee[i];
-  document.getElementById('cm-edit-idx').value=i;
-  document.getElementById('cm-name').value=m.name;
-  document.getElementById('cm-role').value=m.role;
-  openModal('committee-modal');
+  // পুরনো function — আর দরকার নেই
 }
 function saveCommitteeMember(){
-  const i=parseInt(document.getElementById('cm-edit-idx').value);
-  const name=document.getElementById('cm-name').value.trim();
-  const role=document.getElementById('cm-role').value.trim();
-  if(!name){showToast('Name required.');return;}
-  const committee=getCommittee();
-  committee[i]={...committee[i],name,role};
-  ls_set(COMMITTEE_KEY,committee);
-  closeModal('committee-modal');
-  renderCommittee();
-  showToast('&#9989; Committee updated!');
+  // পুরনো function — আর দরকার নেই
 }
-
 function renderMemberSettings(){
   ['m-curr-pass','m-new-pass','m-conf-pass'].forEach(id=>{
     const el=document.getElementById(id);
@@ -1697,6 +1861,76 @@ let _tt;
 function showToast(msg){
   const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');
   clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function toggleSelectAll(cb){
+  document.querySelectorAll('.receipt-cb').forEach(c=>c.checked=cb.checked);
+}
+
+async function bulkDownloadPDF(){
+  if(currentUser.type!=='admin'){showToast('Admin only.');return;}
+  const selected=[...document.querySelectorAll('.receipt-cb:checked')].map(c=>c.value);
+  if(selected.length===0){showToast('&#9888; কোনো receipt select করোনি।');return;}
+  showToast('&#9203; PDF তৈরি হচ্ছে...');
+  const receipts=getReceipts();
+  const zip=new JSZip();
+  const{jsPDF}=window.jspdf;
+  for(const id of selected){
+    const r=receipts.find(x=>x.id===id);
+    if(!r)continue;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a5'});
+    const W=148,M=14;let y=14;
+    doc.setFillColor(11,18,32);doc.rect(0,0,W,30,'F');
+    doc.setFont('times','bold');doc.setFontSize(16);doc.setTextColor(201,162,39);
+    doc.text('ZYRON ORGANIZATION',W/2,13,{align:'center'});
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(200,200,200);doc.text('Official Money Receipt',W/2,20,{align:'center'});
+    doc.setFontSize(7);doc.text(`Receipt No: ${r.receiptNo}  |  Date: ${r.date}`,W/2,27,{align:'center'});
+    y=40;
+    doc.setFillColor(247,240,216);doc.roundedRect(M,y,W-M*2,22,3,3,'F');
+    doc.setFontSize(9);doc.setTextColor(100,100,100);doc.setFont('helvetica','normal');
+    doc.text('TOTAL AMOUNT RECEIVED',W/2,y+7,{align:'center'});
+    doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(11,18,32);
+    doc.text(`BDT ${Number(r.amount).toLocaleString()}`,W/2,y+16,{align:'center'});
+    doc.setFontSize(7);doc.setFont('helvetica','italic');doc.setTextColor(120,120,120);
+    doc.text(n2w(Number(r.amount))+' Taka Only',W/2,y+21,{align:'center'});
+    y+=30;
+    const monthsStr=r.months&&r.months.length>0?r.months.join(', '):(r.month||'');
+    const rows=[
+      ['Member Name',r.memberName],['Member ID',r.memberId],['Role',r.memberRole||'--'],
+      ['Purpose',r.purpose],
+      ...(monthsStr?[['Month(s)',monthsStr]]:[]),
+      ...(r.year?[['Year',String(r.year)]]:[]),
+      ['Payment Method',r.method],['Received By',r.receivedBy],
+    ];
+    if(r.notes)rows.push(['Notes',r.notes]);
+    doc.setFontSize(9);
+    rows.forEach(([k,v],i)=>{
+      const ry=y+i*10;
+      if(i%2===0){doc.setFillColor(248,248,248);doc.rect(M,ry-4,W-M*2,10,'F');}
+      doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);doc.text(k+':',M+3,ry+2);
+      doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+      const txt=String(v);doc.text(txt.length>28?txt.substring(0,26)+'...':txt,M+52,ry+2);
+    });
+    y+=rows.length*10+12;
+    const sig=getSig();
+    if(sig){try{doc.addImage(sig,'PNG',W-M-45+5,y+1,32,11);}catch(e){}}
+    doc.setDrawColor(100);
+    doc.line(M,y+16,M+45,y+16);doc.line(W-M-45,y+16,W-M,y+16);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(100,100,100);
+    doc.text('Member Signature',M+22,y+20,{align:'center'});
+    doc.text('Authorized Signature',W-M-22,y+20,{align:'center'});
+    doc.setFillColor(11,18,32);doc.rect(0,199,W,11,'F');
+    doc.setFontSize(7);doc.setTextColor(201,162,39);
+    doc.text('ZYRON Organization \u2014 Computer Generated Receipt',W/2,206,{align:'center'});
+    const pdfBlob=doc.output('blob');
+    zip.file(`${r.receiptNo}_${r.memberName.replace(/\s/g,'_')}.pdf`,pdfBlob);
+  }
+  zip.generateAsync({type:'blob'}).then(content=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(content);
+    a.download=`ZYRON_Receipts_${new Date().toISOString().split('T')[0]}.zip`;
+    a.click();
+    showToast(`&#9989; ${selected.length}টা PDF download হয়েছে!`);
+  });
 }
 
 function n2w(n){
