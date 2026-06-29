@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -46,7 +46,7 @@
   ::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 3px; }
 
   .page { display: none; }
-  .page.active { display: block; }
+  .page.active { display: block; animation: pageIn .35s ease; }
   .modal-overlay.hidden { display: none; }
 
   .stamp-corner { position: relative; }
@@ -70,8 +70,9 @@
     height: 8px;
   }
 
-  .month-cb-item { transition: all .18s ease; }
-  .month-cb-item.selected { border-color: #C9A227 !important; background: rgba(201,162,39,.14); }
+  .month-cb-item { transition: all .18s ease, transform .15s ease; }
+  .month-cb-item:hover { transform: translateY(-2px); }
+  .month-cb-item.selected { border-color: #C9A227 !important; background: rgba(201,162,39,.14); animation: monthPop .25s ease; }
   .month-cb-check { transition: all .18s ease; }
   .month-cb-item.selected .month-cb-check { background: #C9A227; border-color: #C9A227; color: #0B1220; }
   .month-cb-item.selected .month-cb-name { color: #F7F3E8; }
@@ -81,25 +82,22 @@
 
   input:focus, select:focus, textarea:focus { outline: none; border-color: #C9A227 !important; box-shadow: 0 0 0 3px rgba(201,162,39,0.15); }
 
-  .sidebar { transition: transform .3s ease; }
+  .sidebar { transition: transform .3s cubic-bezier(.4,0,.2,1); }
   @media (max-width: 768px) {
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
     .main-content { margin-left: 0 !important; padding-top: 4rem !important; }
   }
 
-  #toast { transition: opacity .3s, transform .3s; }
-  #toast.show { opacity: 1 !important; transform: translateY(0) !important; }
-  /* ===== PAGE TRANSITION ===== */
-  .page.active {
-    animation: pageIn .35s ease;
-  }
+  #toast { transition: opacity .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1); }
+  #toast.show { opacity: 1 !important; transform: translateY(0) !important; animation: toastBounce .4s cubic-bezier(.34,1.56,.64,1); }
+
   @keyframes pageIn {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ===== CARD HOVER ===== */
+  /* ===== CARD / STAT HOVER ===== */
   .bg-ink, .bg-ink2 {
     transition: transform .2s ease, box-shadow .2s ease;
   }
@@ -130,6 +128,7 @@
   }
 
   /* ===== MODAL ANIMATION ===== */
+  .modal-overlay { transition: opacity .25s ease; }
   .modal-overlay:not(.hidden) {
     animation: overlayIn .25s ease;
   }
@@ -162,9 +161,6 @@
   }
 
   /* ===== TOAST BOUNCE ===== */
-  #toast.show {
-    animation: toastBounce .4s cubic-bezier(.34,1.56,.64,1);
-  }
   @keyframes toastBounce {
     0%   { transform: translateY(20px) scale(.9); opacity: 0; }
     60%  { transform: translateY(-4px) scale(1.02); }
@@ -172,15 +168,6 @@
   }
 
   /* ===== MONTH CHECKBOX SELECT ===== */
-  .month-cb-item {
-    transition: all .18s ease, transform .15s ease;
-  }
-  .month-cb-item:hover {
-    transform: translateY(-2px);
-  }
-  .month-cb-item.selected {
-    animation: monthPop .25s ease;
-  }
   @keyframes monthPop {
     0%   { transform: scale(1); }
     50%  { transform: scale(1.04); }
@@ -229,109 +216,133 @@
     from { opacity: 0; transform: translateX(-10px); }
     to   { opacity: 1; transform: translateX(0); }
   }
-  /* ===== PAGE TRANSITION ===== */
-.page {
-  display: none;
-}
-.page.active {
-  display: block;
-  animation: pageIn .35s ease;
-}
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== CARD / STAT HOVER ===== */
-.bg-ink, .bg-ink2 {
-  transition: transform .2s ease, box-shadow .2s ease;
+  /* Stat card hover করলে glow border + lift আরও স্পষ্ট */
+#dashboard-stats > div,
+#report-stats > div {
+  position: relative;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 #dashboard-stats > div:hover,
-#report-stats > div:hover,
-#members-grid > div:hover,
-#member-directory-grid > div:hover,
-#committee-grid > div:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(201,162,39,0.12);
+#report-stats > div:hover {
+  border-color: rgba(201,162,39,.5);
+  box-shadow: 0 10px 28px rgba(201,162,39,.18);
 }
 
-/* ===== MODAL ANIMATION ===== */
-.modal-overlay {
-  transition: opacity .25s ease;
+/* Card-এর ভিতরে icon (প্রথম div) হালকা wiggle করবে hover এ */
+#dashboard-stats > div:hover .text-2xl:first-child,
+#report-stats > div:hover .text-2xl:first-child {
+  animation: iconWiggle .5s ease;
 }
-.modal-overlay:not(.hidden) {
-  animation: overlayIn .25s ease;
-}
-.modal-overlay:not(.hidden) > div {
-  animation: modalPop .28s cubic-bezier(.34,1.56,.64,1);
-}
-@keyframes overlayIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes modalPop {
-  from { opacity: 0; transform: scale(.92) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+@keyframes iconWiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25%      { transform: rotate(-8deg) scale(1.1); }
+  50%      { transform: rotate(6deg) scale(1.1); }
+  75%      { transform: rotate(-4deg) scale(1.05); }
 }
 
-/* ===== BUTTON FEEDBACK ===== */
-button {
-  transition: transform .12s ease, box-shadow .12s ease, background-color .2s ease;
+/* Card-এর উপর দিয়ে একটা হালকা shine sweep, hover এ একবার চলবে */
+#dashboard-stats > div::before,
+#report-stats > div::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(201,162,39,.12), transparent);
+  transform: skewX(-20deg);
+  transition: left .6s ease;
+  pointer-events: none;
 }
-button:active {
-  transform: scale(.96);
-}
-
-/* ===== TOAST SLIDE-IN ===== */
-#toast {
-  transition: opacity .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
-}
-
-/* ===== MONTH CHECKBOX SELECT ===== */
-.month-cb-item {
-  transition: all .18s ease, transform .15s ease;
-}
-.month-cb-item:hover {
-  transform: translateY(-2px);
-}
-.month-cb-item.selected {
-  animation: monthPop .25s ease;
-}
-@keyframes monthPop {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.04); }
-  100% { transform: scale(1); }
+#dashboard-stats > div:hover::before,
+#report-stats > div:hover::before {
+  left: 130%;
 }
 
-/* ===== NAV ITEM ===== */
-.nav-item {
-  transition: all .2s ease;
+/* সংখ্যা (font-mono ভ্যালু) লোড হওয়ার সময় হালকা pop */
+#dashboard-stats .font-mono,
+#report-stats .font-mono {
+  display: inline-block;
+  animation: numberPop .4s ease backwards;
 }
-.nav-item:hover {
-  padding-left: 22px;
-}
-
-/* ===== SIDEBAR SLIDE (mobile) ===== */
-.sidebar {
-  transition: transform .3s cubic-bezier(.4,0,.2,1);
+@keyframes numberPop {
+  from { opacity: 0; transform: scale(.7); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-/* ===== TABLE ROW FADE-IN ===== */
-tbody tr {
-  animation: rowIn .3s ease;
+/* Label (uppercase ছোট টেক্সট) সামান্য spacing animation hover এ */
+#dashboard-stats > div:hover .uppercase,
+#report-stats > div:hover .uppercase {
+  letter-spacing: 1.2px;
+  transition: letter-spacing .3s ease;
 }
-@keyframes rowIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* Card entrance: একটার পর একটা নিচ থেকে rotate করে উঠে আসবে */
+#dashboard-stats > div,
+#report-stats > div {
+  animation: statCardEntrance .5s cubic-bezier(.22,1,.36,1) backwards;
+}
+#dashboard-stats > div:nth-child(1) { animation-delay: .05s; }
+#dashboard-stats > div:nth-child(2) { animation-delay: .12s; }
+#dashboard-stats > div:nth-child(3) { animation-delay: .19s; }
+#dashboard-stats > div:nth-child(4) { animation-delay: .26s; }
+@keyframes statCardEntrance {
+  from { opacity: 0; transform: translateY(20px) rotateX(-15deg); }
+  to   { opacity: 1; transform: translateY(0) rotateX(0deg); }
 }
 
-/* ===== LOGO PULSE ON AUTH SCREEN ===== */
-#auth-screen img {
-  animation: logoFloat 3s ease-in-out infinite;
+/* Card border-এ ধীরে ধীরে ঘুরন্ত gradient outline (idle অবস্থায় subtle) */
+#dashboard-stats > div,
+#report-stats > div {
+  background-image: linear-gradient(var(--angle, 0deg), rgba(201,162,39,.15), transparent 40%);
+  animation: statCardEntrance .5s cubic-bezier(.22,1,.36,1) backwards,
+             borderSpin 6s linear infinite;
 }
-@keyframes logoFloat {
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes borderSpin {
+  from { --angle: 0deg; }
+  to   { --angle: 360deg; }
+}
+
+/* Card click করলে (active state) হালকা press + ripple feel */
+#dashboard-stats > div:active,
+#report-stats > div:active {
+  transform: scale(.97);
+  transition: transform .1s ease;
+}
+
+/* "Active"/"Total" ইত্যাদি sub-label টেক্সট হালকা fade-slide করে আসবে */
+#dashboard-stats > div .text-xs.text-slatemuted,
+#report-stats > div .text-xs.text-slatemuted {
+  animation: subLabelIn .4s ease .3s backwards;
+}
+@keyframes subLabelIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Icon-এ ধীরে ধীরে idle অবস্থায় ছোট bounce (hover ছাড়াও) */
+#dashboard-stats > div .text-2xl:first-child,
+#report-stats > div .text-2xl:first-child {
+  display: inline-block;
+  animation: iconIdleBounce 2.5s ease-in-out infinite;
+}
+@keyframes iconIdleBounce {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
+  50%      { transform: translateY(-3px); }
+}
+
+/* Due/Warning card (ember রঙের) আলাদা attention-pulse */
+#dashboard-stats > div:has(.text-ember),
+#report-stats > div:has(.text-ember) {
+  animation: statCardEntrance .5s cubic-bezier(.22,1,.36,1) backwards,
+             warnPulse 2s ease-in-out infinite;
+}
+@keyframes warnPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(214,87,63,0); }
+  50%      { box-shadow: 0 0 14px rgba(214,87,63,.25); }
 }
 </style>
 </head>
@@ -417,6 +428,7 @@ tbody tr {
         <button class="hidden bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors items-center gap-1.5" id="dash-new-btn" onclick="navigate('new-receipt')">+ New Receipt</button>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="dashboard-stats"></div>
+    
       <div class="stamp-corner bg-ink border border-brass/20 rounded-xl p-6 mb-5">
         <div class="flex items-center justify-between flex-wrap gap-2 mb-5 pb-3 border-b border-brass/20">
           <span class="font-display font-bold text-base text-brass">Monthly Fee Summary</span>
@@ -429,7 +441,10 @@ tbody tr {
         <div class="overflow-x-auto rounded-lg border border-brass/15">
           <table class="w-full text-[13px] border-collapse">
             <thead class="bg-ink2">
-              <tr><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Receipt #</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Member</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Amount</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Purpose</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th></tr>
+              <tr>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15"><input type="checkbox" onchange="toggleSelectAll(this)" class="w-4 h-4 accent-brass cursor-pointer"></th>
+                  <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Member</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Amount</th>
+                  <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Purpose</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th></tr>
             </thead>
             <tbody id="recent-receipts-table"></tbody>
           </table>
@@ -559,6 +574,7 @@ tbody tr {
           <table class="w-full text-[13px] border-collapse">
             <thead class="bg-ink2">
               <tr>
+                <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15"><input type="checkbox" onchange="toggleSelectAll(this)" class="w-4 h-4 accent-brass cursor-pointer"></th>
                 <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Receipt #</th>
                 <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th>
                 <th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Member</th>
@@ -608,7 +624,35 @@ tbody tr {
         </div>
       </div>
     </div>
-
+    <!-- EXPENSES -->
+<div class="page" id="page-expenses">
+  <div class="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4 border-b border-brass/20">
+    <div>
+      <div class="font-display font-bold text-2xl text-brass">Expenses</div>
+      <div class="text-[13px] text-slatemuted mt-0.5">Track organization expenses</div>
+    </div>
+    <button onclick="openAddExpenseModal()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors inline-flex items-center gap-1.5">+ Add Expense</button>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="expense-stats"></div>
+  <div class="bg-ink border border-brass/20 rounded-xl p-6">
+    <div class="flex gap-3 flex-wrap mb-5">
+     <input type="date" id="filter-exp-from" onchange="renderExpensesTable()" placeholder="Select Date" class="flex-1 min-w-[160px] max-w-[260px] px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+      <select id="filter-exp-category" onchange="renderExpensesTable()" class="flex-1 min-w-[160px] max-w-[260px] px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+        <option value="">All Categories</option>
+        <option>Investment</option><option>Meeting</option><option>Maintenance</option><option>Admin</option>
+      </select>
+    </div>
+    <div class="overflow-x-auto rounded-lg border border-brass/15">
+      <table class="w-full text-[13px] border-collapse">
+        <thead class="bg-ink2">
+          <tr><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Date</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Category</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Description</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Amount</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Paid By</th><th class="px-4 py-3 text-left text-brass font-bold text-[11px] uppercase tracking-wide border-b border-brass/15">Actions</th></tr>
+        </thead>
+        <tbody id="expenses-table-body"></tbody>
+      </table>
+    </div>
+    <div id="expenses-empty" class="text-center py-8 text-slatemuted hidden">No expenses found.</div>
+  </div>
+</div>
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="mb-6 pb-4 border-b border-brass/20">
@@ -722,7 +766,18 @@ tbody tr {
         <button onclick="changeMemberPass()" class="mt-4 bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Update Password</button>
       </div>
     </div>
-
+    <!-- POLLS PAGE -->
+<div class="page" id="page-polls">
+  <div class="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4 border-b border-brass/20">
+    <div>
+      <div class="font-display font-bold text-2xl text-brass">Voting & Polls</div>
+      <div class="text-[13px] text-slatemuted mt-0.5">Cast your vote, share your opinion </div>
+    </div>
+    <button id="create-poll-btn" onclick="openCreatePollModal()" class="hidden bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">+ Create Poll</button>
+  </div>
+  <div id="polls-container" class="space-y-5"></div>
+  <div id="polls-empty" class="hidden text-center text-slatemuted py-16">No polls yet.</div>
+</div>
   </main>
 </div>
 
@@ -766,6 +821,34 @@ tbody tr {
     </div>
   </div>
 </div>
+<!-- POLL MODAL -->
+<div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="poll-modal">
+  <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg shadow-2xl">
+    <div class="font-display font-bold text-lg text-brass mb-4">🗳️ Create New Poll</div>
+    <div class="space-y-3.5">
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Question</label>
+        <input type="text" id="poll-question" placeholder="What would you like to vote on?" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+      </div>
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Deadline</label>
+        <input type="date" id="poll-deadline" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+      </div>
+      <div>
+        <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Options</label>
+        <div id="poll-options-wrap" class="space-y-2">
+          <input type="text" placeholder="Option 1" class="poll-option-input w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+          <input type="text" placeholder="Option 2" class="poll-option-input w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+        </div>
+        <button onclick="addPollOption()" class="mt-2 text-brass text-[12px] hover:underline">+ Add Option</button>
+      </div>
+    </div>
+    <div class="flex gap-3 justify-end mt-5">
+      <button onclick="closeModal('poll-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg">Cancel</button>
+      <button onclick="savePoll()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg">Create Poll</button>
+    </div>
+  </div>
+</div>
 <!-- CONFIRM MODAL -->
 <div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="confirm-modal">
   <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-sm text-center shadow-2xl">
@@ -791,6 +874,25 @@ tbody tr {
   </div>
 </div>
 
+<!-- EXPENSE MODAL -->
+<div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="expense-modal">
+  <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg shadow-2xl">
+    <div class="font-display font-bold text-lg text-brass mb-4" id="expense-modal-title">Add Expense</div>
+    <div class="space-y-3.5">
+      <div><label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Date</label><input type="date" id="exp-date" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm"></div>
+      <div><label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Category</label><select id="exp-category" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm"><option>Investment</option><option>Meeting</option><option>Maintenance</option><option>Admin</option></select></div>
+      <div><label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Description</label><input type="text" id="exp-desc" placeholder="What was the expense?" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm"></div>
+      <div><label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Amount (BDT)</label><input type="number" id="exp-amount" placeholder="0" min="1" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm"></div>
+      <div><label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Paid By</label><input type="text" id="exp-paid-by" placeholder="Name" class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm"></div>
+      <div><label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Notes</label><textarea id="exp-notes" rows="2" placeholder="Optional..." class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm resize-none"></textarea></div>
+    </div>
+    <input type="hidden" id="exp-edit-id">
+    <div class="flex gap-3 justify-end mt-4">
+      <button onclick="closeModal('expense-modal')" class="border border-brass text-brass hover:bg-brass/10 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors">Cancel</button>
+      <button onclick="saveExpense()" class="bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Save Expense</button>
+    </div>
+  </div>
+</div>
 <!-- MEMBER MODAL -->
 <div class="modal-overlay hidden fixed inset-0 bg-black/75 flex items-center justify-center z-[1000] p-4" id="member-modal">
   <div class="bg-ink border border-brass/25 rounded-2xl p-7 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -857,12 +959,12 @@ tbody tr {
 </div>
 
 <script>
-const ADMIN_KEY='zyron_admin',MEMBERS_KEY='zyron_members',RECEIPTS_KEY='zyron_receipts',COUNTER_KEY='zyron_counter',SIG_KEY='zyron_sig';
-const PAGE_SIZE=15;
+const ADMIN_KEY='zyron_admin',MEMBERS_KEY='zyron_members',RECEIPTS_KEY='zyron_receipts',COUNTER_KEY='zyron_counter',SIG_KEY='zyron_sig',EXPENSES_KEY='zyron_expenses',POLLS_KEY='zyron_polls';
+function getPolls(){ return ls_get(POLLS_KEY)||[]; }const PAGE_SIZE=15;
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const COLORS=['#C9A227','#4FAE8E','#6495ed','#a777e3','#D6573F','#52b0e0','#e05299','#7daf52','#cc8855','#52e0c4'];
-const ADMIN_PAGES=new Set(['dashboard','new-receipt','receipts','members','reports','settings','committee']);
-const MEMBER_PAGES=new Set(['dashboard','my-receipts','member-directory','member-settings','committee']);
+const ADMIN_PAGES=new Set(['dashboard','new-receipt','receipts','members','reports','settings','committee','expenses','polls']);
+const MEMBER_PAGES=new Set(['dashboard','my-receipts','member-directory','member-settings','committee','polls']);
 
 let currentUser=null,currentViewReceipt=null,currentPendingReceipt=null,editingMemberId=null,receiptPage=1,editingReceiptId=null;
 const firebaseConfig={
@@ -886,6 +988,7 @@ function getReceipts(){return ls_get(RECEIPTS_KEY)||[];}
 function getCounter(){return ls_get(COUNTER_KEY)||1;}
 function incCounter(){let c=getCounter();ls_set(COUNTER_KEY,c+1);return c;}
 function getSig(){return ls_get(SIG_KEY)||null;}
+function getExpenses(){return ls_get(EXPENSES_KEY)||[];}
 
 function initDefaultMembers(){
   const list=[
@@ -977,15 +1080,16 @@ const adminNav=[
   {section:'Receipts'},{id:'new-receipt',icon:'&#129534;',label:'New Receipt'},{id:'receipts',icon:'&#128203;',label:'Receipt History'},
   {section:'Members'},{id:'members',icon:'&#128101;',label:'Members'},
   {section:'Analytics'},{id:'reports',icon:'&#128200;',label:'Reports'},
-  {section:'Organization'},{id:'committee',icon:'&#127775;',label:'Committee'},
-  {section:'System'},{id:'settings',icon:'&#9881;',label:'Settings'},
+ {section:'Organization'},{id:'committee',icon:'&#127775;',label:'Committee'},
+{section:'Finance'},{id:'expenses',icon:'&#128176;',label:'Expenses'},
+{section:'Polls'},{id:'polls',icon:'🗳️',label:'Voting & Polls'},
 ];
 const memberNav=[
   {section:'Overview'},{id:'dashboard',icon:'&#128202;',label:'Dashboard'},
   {section:'My Account'},{id:'my-receipts',icon:'&#129534;',label:'My Receipts'},
   {section:'Organization'},{id:'member-directory',icon:'&#128101;',label:'Members'},
-  {section:'Committee'},{id:'committee',icon:'&#127775;',label:'Committee'}, // ✅ নতুন
-  {section:'Account'},{id:'member-settings',icon:'&#9881;',label:'Settings'},
+  {section:'Committee'},{id:'committee',icon:'&#127775;',label:'Committee'}, 
+{section:'Polls'},{id:'polls',icon:'🗳️',label:'Voting & Polls'},
 ];
 function setupSidebar(){
   const items=currentUser.type==='admin'?adminNav:memberNav;
@@ -1023,9 +1127,11 @@ function loadPage(p){
   if(p==='members')renderMembers();
   if(p==='reports')renderReports();
   if(p==='settings')renderSettings();
+  if(p==='expenses')renderExpenses();
   if(p==='my-receipts')renderMyReceipts();
   if(p==='member-directory')renderMemberDirectory();
   if(p==='member-settings')renderMemberSettings();
+  if(p==='polls')renderPolls();
   if(p==='committee')renderCommittee();
 }
 function toggleSidebar(){
@@ -1089,52 +1195,53 @@ function renderDashboard(){
         statCard('&#129534;','My Receipts',myR.length,'Total')+
         statCard('&#128101;','Members',members.length,'In ZYRON');
     }
-        setTimeout(()=>{
+    setTimeout(()=>{
       document.querySelectorAll('#dashboard-stats .font-mono').forEach(el=>{
-        const text = el.textContent;
-        const num = parseInt(text.replace(/[^\d]/g,'')) || 0;
-        const prefix = text.match(/^[^\d]*/)[0];
-        animateNumber(el, num, prefix);
+        const text=el.textContent;
+        const num=parseInt(text.replace(/[^\d]/g,''))||0;
+        const prefix=text.match(/^[^\d]*/)[0];
+        animateNumber(el,num,prefix);
       });
-    }, 50);
+    },50);
     renderMonthlySummary();
-    
-    const currentYear=new Date().getFullYear();
-const currentMonth=MONTHS[new Date().getMonth()];
-if(currentUser.type==='admin'){
-  const dueMembers=members.filter(m=>{
-    const paid=new Set();
-    receipts.filter(r=>r.memberId===m.id&&r.purpose==='Monthly Fee'&&String(r.year)===String(currentYear)).forEach(r=>{
-      if(r.months)r.months.forEach(mo=>paid.add(mo));
-      else if(r.month)paid.add(r.month);
-    });
-    return!paid.has(currentMonth);
-  });
-  const dueSection=document.createElement('div');
-  dueSection.className='bg-ink border border-ember/30 rounded-xl p-6 mb-5';
-  dueSection.innerHTML=`
-    <div class="font-display font-bold text-base text-ember mb-4 pb-3 border-b border-ember/20">
-      ⚠️ ${currentMonth} ${currentYear} — বকেয়া Members (${dueMembers.length}জন)
-    </div>
-    ${dueMembers.length===0
-      ?'<div class="text-mint text-sm">✅ সবাই এই মাসের টাকা দিয়েছে!</div>'
-      :`<div class="flex flex-wrap gap-2">
-        ${dueMembers.map(m=>`
-          <div class="flex items-center gap-2 bg-ember/10 border border-ember/20 rounded-lg px-3 py-2">
-            ${m.photo
-              ?`<img src="${m.photo}" class="w-7 h-7 rounded-full object-cover">`
-              :`<div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-midnight flex-shrink-0" style="background:${m.color}">${m.name[0]}</div>`}
-            <div>
-              <div class="text-sm font-semibold text-slate-100">${m.name}</div>
-              <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
-            </div>
-          </div>`).join('')}
-      </div>`}`;
-  const dashboardEl=document.getElementById('page-dashboard');
-  const recentSection=dashboardEl.querySelector('.bg-ink.border.border-brass\\/20.rounded-xl.p-6');
-  if(recentSection)dashboardEl.querySelector('main, .main-content, #page-dashboard').insertBefore(dueSection,recentSection);
-  statsEl.parentNode.insertBefore(dueSection,statsEl.nextSibling.nextSibling);
-}
+    if(currentUser.type==='admin'){
+      const currentYear=new Date().getFullYear();
+      const currentMonth=MONTHS[new Date().getMonth()];
+      const dueMembers=members.filter(m=>{
+        const paid=new Set();
+        receipts.filter(r=>r.memberId===m.id&&r.purpose==='Monthly Fee'&&String(r.year)===String(currentYear)).forEach(r=>{
+          if(r.months)r.months.forEach(mo=>paid.add(mo));
+          else if(r.month)paid.add(r.month);
+        });
+        return!paid.has(currentMonth);
+      });
+      const oldDue=document.getElementById('dash-due-section');
+      if(oldDue)oldDue.remove();
+      const dueSection=document.createElement('div');
+      dueSection.className='bg-ink border border-ember/30 rounded-xl p-6 mb-5';
+      dueSection.id='dash-due-section';
+      dueSection.innerHTML=`
+        <div class="font-display font-bold text-base text-ember mb-4 pb-3 border-b border-ember/20">
+          ⚠️ ${currentMonth} ${currentYear} — Due Members (${dueMembers.length})
+        </div>
+        ${dueMembers.length===0
+          ?'<div class="text-mint text-sm">✅ All members have paid this month!</div>'
+          :`<div class="flex flex-wrap gap-2">
+            ${dueMembers.map(m=>`
+              <div class="flex items-center gap-2 bg-ember/10 border border-ember/20 rounded-lg px-3 py-2">
+                ${m.photo
+                  ?`<img src="${m.photo}" class="w-7 h-7 rounded-full object-cover">`
+                  :`<div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-midnight flex-shrink-0" style="background:${m.color}">${m.name[0]}</div>`}
+                <div>
+                  <div class="text-sm font-semibold text-slate-100">${m.name}</div>
+                  <div class="text-[11px] text-slatemuted font-mono">${m.id}</div>
+                </div>
+              </div>`).join('')}
+          </div>`}`;
+      const anchor=statsEl.nextElementSibling;
+      if(anchor)statsEl.parentNode.insertBefore(dueSection,anchor);
+      else statsEl.parentNode.appendChild(dueSection);
+    }
     const src=currentUser.type==='admin'?receipts:receipts.filter(r=>r.memberId===currentUser.id);
     const recent=[...src].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,8);
     const tbody=document.getElementById('recent-receipts-table');
@@ -1161,7 +1268,7 @@ function renderMonthlySummary(){
     const years=[...yearsSet].sort((a,b)=>b-a);
     const sel=document.getElementById('dash-year-sel');
     if(!sel)return;
-    const prev=Number(sel.value)||new Date().getFullYear();
+    const prev=sel.value?Number(sel.value):new Date().getFullYear();
     sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
     const targetYear=years.includes(prev)?prev:new Date().getFullYear();
     sel.value=String(targetYear);
@@ -1843,14 +1950,20 @@ async function deleteMember(id){
 }
 
 function renderReports(){
-  const receipts=getReceipts(),members=getMembers();
+  const receipts=getReceipts(),members=getMembers(),exps=getExpenses();
   const today=new Date().toISOString().split('T')[0];
   const monthStart=today.substring(0,7);
   const monthAmt=receipts.filter(r=>r.date.startsWith(monthStart)).reduce((s,r)=>s+Number(r.amount),0);
+  const totalIncome=receipts.reduce((s,r)=>s+Number(r.amount),0);
+  const totalExpense=exps.reduce((s,e)=>s+Number(e.amount),0);
+  const balance=totalIncome-totalExpense;
   document.getElementById('report-stats').innerHTML=
     statCard('&#128197;','This Month','&#2547;'+monthAmt.toLocaleString())+
     statCard('&#129534;','Total Receipts',receipts.length)+
-    statCard('&#128101;','Members',members.length);
+    statCard('&#128101;','Members',members.length)+
+    statCard('&#128200;','Total Income','&#2547;'+totalIncome.toLocaleString())+
+    statCard('&#128176;','Total Expense','&#2547;'+totalExpense.toLocaleString())+
+    statCard(balance>=0?'&#9989;':'&#9888;&#65039;','Balance','&#2547;'+Math.abs(balance).toLocaleString(),balance>=0?'Surplus':'Deficit');
   document.getElementById('report-member-table').innerHTML=members.map(m=>{
     const mR=receipts.filter(r=>r.memberId===m.id);
     const mT=mR.reduce((s,r)=>s+Number(r.amount),0);
@@ -1902,22 +2015,23 @@ function renderMyReceipts(){
   const tableSection=myReceiptsEl.querySelector('.bg-ink.border.border-brass\\/20.rounded-xl.p-6');
   if(tableSection)myReceiptsEl.insertBefore(dueSection,tableSection);
   const tbody=document.getElementById('my-receipts-table');
-  if(!receipts.length){tbody.innerHTML='<tr><td colspan="7" class="text-center text-slatemuted py-6">No receipts yet.</td></tr>';return;}
+  if(!receipts.length){tbody.innerHTML='<tr><td colspan="9" class="text-center text-slatemuted py-6">No receipts yet.</td></tr>';return;}
   tbody.innerHTML=[...receipts].sort((a,b)=>b.date.localeCompare(a.date)).map(r=>{
     const monthsDisplay=r.months&&r.months.length>0
       ?r.months.map(m=>`<span class="inline-flex items-center px-2 py-0.5 m-0.5 rounded-full text-[11px] font-bold bg-[#a777e3]/20 text-[#a777e3]">${m.substring(0,3)}</span>`).join('')
       :(r.month?`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#a777e3]/20 text-[#a777e3]">${r.month}${r.year?' '+r.year:''}</span>`:'&#8212;');
     return`<tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
+      <td class="px-4 py-3"><input type="checkbox" class="receipt-cb w-4 h-4 accent-brass cursor-pointer" value="${r.id}"></td>
       <td class="px-4 py-3 font-mono"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${r.receiptNo}</span></td>
       <td class="px-4 py-3 font-mono text-slatemuted">${r.date}</td>
+      <td class="px-4 py-3">${r.memberName||currentUser.name}</td>
       <td class="px-4 py-3 text-brass font-bold font-mono">&#2547;${Number(r.amount).toLocaleString()}</td>
       <td class="px-4 py-3">${r.purpose}</td>
       <td class="px-4 py-3">${monthsDisplay}</td>
       <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#6495ed]/20 text-[#6495ed]">${r.method}</span></td>
       <td class="px-4 py-3"><div class="flex gap-1.5 flex-wrap">
         <button class="bg-brass text-midnight hover:bg-brasslight px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors" onclick="downloadReceiptPDF('${r.id}')">&#11015; PDF</button>
-        <button class="border border-brass text-brass hover:bg-brass/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="viewReceipt('${r.id}')">View</button>
-        
+        <button class="border border-brass text-brass hover:bg-brass/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="viewReceipt('${r.id}')">View</button>       
       </div></td>
     </tr>`;}).join('');
 }
@@ -2006,7 +2120,7 @@ function saveCommitteeAssign(){
   const committeeRole=roleSelect==='custom'
     ?document.getElementById('cm-custom-role').value.trim()
     :roleSelect;
-  if(!committeeRole){showToast('&#9888; Role লিখো।');return;}
+  if(!committeeRole){showToast('&#9888; Please enter a role.');return;}
   const m=getMembers().find(x=>x.id===memberId);
   if(!m)return;
   const committee=getCommittee();
@@ -2019,14 +2133,14 @@ function saveCommitteeAssign(){
   saveCommittee(committee);
   closeModal('committee-modal');
   renderMembers();
-  showToast(`&#9989; ${m.name} — ${committeeRole} হিসেবে assign হয়েছে!`);
+  showToast(`&#9989; ${m.name} — ${committeeRole} assigned successfully!`);
 }
 
 function removeFromCommittee(memberId){
   const committee=getCommittee().filter(x=>x.memberId!==memberId);
   saveCommittee(committee);
   renderCommittee();
-  showToast('&#9989; Committee থেকে remove হয়েছে।');
+  showToast('&#9989; Removed from committee.');
 }
 function renderCommittee(){
   const committee=getCommittee();
@@ -2050,12 +2164,6 @@ function renderCommittee(){
       ${isAdmin?`<button onclick="removeFromCommittee('${mem.id}')" class="mt-3 bg-ember/20 text-ember border border-ember/30 hover:bg-ember/30 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors">✕ Remove</button>`:''}
     </div>`;
   }).join('');
-}
-function editCommitteeMember(i){
-  // পুরনো function — আর দরকার নেই
-}
-function saveCommitteeMember(){
-  // পুরনো function — আর দরকার নেই
 }
 function renderMemberSettings(){
   ['m-curr-pass','m-new-pass','m-conf-pass'].forEach(id=>{
@@ -2128,14 +2236,18 @@ function showToast(msg){
   clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2800);
 }
 function toggleSelectAll(cb){
-  document.querySelectorAll('.receipt-cb').forEach(c=>c.checked=cb.checked);
+  const page=cb.closest('.page');
+  if(page){
+    page.querySelectorAll('.receipt-cb').forEach(c=>c.checked=cb.checked);
+  }else{
+    document.querySelectorAll('.receipt-cb').forEach(c=>c.checked=cb.checked);
+  }
 }
-
 async function bulkDownloadPDF(){
   if(currentUser.type!=='admin'){showToast('Admin only.');return;}
   const selected=[...document.querySelectorAll('.receipt-cb:checked')].map(c=>c.value);
-  if(selected.length===0){showToast('&#9888; কোনো receipt select করোনি।');return;}
-  showToast('&#9203; PDF তৈরি হচ্ছে...');
+  if(selected.length===0){showToast('&#9888; No receipts selected.');return;}
+  showToast('&#9203; Generating PDFs...');
   const receipts=getReceipts();
   const zip=new JSZip();
   const{jsPDF}=window.jspdf;
@@ -2194,7 +2306,7 @@ async function bulkDownloadPDF(){
     a.href=URL.createObjectURL(content);
     a.download=`ZYRON_Receipts_${new Date().toISOString().split('T')[0]}.zip`;
     a.click();
-    showToast(`&#9989; ${selected.length}টা PDF download হয়েছে!`);
+    showToast(`&#9989; ${selected.length} PDF(s) downloaded!`);
   });
 }
 
@@ -2212,6 +2324,108 @@ function n2w(n){
   return c(Math.floor(n));
 }
 
+let editingExpenseId = null;
+
+function openAddExpenseModal(){
+  editingExpenseId=null;
+  document.getElementById('expense-modal-title').textContent='Add Expense';
+  document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('exp-category').value='Meeting';
+  document.getElementById('exp-desc').value='';
+  document.getElementById('exp-amount').value='';
+  document.getElementById('exp-paid-by').value='';
+  document.getElementById('exp-notes').value='';
+  document.getElementById('exp-edit-id').value='';
+  openModal('expense-modal');
+}
+
+function editExpense(id){
+  const e=getExpenses().find(x=>x.id===id);
+  if(!e)return;
+  editingExpenseId=id;
+  document.getElementById('expense-modal-title').textContent='Edit Expense';
+  document.getElementById('exp-date').value=e.date;
+  document.getElementById('exp-category').value=e.category;
+  document.getElementById('exp-desc').value=e.description;
+  document.getElementById('exp-amount').value=e.amount;
+  document.getElementById('exp-paid-by').value=e.paidBy;
+  document.getElementById('exp-notes').value=e.notes||'';
+  document.getElementById('exp-edit-id').value=id;
+  openModal('expense-modal');
+}
+
+function saveExpense(){
+  const date=document.getElementById('exp-date').value;
+  const category=document.getElementById('exp-category').value;
+  const desc=document.getElementById('exp-desc').value.trim();
+  const amt=parseFloat(document.getElementById('exp-amount').value)||0;
+  const paidBy=document.getElementById('exp-paid-by').value.trim();
+  if(!date||!desc||!amt||!paidBy){showToast('Please fill all fields.');return;}
+  const exps=getExpenses();
+  if(editingExpenseId){
+    const idx=exps.findIndex(e=>e.id===editingExpenseId);
+    if(idx!==-1){
+      exps[idx]={...exps[idx],date,category,description:desc,amount:amt,paidBy,notes:document.getElementById('exp-notes').value};
+      ls_set(EXPENSES_KEY,exps);
+      showToast('✅ Expense updated!');
+    }
+    editingExpenseId=null;
+  }else{
+    exps.push({id:`id_${Date.now()}`,date,category,description:desc,amount:amt,paidBy,notes:document.getElementById('exp-notes').value,createdAt:new Date().toISOString()});
+    ls_set(EXPENSES_KEY,exps);
+    showToast('✅ Expense added!');
+  }
+  closeModal('expense-modal');
+  renderExpenses();
+}
+
+async function deleteExpense(id){
+  const ok=await confirmDialog('Delete','Delete this expense?','Delete','ember');
+  if(!ok)return;
+  ls_set(EXPENSES_KEY,getExpenses().filter(e=>e.id!==id));
+  renderExpenses();
+  showToast('Deleted.');
+}
+
+function renderExpenses(){renderExpenseStats();renderExpensesTable();}
+
+function renderExpenseStats(){
+  const exps=getExpenses();
+  const total=exps.reduce((s,e)=>s+Number(e.amount),0);
+  const thisMonth=exps.filter(e=>e.date.startsWith(new Date().toISOString().substring(0,7))).reduce((s,e)=>s+Number(e.amount),0);
+  document.getElementById('expense-stats').innerHTML=
+    statCard('💰','Total Expenses','৳'+total.toLocaleString())+
+    statCard('📊','This Month','৳'+thisMonth.toLocaleString())+
+    statCard('📈','Average','৳'+(exps.length>0?Math.round(total/exps.length):'0').toLocaleString())+
+    statCard('📋','Total Entries',exps.length);
+}
+
+function renderExpensesTable(){
+  let exps=getExpenses();
+  const from=document.getElementById('filter-exp-from').value;
+  const cat=document.getElementById('filter-exp-category').value;
+  if(from) exps=exps.filter(e=>e.date>=from);
+  if(cat) exps=exps.filter(e=>e.category===cat);
+  exps=[...exps].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const tbody=document.getElementById('expenses-table-body');
+  const empty=document.getElementById('expenses-empty');
+  if(!exps.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  tbody.innerHTML=exps.map(e=>`
+    <tr class="border-b border-brass/10 hover:bg-brass/5 last:border-0">
+      <td class="px-4 py-3 font-mono text-slatemuted">${e.date}</td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brass/20 text-brass">${e.category}</span></td>
+      <td class="px-4 py-3">${e.description}</td>
+      <td class="px-4 py-3 text-brass font-bold font-mono">৳${Number(e.amount).toLocaleString()}</td>
+      <td class="px-4 py-3">${e.paidBy}</td>
+      <td class="px-4 py-3">
+        <div class="flex gap-1.5">
+          <button class="border border-[#6495ed] text-[#6495ed] hover:bg-[#6495ed]/10 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editExpense('${e.id}')">Edit</button>
+          <button class="bg-ember text-white hover:bg-ember/80 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="deleteExpense('${e.id}')">Del</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
 db.ref('/').once('value').then(snapshot=>{
   const data=snapshot.val();
   if(data){
@@ -2229,6 +2443,143 @@ if(currentUser){
   updateSidebarUser();
   setTimeout(()=>navigate('dashboard'),50);
 }
-</script>
+function openCreatePollModal(){
+  document.getElementById('poll-question').value='';
+  document.getElementById('poll-deadline').value='';
+  const wrap=document.getElementById('poll-options-wrap');
+  wrap.querySelectorAll('.poll-option-input').forEach((el,i)=>{
+    if(i<2){el.value='';}else{el.remove();}
+  });
+  openModal('poll-modal');
+}
+
+function addPollOption(){
+  const wrap=document.getElementById('poll-options-wrap');
+  const count=wrap.querySelectorAll('.poll-option-input').length+1;
+  const inp=document.createElement('input');
+  inp.type='text';
+  inp.placeholder=`Option ${count}`;
+  inp.className='poll-option-input w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm';
+  wrap.appendChild(inp);
+}
+
+function savePoll(){
+  const q=document.getElementById('poll-question').value.trim();
+  const deadline=document.getElementById('poll-deadline').value;
+ const opts=[...document.getElementById('poll-options-wrap').querySelectorAll('.poll-option-input')].map(i=>i.value.trim()).filter(Boolean);
+  if(!q){showToast('⚠️ Write a question.');return;}
+  if(opts.length<2){showToast('⚠️ Add at least 2 options.');return;}
+  if(!deadline){showToast('⚠️ Set a deadline.');return;}
+  const polls=getPolls();
+  polls.push({
+    id:`poll_${Date.now()}`,
+    question:q,
+    deadline,
+    options:opts.map(o=>({text:o,votes:[]})),
+    createdBy:currentUser.id,
+    createdAt:new Date().toISOString()
+  });
+  ls_set(POLLS_KEY,polls);
+  closeModal('poll-modal');
+  renderPolls();
+  showToast('✅ Poll created!');
+}
+
+function castVote(pollId,optionIdx){
+  const polls=getPolls();
+  const pollIdx=polls.findIndex(p=>p.id===pollId);
+  if(pollIdx===-1){showToast('Poll not found.');return;}
+  const poll=polls[pollIdx];
+  const today=new Date().toISOString().split('T')[0];
+  if(poll.deadline<today){showToast('⏰ Deadline has passed.');return;}
+  const alreadyVoted=poll.options.some(o=>
+    Array.isArray(o.votes)&&o.votes.includes(currentUser.id)
+  );
+  if(alreadyVoted){showToast('⚠️ You already voted! One member = one vote.');return;}
+  if(!Array.isArray(polls[pollIdx].options[optionIdx].votes)){
+    polls[pollIdx].options[optionIdx].votes=[];
+  }
+  polls[pollIdx].options[optionIdx].votes.push(currentUser.id);
+  ls_set(POLLS_KEY,polls);
+  renderPolls();
+  showToast('✅ Vote submitted!');
+}
+
+async function deletePoll(pollId){
+  const ok=await confirmDialog('Delete Poll','Delete this poll permanently?','Delete','ember');
+  if(!ok)return;
+  ls_set(POLLS_KEY,getPolls().filter(p=>p.id!==pollId));
+  renderPolls();
+  showToast('Deleted.');
+}
+
+function renderPolls(){
+  const polls=getPolls();
+  const isAdmin=currentUser.type==='admin';
+  const btn=document.getElementById('create-poll-btn');
+  if(btn)btn.classList.toggle('hidden',!isAdmin);
+  const container=document.getElementById('polls-container');
+  const empty=document.getElementById('polls-empty');
+  if(!polls||!polls.length){
+    container.innerHTML='';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  const today=new Date().toISOString().split('T')[0];
+  container.innerHTML=[...polls].reverse().map(poll=>{
+    if(!poll||!poll.options)return'';
+    const totalVotes=poll.options.reduce((s,o)=>s+(Array.isArray(o.votes)?o.votes.length:0),0);
+    const myVoteIdx=poll.options.findIndex(o=>Array.isArray(o.votes)&&o.votes.includes(currentUser.id));
+    const expired=poll.deadline<today;
+    const winnerIdx=expired&&totalVotes>0
+      ?poll.options.indexOf([...poll.options].sort((a,b)=>b.votes.length-a.votes.length)[0])
+      :-1;
+    const statusBadge=expired
+      ?'<span class="bg-ember/20 text-ember text-[11px] font-bold px-2.5 py-0.5 rounded-full">⏰ Closed</span>'
+      :'<span class="bg-mint/20 text-mint text-[11px] font-bold px-2.5 py-0.5 rounded-full">✅ Active</span>';
+    const optionsHTML=poll.options.map((opt,i)=>{
+      const votes=Array.isArray(opt.votes)?opt.votes.length:0;
+      const pct=totalVotes>0?Math.round(votes/totalVotes*100):0;
+      const isMyChoice=myVoteIdx===i;
+      const isWinner=winnerIdx===i;
+      const barColor=isMyChoice?'#4FAE8E':isWinner?'#C9A227':'#7F8FAE';
+      const canVote=myVoteIdx===-1&&!expired&&currentUser.type!=='admin';
+      return`<div class="mb-4">
+        <div class="flex justify-between items-center mb-1.5">
+          <span class="text-[13px] text-slate-100 flex items-center gap-1.5">
+            ${isWinner?'🏆 ':''}${isMyChoice?'<span class="text-mint font-bold">✓ </span>':''}${opt.text}
+          </span>
+          <span class="text-[12px] font-mono font-bold" style="color:${barColor}">
+            ${pct}% <span class="text-slatemuted">(${votes})</span>
+          </span>
+        </div>
+        <div class="h-2.5 bg-ink2 rounded-full overflow-hidden">
+          <div class="h-full rounded-full transition-all duration-700" style="width:${pct}%;background:${barColor}"></div>
+        </div>
+        ${canVote?`<button onclick="castVote('${poll.id}',${i})" class="mt-2 text-[11px] border border-brass/40 text-brass hover:bg-brass/10 px-3 py-1 rounded-md font-semibold transition-colors">👆 Vote</button>`:''}
+      </div>`;
+    }).join('');
+    return`<div class="bg-ink border border-brass/20 rounded-xl p-6">
+      <div class="flex items-start justify-between gap-3 mb-4 pb-3 border-b border-brass/20">
+        <div>
+          <div class="font-display font-bold text-base text-slate-100">${poll.question}</div>
+          <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+            ${statusBadge}
+            <span class="text-[11px] text-slatemuted font-mono">📅 Deadline: ${poll.deadline}</span>
+            <span class="text-[11px] text-slatemuted">👥 ${totalVotes} votes</span>
+          </div>
+        </div>
+        ${isAdmin?`<button onclick="deletePoll('${poll.id}')" class="text-ember hover:bg-ember/10 border border-ember/30 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors flex-shrink-0">🗑 Del</button>`:''}
+      </div>
+      <div>${optionsHTML}</div>
+      ${myVoteIdx!==-1?`<div class="mt-3 pt-3 border-t border-brass/10 text-[12px] text-mint">✅ You voted for <span class="font-bold">"${poll.options[myVoteIdx].text}"</span></div>`:''}
+      ${isAdmin?`<div class="mt-2 text-[12px] text-slatemuted italic">👁 Admin view only — voting disabled for admin.</div>`:''}
+      ${!expired&&myVoteIdx===-1&&currentUser.type!=='admin'?`<div class="mt-2 text-[12px] text-slatemuted">👆 Select one option — only one vote allowed per member.</div>`:''}
+    </div>`;
+  }).join('');
+}
+  
+  </script>
 </body>
 </html>
