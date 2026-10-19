@@ -965,12 +965,12 @@
       <div id="admin-login-form" class="text-left space-y-3.5">
         <div>
           <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Username</label>
-          <input type="text" id="admin-user" value="admin"
+          <input type="text" id="admin-user" 
             class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
         </div>
         <div>
           <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Password</label>
-          <input type="password" id="admin-pass" value="zyron2024"
+          <input type="password" id="admin-pass" 
             class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
         </div>
         <button onclick="adminLogin()"
@@ -995,8 +995,6 @@
       </div>
 
       <div id="auth-error" class="text-ember text-sm mt-3 min-h-[20px]"></div>
-      <div class="mt-5 font-mono text-[11px] text-slatemuted">Admin: admin / zyron2024 &nbsp;|&nbsp; Members: ZY-001~010
-        / zyron123</div>
     </div>
   </div>
 
@@ -1900,9 +1898,7 @@
     const ls_get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
     firebase.initializeApp(firebaseConfig);
    
-firebase.auth().signInAnonymously().catch(function(error) {
-  console.log("Anonymous auth error:", error);
-});
+
     const db = firebase.database();
     const ls_set = (k, v) => { localStorage.setItem(k, JSON.stringify(v)); db.ref(k).set(v); };
     currentUser = ls_get('zyron_session') || null;
@@ -1951,24 +1947,23 @@ firebase.auth().signInAnonymously().catch(function(error) {
       });
       document.getElementById('auth-error').textContent = '';
     }
-    function adminLogin() {
-      const u = document.getElementById('admin-user').value.trim();
-      const p = document.getElementById('admin-pass').value;
-      const key = 'admin_' + u;
-      if (isLockedOut(key)) {
-        startLockoutCountdown(key);
-        return;
-      }
-      const c = getAdminCreds();
-      if (u === c.username && p === c.password) {
-        clearAttempts(key);
-        currentUser = { type: 'admin', name: 'Admin', role: 'Administrator', id: 'admin' };
-        enterApp();
-      } else {
-        recordFailedAttempt(key);
-        document.getElementById('auth-error').textContent = 'Invalid credentials.';
-      }
-    }
+    const ADMIN_EMAIL = 'admin@zyron.app';
+function adminLogin() {
+  const p = document.getElementById('admin-pass').value;
+  const key = 'admin_login';
+  if (isLockedOut(key)) { startLockoutCountdown(key); return; }
+  if (!p) { document.getElementById('auth-error').textContent = 'Enter password.'; return; }
+  firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, p)
+    .then(() => {
+      clearAttempts(key);
+      currentUser = { type: 'admin', name: 'Admin', role: 'Administrator', id: 'admin' };
+      enterApp();
+    })
+    .catch(() => {
+      recordFailedAttempt(key);
+      document.getElementById('auth-error').textContent = 'Invalid credentials.';
+    });
+}
     function memberLogin() {
       const id = document.getElementById('user-id-input').value.trim().toUpperCase();
       const p = document.getElementById('user-pass').value.trim();
@@ -1990,7 +1985,7 @@ firebase.auth().signInAnonymously().catch(function(error) {
     function enterApp() {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app').classList.remove('hidden');
-      ls_set('zyron_session', currentUser);
+      localStorage.setItem('zyron_session', JSON.stringify(currentUser));
       setupSidebar();
       updateSidebarUser();
       setTimeout(() => navigate('dashboard'), 50);
@@ -1999,11 +1994,11 @@ firebase.auth().signInAnonymously().catch(function(error) {
       const ok = await confirmDialog('Logout', 'Logout from ZYRON?', 'Logout', 'ember');
       if (!ok) return;
       currentUser = null;
+      firebase.auth().signOut();
       localStorage.removeItem('zyron_session');
       document.getElementById('auth-screen').style.display = 'flex';
       document.getElementById('app').classList.add('hidden');
-      document.getElementById('admin-user').value = 'admin';
-      document.getElementById('admin-pass').value = 'zyron2024';
+      
       document.getElementById('user-id-input').value = '';
       document.getElementById('user-pass').value = '';
       document.getElementById('auth-error').textContent = '';
@@ -3616,15 +3611,20 @@ firebase.auth().signInAnonymously().catch(function(error) {
       </td>
     </tr>`).join('');
     }
-    db.ref('/').once('value').then(snapshot => {
-      const data = snapshot.val();
-      if (data) {
-        Object.keys(data).forEach(k => {
-          localStorage.setItem(k, JSON.stringify(data[k]));
-        });
-      }
-      if (!ls_get(MEMBERS_KEY)) initDefaultMembers();
-    });
+    firebase.auth().onAuthStateChanged(function (u) {
+  if (!u) { firebase.auth().signInAnonymously().catch(console.log); return; }
+  db.ref('/').once('value').then(snapshot => {
+    const data = snapshot.val();
+    if (data) {
+            Object.keys(data).forEach(k => {
+        if (k === 'zyron_session') return;
+        localStorage.setItem(k, JSON.stringify(data[k]));
+      });
+    }
+    if (!ls_get(MEMBERS_KEY)) initDefaultMembers();
+  });
+});
+      
     if (currentUser) {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app').classList.remove('hidden');
@@ -3765,20 +3765,7 @@ firebase.auth().signInAnonymously().catch(function(error) {
     </div>`;
       }).join('');
     }
-    // Firebase Admin Login Script
-  window.addEventListener('DOMContentLoaded', () => {
-    
-    const adminEmail = "alvijihad33@gmail.com"; 
-    const adminPassword = "*#alvi123456*#";
-
-    firebase.auth().signInWithEmailAndPassword(adminEmail, adminPassword)
-      .then((user) => {
-        console.log("Firebase Admin Authentication Successful!");
-      })
-      .catch((error) => {
-        console.log("Firebase Auth Status:", error.message);
-      });
-  });
+   
   </script>
 </body>
 </html>
