@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="Adobe Express - file.png">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
@@ -1898,6 +1899,10 @@
     };
     const ls_get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
     firebase.initializeApp(firebaseConfig);
+   
+firebase.auth().signInAnonymously().catch(function(error) {
+  console.log("Anonymous auth error:", error);
+});
     const db = firebase.database();
     const ls_set = (k, v) => { localStorage.setItem(k, JSON.stringify(v)); db.ref(k).set(v); };
     currentUser = ls_get('zyron_session') || null;
@@ -3760,6 +3765,20 @@
     </div>`;
       }).join('');
     }
+    // Firebase Admin Login Script
+  window.addEventListener('DOMContentLoaded', () => {
+    
+    const adminEmail = "alvijihad33@gmail.com"; 
+    const adminPassword = "*#alvi123456*#";
+
+    firebase.auth().signInWithEmailAndPassword(adminEmail, adminPassword)
+      .then((user) => {
+        console.log("Firebase Admin Authentication Successful!");
+      })
+      .catch((error) => {
+        console.log("Firebase Auth Status:", error.message);
+      });
+  });
   </script>
 </body>
 </html>
