@@ -1897,6 +1897,20 @@
     };
     const ls_get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
     firebase.initializeApp(firebaseConfig);
+    function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+    function memberEmail(id) { return id.trim().toLowerCase() + '@zyron.app'; }
+
+async function createMemberLogin(id, password) {
+  const app2 = firebase.initializeApp(firebaseConfig, 'Secondary_' + Date.now());
+  try {
+    await app2.auth().createUserWithEmailAndPassword(memberEmail(id), password);
+    await app2.auth().signOut();
+  } finally {
+    await app2.delete();
+  }
+}
    
 
     const db = firebase.database();
@@ -1925,7 +1939,7 @@
       const members = list.map((m, i) => ({
         id: `ZY-${String(i + 1).padStart(3, '0')}`, name: m.name, role: m.role,
         phone: '', email: '', address: '', color: COLORS[i % COLORS.length],
-        password: 'zyron123', joinDate: '2024-01-01', photo: ''
+                joinDate: '2024-01-01', photo: ''
       }));
       ls_set(MEMBERS_KEY, members);
       return members;
@@ -1954,7 +1968,12 @@ function adminLogin() {
   if (isLockedOut(key)) { startLockoutCountdown(key); return; }
   if (!p) { document.getElementById('auth-error').textContent = 'Enter password.'; return; }
   firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, p)
-    .then(() => {
+    .then(() => db.ref('/').once('value'))
+    .then(snapshot => {
+      const data = snapshot.val() || {};
+      Object.keys(data).forEach(k => {
+        if (k !== 'zyron_session') localStorage.setItem(k, JSON.stringify(data[k]));
+      });
       clearAttempts(key);
       currentUser = { type: 'admin', name: 'Admin', role: 'Administrator', id: 'admin' };
       enterApp();
@@ -1964,23 +1983,29 @@ function adminLogin() {
       document.getElementById('auth-error').textContent = 'Invalid credentials.';
     });
 }
-    function memberLogin() {
+       function memberLogin() {
       const id = document.getElementById('user-id-input').value.trim().toUpperCase();
-      const p = document.getElementById('user-pass').value.trim();
+      const p = document.getElementById('user-pass').value;
       const key = 'member_' + id;
-      if (isLockedOut(key)) {
-        startLockoutCountdown(key);
-        return;
-      }
-      const m = getMembers().find(x => x.id === id && x.password === p);
-      if (m) {
-        clearAttempts(key);
-        currentUser = { type: 'member', name: m.name, role: m.role, id: m.id };
-        enterApp();
-      } else {
-        recordFailedAttempt(key);
-        document.getElementById('auth-error').textContent = 'Invalid Member ID or password.';
-      }
+      if (isLockedOut(key)) { startLockoutCountdown(key); return; }
+      if (!id || !p) { document.getElementById('auth-error').textContent = 'Enter ID and password.'; return; }
+      firebase.auth().signInWithEmailAndPassword(memberEmail(id), p)
+        .then(() => db.ref('/').once('value'))
+        .then(snapshot => {
+          const data = snapshot.val() || {};
+          Object.keys(data).forEach(k => {
+            if (k !== 'zyron_session') localStorage.setItem(k, JSON.stringify(data[k]));
+          });
+          const m = getMembers().find(x => x.id === id);
+          if (!m) throw new Error('not a member');
+          clearAttempts(key);
+          currentUser = { type: 'member', name: m.name, role: m.role, id: m.id };
+          enterApp();
+        })
+        .catch(() => {
+          recordFailedAttempt(key);
+          document.getElementById('auth-error').textContent = 'Invalid Member ID or password.';
+        });
     }
     function enterApp() {
       document.getElementById('auth-screen').style.display = 'none';
@@ -2899,7 +2924,6 @@ function adminLogin() {
           <div class="flex justify-center gap-2 mt-4 flex-wrap">
             <button class="border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editMember('${m.id}')">Edit</button>
             <button class="bg-ember text-white hover:bg-ember/80 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="deleteMember('${m.id}')">Del</button>
-            <button class="bg-ink2 border border-brass/30 text-slatemuted hover:text-brass px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="showMemberPass('${m.id}')">&#128273; Pass</button>
             <button class="bg-brass/20 border border-brass/40 text-brass hover:bg-brass/30 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="openAssignCommitteeModal('${m.id}')">&#127775; Committee</button>
           </div>
         </div>
@@ -2916,18 +2940,13 @@ function adminLogin() {
     <div class="flex justify-center gap-2 mt-3 flex-wrap">
   <button class="border border-brass text-brass hover:bg-brass/10 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="editMember('${m.id}')">Edit</button>
   <button class="bg-ember text-white hover:bg-ember/80 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="deleteMember('${m.id}')">Del</button>
-  <button class="bg-ink2 border border-brass/30 text-slatemuted hover:text-brass px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="showMemberPass('${m.id}')">&#128273; Pass</button>
   <button class="bg-brass/20 border border-brass/40 text-brass hover:bg-brass/30 px-3 py-1 rounded-md text-[11px] font-semibold transition-colors" onclick="openAssignCommitteeModal('${m.id}')">&#127775; Committee</button>
 </div>
     </div>`;
       }).join('');
     }
 
-    function showMemberPass(id) {
-      const m = getMembers().find(x => x.id === id);
-      if (!m) return;
-      showToast('&#128273; ' + m.name + ': ' + m.password);
-    }
+   
     function renderMemberDirectory() {
       const members = getMembers();
       const committee = getCommittee();
@@ -3041,7 +3060,7 @@ function adminLogin() {
       document.getElementById('m-phone').value = m.phone || ''; document.getElementById('m-email').value = m.email || '';
       document.getElementById('m-address').value = m.address || ''; document.getElementById('m-password').value = '';
       document.getElementById('m-pass-id').textContent = m.id;
-      document.getElementById('m-pass-section').classList.remove('hidden');
+    
       document.getElementById('m-edit-id').value = id;
       document.getElementById('m-photo').value = '';
       document.getElementById('m-new-id').value = '';
@@ -3053,7 +3072,8 @@ function adminLogin() {
       }
       openModal('member-modal');
     }
-    function saveMember() {
+    
+        async function saveMember() {
       const name = document.getElementById('m-name').value.trim();
       const role = document.getElementById('m-role').value.trim();
       const phone = document.getElementById('m-phone').value.trim();
@@ -3065,28 +3085,26 @@ function adminLogin() {
       if (editingMemberId) {
         const idx = members.findIndex(m => m.id === editingMemberId);
         if (idx !== -1) {
-          const np = document.getElementById('m-password').value.trim();
-          if (np && np.length < 4) { showToast('Password min 4 chars.'); return; }
-          members[idx] = { ...members[idx], name, role, phone: document.getElementById('m-phone').value, email: document.getElementById('m-email').value, address: document.getElementById('m-address').value, photo: tempMemberPhoto || members[idx].photo || '' };
-          if (np) members[idx].password = np;
-          const newId = document.getElementById('m-new-id').value.trim().toUpperCase();
-          if (newId && newId !== members[idx].id) {
-            const duplicate = members.some((x, i) => x.id === newId && i !== idx);
-            if (duplicate) { showToast('This ID already exists.'); return; }
-            const oldId = members[idx].id;
-            members[idx].id = newId;
-            const receipts = getReceipts();
-            receipts.forEach(r => {
-              if (r.memberId === oldId) r.memberId = newId;
-            });
-            ls_set(RECEIPTS_KEY, receipts);
-          }
+          members[idx] = { ...members[idx], name, role, phone, email,
+            address: document.getElementById('m-address').value,
+            photo: tempMemberPhoto || members[idx].photo || '' };
         }
         showToast('Member updated!');
       } else {
         const newId = generateMemberId(members);
-        members.push({ id: newId, name, role, phone: document.getElementById('m-phone').value, email: document.getElementById('m-email').value, address: document.getElementById('m-address').value, color: COLORS[members.length % COLORS.length], password: 'zyron123', joinDate: new Date().toISOString().split('T')[0], photo: tempMemberPhoto || '' });
-        showToast(`Added! ID: ${newId}`);
+        const pw = prompt('Set a password for ' + name + ' (min 6 characters):');
+        if (!pw || pw.length < 6) { showToast('Password min 6 chars. Member not added.'); return; }
+        try {
+          await createMemberLogin(newId, pw);
+        } catch (e) {
+          showToast('Login create failed: ' + e.message); return;
+        }
+        members.push({ id: newId, name, role, phone, email,
+          address: document.getElementById('m-address').value,
+          color: COLORS[members.length % COLORS.length],
+          joinDate: new Date().toISOString().split('T')[0],
+          photo: tempMemberPhoto || '' });
+        showToast('Added! ID: ' + newId);
       }
       ls_set(MEMBERS_KEY, members); closeModal('member-modal'); renderMembers();
     }
@@ -3345,20 +3363,22 @@ function adminLogin() {
         document.getElementById('ms-photo-preview-wrap').classList.add('hidden');
       }
     }
-    function changeMemberPass() {
-      const c = document.getElementById('m-curr-pass').value.trim();
-      const n = document.getElementById('m-new-pass').value.trim();
-      const cf = document.getElementById('m-conf-pass').value.trim();
-      const members = getMembers();
-      const idx = members.findIndex(m => m.id === currentUser.id);
-      if (idx === -1) { showToast('Member not found.'); return; }
-      if (c !== members[idx].password) { showToast('Wrong current password.'); return; }
-      if (n.length < 4) { showToast('Min 4 characters.'); return; }
+      async function changeMemberPass() {
+      const c = document.getElementById('m-curr-pass').value;
+      const n = document.getElementById('m-new-pass').value;
+      const cf = document.getElementById('m-conf-pass').value;
+      if (n.length < 6) { showToast('Min 6 characters.'); return; }
       if (n !== cf) { showToast('Passwords do not match.'); return; }
-      members[idx].password = n;
-      ls_set(MEMBERS_KEY, members);
-      showToast('&#9989; Password updated!');
-      ['m-curr-pass', 'm-new-pass', 'm-conf-pass'].forEach(id => document.getElementById(id).value = '');
+      try {
+        const user = firebase.auth().currentUser;
+        const cred = firebase.auth.EmailAuthProvider.credential(memberEmail(currentUser.id), c);
+        await user.reauthenticateWithCredential(cred);
+        await user.updatePassword(n);
+        showToast('&#9989; Password updated!');
+        ['m-curr-pass', 'm-new-pass', 'm-conf-pass'].forEach(id => document.getElementById(id).value = '');
+      } catch (e) {
+        showToast('Wrong current password.');
+      }
     }
     async function clearAllData() {
       const ok = await confirmDialog('Clear All', 'DELETE ALL RECEIPTS permanently?', 'Delete All', 'ember');
@@ -3611,20 +3631,18 @@ function adminLogin() {
       </td>
     </tr>`).join('');
     }
-    firebase.auth().onAuthStateChanged(function (u) {
-  if (!u) { firebase.auth().signInAnonymously().catch(console.log); return; }
+   firebase.auth().onAuthStateChanged(function (u) {
+  if (!u) return;
   db.ref('/').once('value').then(snapshot => {
     const data = snapshot.val();
     if (data) {
-            Object.keys(data).forEach(k => {
+      Object.keys(data).forEach(k => {
         if (k === 'zyron_session') return;
         localStorage.setItem(k, JSON.stringify(data[k]));
       });
     }
-    if (!ls_get(MEMBERS_KEY)) initDefaultMembers();
   });
-});
-      
+}); 
     if (currentUser) {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app').classList.remove('hidden');
@@ -3719,7 +3737,7 @@ function adminLogin() {
         const myVoteIdx = poll.options.findIndex(o => Array.isArray(o.votes) && o.votes.includes(currentUser.id));
         const expired = poll.deadline < today;
         const winnerIdx = expired && totalVotes > 0
-          ? poll.options.indexOf([...poll.options].sort((a, b) => b.votes.length - a.votes.length)[0])
+       ? poll.options.indexOf([...poll.options].sort((a, b) => (b.votes || []).length - (a.votes || []).length)[0])
           : -1;
         const statusBadge = expired
           ? '<span class="bg-ember/20 text-ember text-[11px] font-bold px-2.5 py-0.5 rounded-full">⏰ Closed</span>'
@@ -3734,7 +3752,7 @@ function adminLogin() {
           return `<div class="mb-4">
         <div class="flex justify-between items-center mb-1.5">
           <span class="text-[13px] text-slate-100 flex items-center gap-1.5">
-            ${isWinner ? '🏆 ' : ''}${isMyChoice ? '<span class="text-mint font-bold">✓ </span>' : ''}${opt.text}
+            ${isWinner ? '🏆 ' : ''}${isMyChoice ? '<span class="text-mint font-bold">✓ </span>' : ''}   ${esc(opt.text)}
           </span>
           <span class="text-[12px] font-mono font-bold" style="color:${barColor}">
             ${pct}% <span class="text-slatemuted">(${votes})</span>
@@ -3749,7 +3767,7 @@ function adminLogin() {
         return `<div class="bg-ink border border-brass/20 rounded-xl p-6">
       <div class="flex items-start justify-between gap-3 mb-4 pb-3 border-b border-brass/20">
         <div>
-          <div class="font-display font-bold text-base text-slate-100">${poll.question}</div>
+          <div class="font-display font-bold text-base text-slate-100">  ${esc(poll.question)}</div>
           <div class="flex items-center gap-2 mt-1.5 flex-wrap">
             ${statusBadge}
             <span class="text-[11px] text-slatemuted font-mono">📅 Deadline: ${poll.deadline}</span>
@@ -3759,7 +3777,7 @@ function adminLogin() {
         ${isAdmin ? `<button onclick="deletePoll('${poll.id}')" class="text-ember hover:bg-ember/10 border border-ember/30 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors flex-shrink-0">🗑 Del</button>` : ''}
       </div>
       <div>${optionsHTML}</div>
-      ${myVoteIdx !== -1 ? `<div class="mt-3 pt-3 border-t border-brass/10 text-[12px] text-mint">✅ You voted for <span class="font-bold">"${poll.options[myVoteIdx].text}"</span></div>` : ''}
+      ${myVoteIdx !== -1 ? `<div class="mt-3 pt-3 border-t border-brass/10 text-[12px] text-mint">✅ You voted for <span class="font-bold">"   ${esc(poll.options[myVoteIdx].text)}"</span></div>` : ''}
       ${isAdmin ? `<div class="mt-2 text-[12px] text-slatemuted italic">👁 Admin view only — voting disabled for admin.</div>` : ''}
       ${!expired && myVoteIdx === -1 && currentUser.type !== 'admin' ? `<div class="mt-2 text-[12px] text-slatemuted">👆 Select one option — only one vote allowed per member.</div>` : ''}
     </div>`;
