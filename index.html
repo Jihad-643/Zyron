@@ -3673,6 +3673,18 @@ function adminLogin() {
       </td>
     </tr>`).join('');
     }
+    let pollsListenerOn = false;
+function startPollsLiveSync() {
+  if (pollsListenerOn) return;
+  pollsListenerOn = true;
+  db.ref(POLLS_KEY).on('value', snap => {
+    const v = snap.val();
+    localStorage.setItem(POLLS_KEY, JSON.stringify(v || []));
+    if (!currentUser) return;
+    if (document.getElementById('page-polls')?.classList.contains('active')) renderPolls();
+  }, () => { pollsListenerOn = false; });
+}
+
     let membersListenerOn = false;
 function startMembersLiveSync() {
   if (membersListenerOn) return;
@@ -3691,6 +3703,7 @@ function startMembersLiveSync() {
    firebase.auth().onAuthStateChanged(function (u) {
   if (!u) return;
     startMembersLiveSync();
+      startPollsLiveSync();
   db.ref('/').once('value').then(snapshot => {
     const data = snapshot.val();
     if (data) {
