@@ -1916,7 +1916,7 @@
     firebase.initializeApp(firebaseConfig);
     function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
+}    function safeId(s) { return String(s ?? '').replace(/[^A-Za-z0-9_-]/g, ''); }
     function memberEmail(id) { return id.trim().toLowerCase() + '@zyron.app'; }
 
 async function createMemberLogin(id, password) {
@@ -1931,11 +1931,11 @@ async function createMemberLogin(id, password) {
    
 
     const db = firebase.database();
-    const ls_set = (k, v) => { localStorage.setItem(k, JSON.stringify(v)); db.ref(k).set(v); };
+        const ls_set = (k, v) => { localStorage.setItem(k, JSON.stringify(v)); db.ref(k).set(v).catch(() => showToast('⚠ Not saved to server! Reload and try again.')); };
     currentUser = ls_get('zyron_session') || null;
 
     function getAdminCreds() { return ls_get(ADMIN_KEY) || { username: 'admin', password: 'zyron2024' }; }
-    function getMembers() { return ls_get(MEMBERS_KEY) || initDefaultMembers(); }
+        function getMembers() { return ls_get(MEMBERS_KEY) || []; }
     function getReceipts() { return ls_get(RECEIPTS_KEY) || []; }
     function getCounter() { return ls_get(COUNTER_KEY) || 1; }
     function incCounter() { let c = getCounter(); ls_set(COUNTER_KEY, c + 1); return c; }
@@ -3673,8 +3673,24 @@ function adminLogin() {
       </td>
     </tr>`).join('');
     }
+    let membersListenerOn = false;
+function startMembersLiveSync() {
+  if (membersListenerOn) return;
+  membersListenerOn = true;
+  db.ref(MEMBERS_KEY).on('value', snap => {
+    const v = snap.val();
+    if (!v) return;
+    localStorage.setItem(MEMBERS_KEY, JSON.stringify(v));
+    if (!currentUser) return;
+    if (document.getElementById('page-members')?.classList.contains('active') && currentUser.type === 'admin') renderMembers();
+    if (document.getElementById('page-member-directory')?.classList.contains('active')) renderMemberDirectory();
+    if (document.getElementById('page-committee')?.classList.contains('active')) renderCommittee();
+    updateSidebarUser();
+  }, () => { membersListenerOn = false; });
+}
    firebase.auth().onAuthStateChanged(function (u) {
   if (!u) return;
+    startMembersLiveSync();
   db.ref('/').once('value').then(snapshot => {
     const data = snapshot.val();
     if (data) {
@@ -3803,7 +3819,7 @@ function adminLogin() {
         <div class="h-2.5 bg-ink2 rounded-full overflow-hidden">
           <div class="h-full rounded-full transition-all duration-700" style="width:${pct}%;background:${barColor}"></div>
         </div>
-        ${canVote ? `<button onclick="castVote('${poll.id}',${i})" class="mt-2 text-[11px] border border-brass/40 text-brass hover:bg-brass/10 px-3 py-1 rounded-md font-semibold transition-colors">👆 Vote</button>` : ''}
+        ${canVote ? `<button onclick="castVote('${safeId(poll.id)}',${i})" class="mt-2 text-[11px] border border-brass/40 text-brass hover:bg-brass/10 px-3 py-1 rounded-md font-semibold transition-colors">👆 Vote</button>` : ''}
       </div>`;
         }).join('');
         return `<div class="bg-ink border border-brass/20 rounded-xl p-6">
@@ -3812,11 +3828,11 @@ function adminLogin() {
           <div class="font-display font-bold text-base text-slate-100">  ${esc(poll.question)}</div>
           <div class="flex items-center gap-2 mt-1.5 flex-wrap">
             ${statusBadge}
-            <span class="text-[11px] text-slatemuted font-mono">📅 Deadline: ${poll.deadline}</span>
+            <span class="text-[11px] text-slatemuted font-mono">📅 Deadline: ${esc(poll.deadline)}</span>
             <span class="text-[11px] text-slatemuted">👥 ${totalVotes} votes</span>
           </div>
         </div>
-        ${isAdmin ? `<button onclick="deletePoll('${poll.id}')" class="text-ember hover:bg-ember/10 border border-ember/30 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors flex-shrink-0">🗑 Del</button>` : ''}
+        ${isAdmin ? `<button onclick="deletePoll('${safeId(poll.id)}')" class="text-ember hover:bg-ember/10 border border-ember/30 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors flex-shrink-0">🗑 Del</button>` : ''}
       </div>
       <div>${optionsHTML}</div>
       ${myVoteIdx !== -1 ? `<div class="mt-3 pt-3 border-t border-brass/10 text-[12px] text-mint">✅ You voted for <span class="font-bold">"   ${esc(poll.options[myVoteIdx].text)}"</span></div>` : ''}
