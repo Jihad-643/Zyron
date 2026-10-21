@@ -2038,6 +2038,8 @@ function adminLogin() {
       currentUser = null;
                   try { await firebase.auth().signOut(); } catch (e) { }
       Object.keys(localStorage).filter(k => k.startsWith('zyron_')).forEach(k => localStorage.removeItem(k));
+           pollsListenerOn = false; membersListenerOn = false;
+      db.ref(POLLS_KEY).off(); db.ref(MEMBERS_KEY).off();
       document.getElementById('auth-screen').style.display = 'flex';
       document.getElementById('app').classList.add('hidden');
       
@@ -3673,23 +3675,24 @@ function adminLogin() {
       </td>
     </tr>`).join('');
     }
-    let pollsListenerOn = false;
+   let pollsListenerOn = false;
 function startPollsLiveSync() {
   if (pollsListenerOn) return;
   pollsListenerOn = true;
   db.ref(POLLS_KEY).on('value', snap => {
+    if (!firebase.auth().currentUser) return;
     const v = snap.val();
     localStorage.setItem(POLLS_KEY, JSON.stringify(v || []));
     if (!currentUser) return;
     if (document.getElementById('page-polls')?.classList.contains('active')) renderPolls();
   }, () => { pollsListenerOn = false; });
 }
-
-    let membersListenerOn = false;
+let membersListenerOn = false;
 function startMembersLiveSync() {
   if (membersListenerOn) return;
   membersListenerOn = true;
   db.ref(MEMBERS_KEY).on('value', snap => {
+    if (!firebase.auth().currentUser) return;
     const v = snap.val();
     if (!v) return;
     localStorage.setItem(MEMBERS_KEY, JSON.stringify(v));
