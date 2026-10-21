@@ -1522,11 +1522,28 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="committee-grid"></div>
       </div>
 
-      <!-- MEMBER SETTINGS -->
+           <!-- MEMBER SETTINGS -->
       <div class="page" id="page-member-settings">
         <div class="mb-6 pb-4 border-b border-brass/20">
           <div class="font-display font-bold text-2xl text-brass">Settings</div>
-          <div class="text-[13px] text-slatemuted mt-0.5">Change your password</div>
+          <div class="text-[13px] text-slatemuted mt-0.5">Update your profile and password</div>
+        </div>
+        <div class="bg-ink border border-brass/20 rounded-xl p-6 max-w-lg mb-5">
+          <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">My Contact Info</div>
+          <div class="space-y-3.5">
+            <div>
+              <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Mobile Number</label>
+              <input type="text" id="ms-phone" placeholder="01XXXXXXXXX"
+                class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-brass font-bold mb-1.5 tracking-wide uppercase">Email</label>
+              <input type="text" id="ms-email" placeholder="email@example.com"
+                class="w-full px-3.5 py-2.5 bg-ink2 border border-brass/25 rounded-lg text-slate-100 text-sm">
+            </div>
+          </div>
+          <button onclick="saveMyProfile()"
+            class="mt-4 bg-brass hover:bg-brasslight text-midnight font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">Save</button>
         </div>
         <div class="bg-ink border border-brass/20 rounded-xl p-6 max-w-lg mb-5">
           <div class="font-display font-bold text-base text-brass mb-5 pb-3 border-b border-brass/20">Profile Photo
@@ -3019,7 +3036,7 @@ function adminLogin() {
       r.readAsDataURL(f);
     }
 
-    function handleSelfPhotoUpload(e) {
+        function handleSelfPhotoUpload(e) {
       const f = e.target.files[0];
       if (!f || !f.type.startsWith('image/')) { showToast('Image only.'); return; }
       const r = new FileReader();
@@ -3028,13 +3045,17 @@ function adminLogin() {
           const members = getMembers();
           const idx = members.findIndex(m => m.id === currentUser.id);
           if (idx === -1) return;
-          members[idx].photo = compressed;
-          ls_set(MEMBERS_KEY, members);
-          document.getElementById('ms-photo-preview').src = compressed;
-          document.getElementById('ms-photo-preview-wrap').classList.remove('hidden');
-          updateSidebarUser();
-          showToast('✅ Photo updated!');
-          e.target.value = '';
+          db.ref('zyron_members/' + idx + '/photo').set(compressed)
+            .then(() => {
+              members[idx].photo = compressed;
+              localStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
+              document.getElementById('ms-photo-preview').src = compressed;
+              document.getElementById('ms-photo-preview-wrap').classList.remove('hidden');
+              updateSidebarUser();
+              showToast('✅ Photo updated!');
+              e.target.value = '';
+            })
+            .catch(() => showToast('⚠ Photo could not be saved.'));
         });
       };
       r.readAsDataURL(f);
@@ -3350,17 +3371,38 @@ function adminLogin() {
     </div>`;
       }).join('');
     }
-    function renderMemberSettings() {
+        function renderMemberSettings() {
       ['m-curr-pass', 'm-new-pass', 'm-conf-pass'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
       const m = getMembers().find(x => x.id === currentUser.id);
+      document.getElementById('ms-phone').value = (m && m.phone) || '';
+      document.getElementById('ms-email').value = (m && m.email) || '';
       if (m && m.photo) {
         document.getElementById('ms-photo-preview').src = m.photo;
         document.getElementById('ms-photo-preview-wrap').classList.remove('hidden');
       } else {
         document.getElementById('ms-photo-preview-wrap').classList.add('hidden');
+      }
+    }
+    async function saveMyProfile() {
+      const phone = document.getElementById('ms-phone').value.trim();
+      const email = document.getElementById('ms-email').value.trim();
+      if (phone && !/^01[3-9]\d{8}$/.test(phone)) { showToast('Invalid phone number (e.g. 01XXXXXXXXX).'); return; }
+      if (email && !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) { showToast('Invalid email address.'); return; }
+      const members = getMembers();
+      const idx = members.findIndex(m => m.id === currentUser.id);
+      if (idx === -1) return;
+      try {
+        await db.ref('zyron_members/' + idx + '/phone').set(phone);
+        await db.ref('zyron_members/' + idx + '/email').set(email);
+        members[idx].phone = phone;
+        members[idx].email = email;
+        localStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
+        showToast('✅ Profile updated!');
+      } catch (e) {
+        showToast('⚠ Could not be saved.');
       }
     }
       async function changeMemberPass() {
